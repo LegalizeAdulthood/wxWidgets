@@ -2699,6 +2699,13 @@ bool wxWindowMSW::MSWProcessMessage(WXMSG* pMsg)
 
             if ( bProcess )
             {
+                if ( msg->wParam == VK_TAB && bShiftDown && !bCtrlDown )
+                {
+                    wxWindow * const win = wxFindWinFromHandle(msg->hwnd);
+                    if ( win && win->HandleKeyDown(msg->wParam, msg->lParam) )
+                        return true;
+                }
+
                 wxNavigationKeyEvent event;
                 event.SetDirection(bForward);
                 event.SetWindowChange(bWindowChange);
