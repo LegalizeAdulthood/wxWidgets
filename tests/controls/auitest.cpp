@@ -4,6 +4,7 @@
 // Author:      Sebastian Walderich
 // Created:     2018-12-19
 // Copyright:   (c) 2018 Sebastian Walderich
+// Copyright:   (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -20,10 +21,12 @@
 #endif // WX_PRECOMP
 
 #include "wx/panel.h"
+#include "wx/sizer.h"
 
 #include "wx/aui/auibar.h"
 #include "wx/aui/auibook.h"
 #include "wx/aui/serializer.h"
+#include "wx/aui/tabmdi.h"
 
 #include "asserthelper.h"
 
@@ -50,9 +53,60 @@ protected:
     wxAuiNotebook* const nb;
 };
 
+#if wxUSE_MDI
+
+class AuiMDITestCase
+{
+public:
+    AuiMDITestCase()
+        : frame(new wxAuiMDIParentFrame(nullptr, wxID_ANY,
+              "wxAuiMDIParentFrame test"))
+    {
+    }
+
+protected:
+    std::unique_ptr<wxAuiMDIParentFrame> frame;
+};
+
+#endif // wxUSE_MDI
+
 // ----------------------------------------------------------------------------
 // the tests themselves
 // ----------------------------------------------------------------------------
+
+#if wxUSE_MDI
+
+TEST_CASE_METHOD(AuiMDITestCase,
+                 "wxAuiMDIParentFrame::ChildWindowResize", "[aui][mdi]")
+{
+    wxAuiMDIClientWindow* const client = frame->GetClientWindow();
+    REQUIRE( client );
+
+    wxAuiMDIChildFrame* const child =
+        new wxAuiMDIChildFrame(frame.get(), wxID_ANY, "Child");
+    wxPanel* const panel = new wxPanel(child);
+
+    wxBoxSizer* const sizer = new wxBoxSizer(wxVERTICAL);
+    sizer->Add(panel, wxSizerFlags(1).Expand());
+    child->SetSizer(sizer);
+    child->Show();
+
+    frame->SetSize(320, 240);
+    CHECK( client->GetSize() == frame->GetClientSize() );
+    const wxSize oldChildSize = child->GetSize();
+    const wxSize oldPanelSize = panel->GetSize();
+
+    frame->SetSize(480, 300);
+    CHECK( client->GetSize() == frame->GetClientSize() );
+    CHECK( child->GetSize().x > oldChildSize.x );
+    CHECK( child->GetSize().y > oldChildSize.y );
+    CHECK( panel->GetSize().x > oldPanelSize.x );
+    CHECK( panel->GetSize().y > oldPanelSize.y );
+
+    child->Destroy();
+}
+
+#endif // wxUSE_MDI
 
 TEST_CASE_METHOD(AuiNotebookTestCase, "wxAuiNotebook::DoGetBestSize", "[aui]")
 {

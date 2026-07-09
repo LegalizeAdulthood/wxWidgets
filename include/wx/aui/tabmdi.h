@@ -5,6 +5,7 @@
 // Modified by: Benjamin I. Williams / Kirix Corporation
 // Created:     29/07/2002
 // Copyright:   (c) Hans Van Leemputten
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -111,6 +112,7 @@ protected:
 
 private:
     void OnClose(wxCloseEvent& event);
+    void OnSize(wxSizeEvent& event);
 
     // close all children, return false if any of them vetoed it
     bool CloseAll();
