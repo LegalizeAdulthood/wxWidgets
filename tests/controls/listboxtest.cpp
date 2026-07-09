@@ -16,11 +16,34 @@
     #include "wx/listbox.h"
 #endif // WX_PRECOMP
 
+#include "wx/vlbox.h"
+
 #include "itemcontainertest.h"
 #include "testableframe.h"
 #include "wx/uiaction.h"
 
 #include <memory>
+
+class TestVListBox : public wxVListBox
+{
+public:
+    TestVListBox()
+        : wxVListBox(wxTheApp->GetTopWindow(), wxID_ANY,
+                     wxDefaultPosition, wxSize(300, 200), wxLB_MULTIPLE)
+    {
+    }
+private:
+    virtual void OnDrawItem(wxDC& WXUNUSED(dc),
+                            const wxRect& WXUNUSED(rect),
+                            size_t WXUNUSED(n)) const override
+    {
+    }
+
+    virtual wxCoord OnMeasureItem(size_t WXUNUSED(n)) const override
+    {
+        return 10;
+    }
+};
 
 class ListBoxTestCase : public ItemContainerTestCase
 {
@@ -159,6 +182,29 @@ TEST_CASE_METHOD(ListBoxTestCase, "ListBox::MultipleSelect", "[listbox]")
 
     m_list->GetSelections(selected);
     CHECK(selected.Count() == 0);
+}
+
+TEST_CASE_METHOD(ListBoxTestCase, "ListBox::VListBoxSetRowCount", "[listbox]")
+{
+    TestVListBox list;
+
+    list.SetItemCount(4);
+    list.Select(1);
+    list.Select(3);
+
+    CHECK(list.GetSelectedCount() == 2);
+
+    list.SetRowCount(2);
+
+    CHECK(list.GetSelectedCount() == 1);
+
+    unsigned long cookie;
+    CHECK(list.GetFirstSelected(cookie) == 1);
+    CHECK(list.GetNextSelected(cookie) == wxNOT_FOUND);
+
+    list.DeselectAll();
+
+    CHECK(list.GetSelectedCount() == 0);
 }
 
 TEST_CASE_METHOD(ListBoxTestCase, "ListBox::ClickEvents", "[listbox]")
