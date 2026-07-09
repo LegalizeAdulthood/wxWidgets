@@ -4,6 +4,7 @@
 // Author:      Vaclav Slavik
 // Created:     2008-10-15
 // Copyright:   (c) 2008 Vaclav Slavik <vslavik@fastmail.fm>
+// Copyright:   (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -43,6 +44,7 @@ private:
         WXUISIM_TEST( CellClick );
         WXUISIM_TEST( LinkClick );
 #endif // wxUSE_UIACTIONSIMULATOR
+        CPPUNIT_TEST( ImageMapCoordinates );
         CPPUNIT_TEST( AppendToPage );
     CPPUNIT_TEST_SUITE_END();
 
@@ -50,6 +52,7 @@ private:
     void Title();
     void CellClick();
     void LinkClick();
+    void ImageMapCoordinates();
     void AppendToPage();
 
     wxHtmlWindow *m_win;
@@ -98,6 +101,44 @@ static const char *TEST_MARKUP_LINK =
 
 static const char *TEST_PLAIN_TEXT =
     "Title\nA longer line\nand the last line.";
+
+static const char *TEST_MARKUP_IMAGEMAP =
+    "<html><body>"
+    "Text<br>"
+    "<img src=\"missing.png\" width=\"100\" height=\"100\" usemap=\"#map\">"
+    "<map name=\"map\">"
+    "<area shape=\"rect\" coords=\"10,10,20,20\" href=\"hit\">"
+    "</map>"
+    "</body></html>";
+
+static wxHtmlCell *FindCellWithLink(wxHtmlCell *cell, wxPoint *pos)
+{
+    if ( !cell->GetFirstChild() )
+    {
+        for ( int y = 0; y < cell->GetHeight(); y++ )
+        {
+            for ( int x = 0; x < cell->GetWidth(); x++ )
+            {
+                if ( cell->GetLink(x, y) )
+                {
+                    *pos = wxPoint(x, y);
+                    return cell;
+                }
+            }
+        }
+    }
+
+    for ( wxHtmlCell *child = cell->GetFirstChild();
+          child;
+          child = child->GetNext() )
+    {
+        wxHtmlCell *found = FindCellWithLink(child, pos);
+        if ( found )
+            return found;
+    }
+
+    return nullptr;
+}
 
 void HtmlWindowTestCase::SelectionToText()
 {
@@ -155,6 +196,26 @@ void HtmlWindowTestCase::LinkClick()
     CPPUNIT_ASSERT_EQUAL(1, clicked.GetCount());
 }
 #endif // wxUSE_UIACTIONSIMULATOR
+
+void HtmlWindowTestCase::ImageMapCoordinates()
+{
+    m_win->SetBorders(0);
+    m_win->SetPage(TEST_MARKUP_IMAGEMAP);
+
+    wxHtmlContainerCell *root = m_win->GetInternalRepresentation();
+    wxPoint hitpos;
+    wxHtmlCell *image = FindCellWithLink(root, &hitpos);
+
+    CPPUNIT_ASSERT(image);
+
+    const wxPoint imgpos = image->GetAbsPos(root);
+    wxHtmlLinkInfo *link = root->GetLink(imgpos.x + hitpos.x,
+                                         imgpos.y + hitpos.y);
+
+    CPPUNIT_ASSERT(link);
+    CPPUNIT_ASSERT_EQUAL("hit", link->GetHref());
+    CPPUNIT_ASSERT(!root->GetLink(imgpos.x, imgpos.y));
+}
 
 void HtmlWindowTestCase::AppendToPage()
 {
