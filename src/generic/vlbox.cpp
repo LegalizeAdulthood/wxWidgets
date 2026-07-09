@@ -4,6 +4,7 @@
 // Author:      Vadim Zeitlin
 // Created:     31.05.03
 // Copyright:   (c) 2003 Vadim Zeitlin <vadim@wxwidgets.org>
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -109,7 +110,7 @@ void wxVListBox::SetItemCount(size_t count)
         m_selStore->SetItemCount(count);
     }
 
-    SetRowCount(count);
+    wxVScrolledCanvas::SetRowCount(count);
 }
 
 // ----------------------------------------------------------------------------

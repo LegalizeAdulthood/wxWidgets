@@ -4,6 +4,7 @@
 // Author:      Steven Lamerton
 // Created:     2010-06-29
 // Copyright:   (c) 2010 Steven Lamerton
+// Copyright:   (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "testprec.h"
@@ -16,9 +17,33 @@
     #include "wx/listbox.h"
 #endif // WX_PRECOMP
 
+#include "wx/vlbox.h"
+
 #include "itemcontainertest.h"
 #include "testableframe.h"
 #include "wx/uiaction.h"
+
+class TestVListBox : public wxVListBox
+{
+public:
+    TestVListBox()
+        : wxVListBox(wxTheApp->GetTopWindow(), wxID_ANY,
+                     wxDefaultPosition, wxSize(300, 200), wxLB_MULTIPLE)
+    {
+    }
+
+private:
+    virtual void OnDrawItem(wxDC& WXUNUSED(dc),
+                            const wxRect& WXUNUSED(rect),
+                            size_t WXUNUSED(n)) const override
+    {
+    }
+
+    virtual wxCoord OnMeasureItem(size_t WXUNUSED(n)) const override
+    {
+        return 10;
+    }
+};
 
 class ListBoxTestCase : public ItemContainerTestCase, public CppUnit::TestCase
 {
@@ -36,6 +61,7 @@ private:
         wxITEM_CONTAINER_TESTS();
         CPPUNIT_TEST( Sort );
         CPPUNIT_TEST( MultipleSelect );
+        CPPUNIT_TEST( VListBoxSetRowCount );
         WXUISIM_TEST( ClickEvents );
         WXUISIM_TEST( ClickNotOnItem );
         CPPUNIT_TEST( HitTest );
@@ -53,6 +79,7 @@ private:
 
     void Sort();
     void MultipleSelect();
+    void VListBoxSetRowCount();
     void ClickEvents();
     void ClickNotOnItem();
     void HitTest();
@@ -179,6 +206,29 @@ void ListBoxTestCase::MultipleSelect()
 
     m_list->GetSelections(selected);
     CPPUNIT_ASSERT_EQUAL(0, selected.Count());
+}
+
+void ListBoxTestCase::VListBoxSetRowCount()
+{
+    TestVListBox list;
+
+    list.SetItemCount(4);
+    list.Select(1);
+    list.Select(3);
+
+    CPPUNIT_ASSERT_EQUAL(2, static_cast<int>(list.GetSelectedCount()));
+
+    list.SetRowCount(2);
+
+    CPPUNIT_ASSERT_EQUAL(1, static_cast<int>(list.GetSelectedCount()));
+
+    unsigned long cookie;
+    CPPUNIT_ASSERT_EQUAL(1, list.GetFirstSelected(cookie));
+    CPPUNIT_ASSERT_EQUAL(wxNOT_FOUND, list.GetNextSelected(cookie));
+
+    list.DeselectAll();
+
+    CPPUNIT_ASSERT_EQUAL(0, static_cast<int>(list.GetSelectedCount()));
 }
 
 void ListBoxTestCase::ClickEvents()

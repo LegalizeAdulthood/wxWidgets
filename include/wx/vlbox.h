@@ -4,6 +4,7 @@
 // Author:      Vadim Zeitlin
 // Created:     31.05.03
 // Copyright:   (c) 2003 Vadim Zeitlin <vadim@wxwidgets.org>
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -138,9 +139,8 @@ public:
     // ----------
 
     // set the number of items to be shown in the control
-    //
-    // this is just a synonym for wxVScrolledCanvas::SetRowCount()
     virtual void SetItemCount(size_t count);
+    void SetRowCount(size_t count) { SetItemCount(count); }
 
     // delete all items from the control
     void Clear() { SetItemCount(0); }
