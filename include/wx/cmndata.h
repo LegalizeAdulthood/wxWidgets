@@ -4,6 +4,7 @@
 // Author:      Julian Smart and others
 // Created:     01/02/97
 // Copyright:   (c)
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -23,6 +24,7 @@
 #include <vector>
 
 class WXDLLIMPEXP_FWD_CORE wxPrintNativeDataBase;
+class WXDLLIMPEXP_FWD_CORE wxWindowsPrintNativeData;
 
 /*
  * wxPrintData
@@ -70,7 +72,7 @@ public:
 
     const wxString& GetPrinterName() const { return m_printerName; }
     bool GetColour() const { return m_colour; }
-    wxDuplexMode GetDuplex() const { return m_duplexMode; }
+    wxDuplexMode GetDuplex() const { return IsDuplexSpecified() ? m_duplexMode : wxDUPLEX_SIMPLEX; }
     wxPaperSize GetPaperId() const { return m_paperId; }
     const wxSize& GetPaperSize() const { return m_paperSize; }
     wxPrintQuality GetQuality() const { return m_printQuality; }
@@ -115,6 +117,17 @@ public:
     wxPrintNativeDataBase *GetNativeData() const { return m_nativeData.get(); }
 
 private:
+    friend class wxWindowsPrintNativeData;
+
+    static wxDuplexMode DuplexModeNotSpecified()
+    {
+        return static_cast<wxDuplexMode>(wxDUPLEX_VERTICAL + 1);
+    }
+
+    bool IsDuplexSpecified() const { return m_duplexMode != DuplexModeNotSpecified(); }
+
+    void ResetDuplex() { m_duplexMode = DuplexModeNotSpecified(); }
+
     wxPrintBin      m_bin = wxPRINTBIN_DEFAULT;
     int             m_media = wxPRINTMEDIA_DEFAULT;
     wxPrintMode     m_printMode = wxPRINT_MODE_PRINTER;
@@ -126,7 +139,7 @@ private:
 
     wxString        m_printerName;
     bool            m_colour = true;
-    wxDuplexMode    m_duplexMode = wxDUPLEX_SIMPLEX;
+    wxDuplexMode    m_duplexMode = DuplexModeNotSpecified();
     wxPrintQuality  m_printQuality = wxPRINT_QUALITY_HIGH;
 
     // we intentionally don't initialize paper id and size at all, like this

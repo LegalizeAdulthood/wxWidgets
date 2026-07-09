@@ -4,6 +4,7 @@
 // Author:      Vadim Zeitlin
 // Created:     2008-09-22
 // Copyright:   (c) 2008 Vadim Zeitlin
+// Copyright:   (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -25,6 +26,11 @@
 #include "wx/clipbrd.h"
 #include "wx/dataobj.h"
 #include "wx/panel.h"
+
+#if defined(__WXMSW__) && wxUSE_PRINTING_ARCHITECTURE
+    #include "wx/msw/wrapwin.h"
+    #include "wx/msw/printdlg.h"
+#endif
 
 #include "asserthelper.h"
 #include "waitfor.h"
@@ -173,6 +179,59 @@ TEST_CASE("GUI::ParseFileDialogFilter", "[guifuncs]")
         )
     );
 }
+
+#if defined(__WXMSW__) && wxUSE_PRINTING_ARCHITECTURE
+
+namespace
+{
+
+HGLOBAL CreateDevModeWithDuplexDefault()
+{
+    HGLOBAL const hDevMode =
+        ::GlobalAlloc(GMEM_FIXED | GMEM_ZEROINIT, sizeof(DEVMODE));
+    REQUIRE( hDevMode );
+
+    DEVMODE * const devMode = static_cast<DEVMODE *>(hDevMode);
+    devMode->dmSize = sizeof(DEVMODE);
+    devMode->dmFields = DM_DUPLEX;
+    devMode->dmDuplex = DMDUP_VERTICAL;
+
+    return hDevMode;
+}
+
+} // anonymous namespace
+
+TEST_CASE("wxPrintData::MSWDuplexDefault", "[print][msw]")
+{
+    wxWindowsPrintNativeData nativeData;
+    HGLOBAL const hDevMode = CreateDevModeWithDuplexDefault();
+    nativeData.SetDevMode(hDevMode);
+
+    DEVMODE * const devMode = static_cast<DEVMODE *>(hDevMode);
+
+    SECTION("Default")
+    {
+        wxPrintData data;
+
+        REQUIRE( nativeData.TransferFrom(data) );
+
+        CHECK( (devMode->dmFields & DM_DUPLEX) != 0 );
+        CHECK( devMode->dmDuplex == DMDUP_VERTICAL );
+    }
+
+    SECTION("ExplicitSimplex")
+    {
+        wxPrintData data;
+        data.SetDuplex(wxDUPLEX_SIMPLEX);
+
+        REQUIRE( nativeData.TransferFrom(data) );
+
+        CHECK( (devMode->dmFields & DM_DUPLEX) != 0 );
+        CHECK( devMode->dmDuplex == DMDUP_SIMPLEX );
+    }
+}
+
+#endif // defined(__WXMSW__) && wxUSE_PRINTING_ARCHITECTURE
 
 TEST_CASE("GUI::ClientToScreen", "[guifuncs]")
 {
