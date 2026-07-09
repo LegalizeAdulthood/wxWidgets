@@ -4,6 +4,7 @@
 // Author:      Vadim Zeitlin
 // Created:     2011-01-13
 // Copyright:   (c) 2011 Vadim Zeitlin <vadim@wxwidgets.org>
+// Copyright:   (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -20,6 +21,7 @@
 #endif // WX_PRECOMP
 
 #include "wx/html/winpars.h"
+#include "wx/sstream.h"
 
 #include <memory>
 
@@ -40,6 +42,67 @@ TEST_CASE("wxHtmlParser::ParseInvalid", "[html][parser][error]")
     delete p.Parse("<foo");
     delete p.Parse("<!--");
     delete p.Parse("<!---");
+}
+
+TEST_CASE("wxHtmlWinParser::OpenURLAbsoluteArchivePath",
+          "[html][parser][url]")
+{
+    class RecordingFSHandler : public wxFileSystemHandler
+    {
+    public:
+        bool CanOpen(const wxString& location) override
+        {
+            return !location.empty();
+        }
+
+        wxFSFile *OpenFile(wxFileSystem& WXUNUSED(fs),
+                           const wxString& location) override
+        {
+            m_location = location;
+            return new wxFSFile(new wxStringInputStream("data"),
+                                location,
+                                wxEmptyString,
+                                wxEmptyString
+#if wxUSE_DATETIME
+                                , wxDateTime::Now()
+#endif // wxUSE_DATETIME
+                                );
+        }
+
+        const wxString& GetLocation() const { return m_location; }
+
+    private:
+        wxString m_location;
+    };
+
+    class AutoFSHandler
+    {
+    public:
+        AutoFSHandler(RecordingFSHandler *handler) : m_handler(handler)
+            { wxFileSystem::AddHandler(m_handler); }
+        ~AutoFSHandler()
+            { wxFileSystem::RemoveHandler(m_handler); }
+
+    private:
+        RecordingFSHandler *m_handler;
+    };
+
+    RecordingFSHandler handler;
+    AutoFSHandler autoFSHandler(&handler);
+
+    wxFileSystem fs;
+    fs.ChangePathTo("file:doc.chm#xchm:/d/e/", true);
+
+    wxHtmlWinParser parser;
+    parser.SetFS(&fs);
+
+    const wxString expected("file:doc.chm#xchm:/a/b/c.jpg");
+    std::unique_ptr<wxFSFile> file(
+        parser.OpenURL(wxHTML_URL_IMAGE, "/a/b/c.jpg"));
+
+    REQUIRE(file);
+    CHECK(handler.GetLocation() == expected);
+    CHECK(file->GetLocation() == expected);
 }
 
 TEST_CASE("wxHtmlCell::Detach", "[html][cell]")
