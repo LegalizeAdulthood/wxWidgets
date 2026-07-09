@@ -1235,6 +1235,13 @@ public:
         The current pen is used for the outline and the current brush
         for filling the shape.  Special case:  If the current pen is
         transparent, then the current brush is used for the entire rectangle.
+
+        @note Under wxMSW, very small rectangles drawn with a non-transparent
+              pen can be affected by limitations of the native GDI Rectangle()
+              function: a 1x1 outlined rectangle is not drawn, and corner
+              pixels can be missing from other tiny outlined rectangles.
+              Use DrawPoint() for a single pixel, or DrawLine() for thin
+              horizontal or vertical strokes.
     */
     void DrawRectangle(wxCoord x, wxCoord y, wxCoord width, wxCoord height);
 

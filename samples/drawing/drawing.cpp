@@ -4,6 +4,7 @@
 // Author:      Robert Roebling
 // Created:     04/01/98
 // Copyright:   (c) Robert Roebling
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -992,13 +993,16 @@ void MyCanvas::DrawDefault(wxDC& dc)
     dc.DrawLine(dc.FromDIP(400), dc.FromDIP(170), dc.FromDIP(400), dc.FromDIP(210));
     dc.DrawLine(dc.FromDIP(300), dc.FromDIP(200), dc.FromDIP(410), dc.FromDIP(200));
 
-    // a few more tests of this kind
+    // Draw tiny rectangles, including the MSW GDI edge case documented in
+    // wxDC::DrawRectangle(): outlined 1x1 rectangles may not produce a pixel.
+    // DrawPoint() is the portable way to draw a single pixel.
     dc.SetPen(*wxRED_PEN);
     dc.SetBrush( *wxWHITE_BRUSH );
     dc.DrawRectangle(dc.FromDIP(300), dc.FromDIP(220), dc.FromDIP(1), dc.FromDIP(1));
     dc.DrawRectangle(dc.FromDIP(310), dc.FromDIP(220), dc.FromDIP(2), dc.FromDIP(2));
     dc.DrawRectangle(dc.FromDIP(320), dc.FromDIP(220), dc.FromDIP(3), dc.FromDIP(3));
     dc.DrawRectangle(dc.FromDIP(330), dc.FromDIP(220), dc.FromDIP(4), dc.FromDIP(4));
+    dc.DrawPoint(dc.FromDIP(340), dc.FromDIP(220));
 
     dc.SetPen(*wxTRANSPARENT_PEN);
     dc.SetBrush( *wxWHITE_BRUSH );
