@@ -4,6 +4,7 @@
 // Author:      Vadim Zeitlin
 // Created:     2004-06-23 (extracted from samples/console/console.cpp)
 // Copyright:   (c) 2004 Vadim Zeitlin <vadim@wxwidgets.org>
+// Copyright:   (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -1059,6 +1060,17 @@ TEST_CASE("wxDateTime::Ticks", "[datetime]")
         wxInt64 ticks = (dt.GetValue() / 1000).GetValue();
         CHECK( d.gmticks == ticks );
     }
+}
+
+TEST_CASE("wxDateTime::DOS", "[datetime]")
+{
+    CHECK( wxDateTime(1, wxDateTime::Jan, 1980).GetAsDOS() == 0x00210000UL );
+
+    const wxDateTime dt(8, wxDateTime::Apr, 2079, 13, 24, 58);
+    CHECK( dt.GetAsDOS() == 0xC6886B1DUL );
+
+    const wxDateTime dtMax(31, wxDateTime::Dec, 2107, 23, 59, 58);
+    CHECK( dtMax.GetAsDOS() == 0xFF9FBF7DUL );
 }
 
 // test parsing dates in RFC822 format
