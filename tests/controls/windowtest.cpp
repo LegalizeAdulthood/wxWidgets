@@ -4,6 +4,7 @@
 // Author:      Steven Lamerton
 // Created:     2010-07-10
 // Copyright:   (c) 2010 Steven Lamerton
+// Copyright:   (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "testprec.h"
@@ -13,6 +14,7 @@
     #include "wx/app.h"
     #include "wx/window.h"
     #include "wx/button.h"
+    #include "wx/panel.h"
     #include "wx/sizer.h"
 #endif // WX_PRECOMP
 
@@ -111,6 +113,49 @@ TEST_CASE_METHOD(WindowTestCase, "Window::KeyEvent", "[window]")
     CHECK( keyup.GetCount() == 5 );
     CHECK( keychar.GetCount() == 4 );
 #endif
+}
+
+TEST_CASE("Window::ShiftTabKeyEvent", "[window][msw]")
+{
+#if defined(__WXMSW__) && wxUSE_UIACTIONSIMULATOR && wxUSE_BUTTON
+    if ( !EnableUITests() )
+        return;
+
+    wxWindow* const parent = wxTheApp->GetTopWindow();
+    wxPanel* const panel = new wxPanel(parent, wxID_ANY, wxDefaultPosition,
+                                       wxDefaultSize, wxTAB_TRAVERSAL);
+    wxButton* const previous = new wxButton(panel, wxID_ANY, "Previous");
+    wxButton* const target = new wxButton(panel, wxID_ANY, "Target");
+
+    wxBoxSizer* const sizer = new wxBoxSizer(wxHORIZONTAL);
+    sizer->Add(previous);
+    sizer->Add(target);
+    panel->SetSizerAndFit(sizer);
+    parent->Layout();
+
+    int shiftTabEvents = 0;
+    target->Bind(wxEVT_KEY_DOWN, [&](wxKeyEvent& event) {
+        if ( event.GetKeyCode() == WXK_TAB && event.ShiftDown() )
+        {
+            ++shiftTabEvents;
+            return;
+        }
+
+        event.Skip();
+    });
+
+    target->SetFocus();
+    REQUIRE( WaitFor("target focus",
+                     [target]() { return wxWindow::FindFocus() == target; }) );
+
+    wxUIActionSimulator sim;
+    sim.Char(WXK_TAB, wxMOD_SHIFT);
+
+    CHECK( WaitFor("Shift-TAB key event",
+                   [&]() { return shiftTabEvents != 0; }) );
+    CHECK( shiftTabEvents == 1 );
+    CHECK_FOCUS_IS( target );
+#endif // __WXMSW__ && wxUSE_UIACTIONSIMULATOR && wxUSE_BUTTON
 }
 
 TEST_CASE_METHOD(WindowTestCase, "Window::FocusEvent", "[window]")

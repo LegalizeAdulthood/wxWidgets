@@ -5,6 +5,7 @@
 // Modified by: VZ on 13.05.99: no more Default(), MSWOnXXX() reorganisation
 // Created:     04/01/98
 // Copyright:   (c) Julian Smart
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -2707,6 +2708,13 @@ bool wxWindowMSW::MSWProcessMessage(WXMSG* pMsg)
 
             if ( bProcess )
             {
+                if ( msg->wParam == VK_TAB && bShiftDown && !bCtrlDown )
+                {
+                    wxWindow * const win = wxFindWinFromHandle(msg->hwnd);
+                    if ( win && win->HandleKeyDown(msg->wParam, msg->lParam) )
+                        return true;
+                }
+
                 wxNavigationKeyEvent event;
                 event.SetDirection(bForward);
                 event.SetWindowChange(bWindowChange);
