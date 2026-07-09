@@ -4,6 +4,7 @@
 // Author:      Vadim Zeitlin
 // Created:     2011-01-13
 // Copyright:   (c) 2011 Vadim Zeitlin <vadim@wxwidgets.org>
+// Copyright:   (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -40,6 +41,15 @@ TEST_CASE("wxHtmlParser::ParseInvalid", "[html][parser][error]")
     delete p.Parse("<foo");
     delete p.Parse("<!--");
     delete p.Parse("<!---");
+}
+
+TEST_CASE("wxHtmlEntitiesParser::StrokedD", "[html][parser][entity]")
+{
+    wxHtmlEntitiesParser p;
+    wxString expected;
+    expected << wxUniChar(0x0110) << wxUniChar(0x0111);
+
+    CHECK( p.Parse("&Dstrok;&dstrok;") == expected );
 }
 
 TEST_CASE("wxHtmlCell::Detach", "[html][cell]")
