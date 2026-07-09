@@ -138,9 +138,8 @@ public:
     // ----------
 
     // set the number of items to be shown in the control
-    //
-    // this is just a synonym for wxVScrolledCanvas::SetRowCount()
     virtual void SetItemCount(size_t count);
+    void SetRowCount(size_t count) { SetItemCount(count); }
 
     // delete all items from the control
     void Clear() { SetItemCount(0); }

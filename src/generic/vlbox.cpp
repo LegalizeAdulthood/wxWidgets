@@ -109,7 +109,7 @@ void wxVListBox::SetItemCount(size_t count)
         m_selStore->SetItemCount(count);
     }
 
-    SetRowCount(count);
+    wxVScrolledCanvas::SetRowCount(count);
 }
 
 // ----------------------------------------------------------------------------
