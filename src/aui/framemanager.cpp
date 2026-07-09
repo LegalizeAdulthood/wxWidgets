@@ -4,6 +4,7 @@
 // Author:      Benjamin I. Williams
 // Created:     2005-05-17
 // Copyright:   (C) Copyright 2005-2006, Kirix Corporation, All Rights Reserved
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows Library Licence, Version 3.1
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1086,6 +1087,27 @@ bool wxAuiManager::AddPane(wxWindow* window, const wxAuiPaneInfo& paneInfo)
         // But we still shouldn't make it too small.
         pinfo.best_size.IncTo(pinfo.window->GetBestSize());
         pinfo.best_size.IncTo(pinfo.min_size);
+    }
+
+    if ( pinfo.dock_size == 0 && paneInfo.best_size != wxDefaultSize )
+    {
+        switch ( pinfo.dock_direction )
+        {
+            case wxAUI_DOCK_LEFT:
+            case wxAUI_DOCK_RIGHT:
+                if ( pinfo.best_size.x != wxDefaultCoord )
+                    pinfo.dock_size = pinfo.best_size.x;
+                break;
+
+            case wxAUI_DOCK_TOP:
+            case wxAUI_DOCK_BOTTOM:
+                if ( pinfo.best_size.y != wxDefaultCoord )
+                    pinfo.dock_size = pinfo.best_size.y;
+                break;
+
+            default:
+                break;
+        }
     }
 
     AddPaneToMinDockIfNecessary(pinfo);
