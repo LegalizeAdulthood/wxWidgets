@@ -4,6 +4,7 @@
 // Author:      Steven Lamerton
 // Created:     2010-07-07
 // Copyright:   (c) 2010 Steven Lamerton
+// Copyright:   (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "testprec.h"
@@ -42,6 +43,7 @@ private:
         CPPUNIT_TEST( CutCopyPaste );
         CPPUNIT_TEST( UndoRedo );
         CPPUNIT_TEST( CaretPosition );
+        CPPUNIT_TEST( LineBreak );
         CPPUNIT_TEST( Selection );
         WXUISIM_TEST( Editable );
         CPPUNIT_TEST( Range );
@@ -73,6 +75,7 @@ private:
     void CutCopyPaste();
     void UndoRedo();
     void CaretPosition();
+    void LineBreak();
     void Selection();
     void Editable();
     void Range();
@@ -369,6 +372,45 @@ void RichTextCtrlTestCase::CaretPosition()
     m_rich->MoveToLineEnd();
 
     CPPUNIT_ASSERT_EQUAL(21, m_rich->GetCaretPosition());
+}
+
+void RichTextCtrlTestCase::LineBreak()
+{
+    m_rich->WriteText("one");
+
+    CPPUNIT_ASSERT(m_rich->LineBreak());
+
+    m_rich->LayoutContent();
+
+    CPPUNIT_ASSERT_EQUAL(2, m_rich->GetFocusObject()->GetLineCount());
+    CPPUNIT_ASSERT_EQUAL(3, m_rich->GetCaretPosition());
+    CPPUNIT_ASSERT(m_rich->GetCaretAtLineStart());
+
+    m_rich->MoveLeft();
+
+    CPPUNIT_ASSERT_EQUAL(2, m_rich->GetCaretPosition());
+    CPPUNIT_ASSERT(!m_rich->GetCaretAtLineStart());
+
+    m_rich->MoveRight();
+
+    CPPUNIT_ASSERT_EQUAL(3, m_rich->GetCaretPosition());
+    CPPUNIT_ASSERT(m_rich->GetCaretAtLineStart());
+
+    m_rich->WriteText("two");
+
+    wxString text;
+    text << "one" << wxRichTextLineBreakChar << "two";
+
+    CPPUNIT_ASSERT_EQUAL(text, m_rich->GetValue());
+
+    m_rich->MoveToLineStart();
+
+    CPPUNIT_ASSERT_EQUAL(3, m_rich->GetCaretPosition());
+    CPPUNIT_ASSERT(m_rich->GetCaretAtLineStart());
+
+    m_rich->MoveToLineEnd();
+
+    CPPUNIT_ASSERT_EQUAL(6, m_rich->GetCaretPosition());
 }
 
 void RichTextCtrlTestCase::Selection()
