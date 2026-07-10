@@ -4,6 +4,7 @@
 // Author:      Sebastian Walderich
 // Created:     2018-12-19
 // Copyright:   (c) 2018 Sebastian Walderich
+// Copyright:   (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -153,6 +154,23 @@ TEST_CASE_METHOD(AuiNotebookTestCase, "wxAuiNotebook::RTTI", "[aui][rtti]")
     CHECK( wxDynamicCast(book, wxAuiNotebook) == nb );
 
     CHECK( wxDynamicCast(nb, wxBookCtrlBase) == book );
+}
+
+TEST_CASE_METHOD(AuiNotebookTestCase, "wxAuiNotebook::NonTabPane", "[aui]")
+{
+    wxPanel *page = new wxPanel(nb);
+    REQUIRE( nb->AddPage(page, "Page") );
+
+    wxPanel *pane = new wxPanel(nb);
+    wxAuiManager& mgr = const_cast<wxAuiManager&>(nb->GetAuiManager());
+    mgr.AddPane(pane,
+                wxAuiPaneInfo().Name("plain-pane").Right().CaptionVisible(false));
+    mgr.Update();
+
+    nb->SetTabCtrlHeight(nb->GetTabCtrlHeight() + 1);
+
+    CHECK( mgr.GetPane("plain-pane").window == pane );
+    CHECK( mgr.DetachPane(pane) );
 }
 
 TEST_CASE_METHOD(AuiNotebookTestCase, "wxAuiNotebook::FindPage", "[aui]")
