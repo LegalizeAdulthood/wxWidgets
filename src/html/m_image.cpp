@@ -3,6 +3,7 @@
 // Purpose:     wxHtml module for displaying images
 // Author:      Vaclav Slavik
 // Copyright:   (c) 1999 Vaclav Slavik, Joel Lucsy
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -326,7 +327,6 @@ private:
 #if wxUSE_GIF && wxUSE_TIMER
     wxGIFDecoder       *m_gifDecoder;
     wxTimer            *m_gifTimer;
-    int                 m_physX, m_physY;
     size_t              m_nCurrFrame;
 #endif
     double              m_scale;
@@ -381,7 +381,6 @@ wxHtmlImageCell::wxHtmlImageCell(const wxHtmlTag& tag,
 #if wxUSE_GIF && wxUSE_TIMER
     m_gifDecoder = nullptr;
     m_gifTimer = nullptr;
-    m_physX = m_physY = wxDefaultCoord;
     m_nCurrFrame = 0;
 #endif
 
@@ -500,19 +499,9 @@ void wxHtmlImageCell::AdvanceAnimation(wxTimer *timer)
     if (m_nCurrFrame == m_gifDecoder->GetFrameCount())
         m_nCurrFrame = 0;
 
-    if ( m_physX == wxDefaultCoord )
-    {
-        m_physX = m_physY = 0;
-        for (wxHtmlCell *cell = this; cell; cell = cell->GetParent())
-        {
-            m_physX += cell->GetPosX();
-            m_physY += cell->GetPosY();
-        }
-    }
-
     wxWindow *win = m_windowIface->GetHTMLWindow();
     wxPoint pos =
-        m_windowIface->HTMLCoordsToWindow(this, wxPoint(m_physX, m_physY));
+        m_windowIface->HTMLCoordsToWindow(this, GetAbsPos());
     wxRect rect(pos, wxSize(m_Width, m_Height));
 
     if ( win->GetClientRect().Intersects(rect) &&
@@ -573,9 +562,6 @@ void wxHtmlImageCell::Layout(int w)
     }
 
     wxHtmlCell::Layout(w);
-#if wxUSE_GIF && wxUSE_TIMER
-    m_physX = m_physY = wxDefaultCoord;
-#endif
 }
 
 wxHtmlImageCell::~wxHtmlImageCell()
