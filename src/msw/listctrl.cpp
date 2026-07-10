@@ -5,6 +5,7 @@
 // Modified by: Agron Selimaj
 // Created:     04/01/98
 // Copyright:   (c) Julian Smart
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -37,6 +38,9 @@
 
 #include "wx/imaglist.h"
 #include "wx/vector.h"
+#if wxUSE_TOOLTIPS
+    #include "wx/tooltip.h"
+#endif
 
 #include "wx/msw/private.h"
 #include "wx/msw/uxtheme.h"
@@ -310,7 +314,12 @@ void wxListCtrl::MSWSetExListStyles()
     // showing 2 tooltips simultaneously, which would be confusing. So only
     // enable this style if there is no risk of this happening.
     if ( !GetToolTip() )
-        exStyle |= LVS_EX_LABELTIP;
+    {
+#if wxUSE_TOOLTIPS
+        if ( wxToolTip::IsEnabled() )
+#endif // wxUSE_TOOLTIPS
+            exStyle |= LVS_EX_LABELTIP;
+    }
 
     // include the checkbox style
     if ( HasCheckBoxes() )

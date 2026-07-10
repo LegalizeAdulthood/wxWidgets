@@ -4,6 +4,7 @@
 // Author:      Vadim Zeitlin
 // Created:     31.01.99
 // Copyright:   (c) 1999 Vadim Zeitlin
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -21,6 +22,7 @@
 #if wxUSE_TOOLTIPS
 
 #include "wx/tooltip.h"
+#include "wx/window.h"
 
 #ifndef WX_PRECOMP
     #include "wx/msw/wrapcctl.h" // include <commctrl.h> "properly"
@@ -28,6 +30,14 @@
     #include "wx/control.h"
     #include "wx/module.h"
     #include "wx/toplevel.h"
+#endif
+
+#if wxUSE_LISTCTRL
+    #include "wx/listctrl.h"
+#endif
+
+#if wxUSE_TOOLBAR && wxUSE_TOOLBAR_NATIVE
+    #include "wx/toolbar.h"
 #endif
 
 #include "wx/tokenzr.h"
@@ -60,8 +70,66 @@
 // the tooltip parent window
 WXHWND wxToolTip::ms_hwndTT = nullptr;
 
+bool wxToolTip::ms_enabled = true;
+
 // new tooltip maximum width, default value is set on first call to wxToolTip::Add()
 int wxToolTip::ms_maxWidth = 0;
+
+namespace
+{
+
+void ActivateNativeToolTip(HWND hwnd, UINT msg, bool flag)
+{
+    HWND hwndTT = (HWND)::SendMessage(hwnd, msg, 0, 0);
+    if ( hwndTT )
+        ::SendMessage(hwndTT, TTM_ACTIVATE, flag, 0);
+}
+
+void UpdateNativeToolTips(wxWindow* win, bool flag)
+{
+#if wxUSE_TOOLBAR && wxUSE_TOOLBAR_NATIVE
+    if ( wxToolBar* toolbar = wxDynamicCast(win, wxToolBar) )
+    {
+        if ( HWND hwnd = GetHwndOf(toolbar) )
+            ActivateNativeToolTip(hwnd, TB_GETTOOLTIPS, flag);
+    }
+#endif // wxUSE_TOOLBAR && wxUSE_TOOLBAR_NATIVE
+
+#if wxUSE_LISTCTRL
+    if ( wxListCtrl* list = wxDynamicCast(win, wxListCtrl) )
+    {
+        if ( HWND hwnd = GetHwndOf(list) )
+        {
+            const DWORD labelTip = flag && !list->GetToolTip()
+                                     ? LVS_EX_LABELTIP
+                                     : 0;
+            ListView_SetExtendedListViewStyleEx(hwnd,
+                                                LVS_EX_LABELTIP,
+                                                labelTip);
+            ActivateNativeToolTip(hwnd, LVM_GETTOOLTIPS, flag);
+        }
+    }
+#endif // wxUSE_LISTCTRL
+
+    for ( wxWindowList::compatibility_iterator node = win->GetChildren().GetFirst();
+          node;
+          node = node->GetNext() )
+    {
+        UpdateNativeToolTips(node->GetData(), flag);
+    }
+}
+
+void UpdateAllNativeToolTips(bool flag)
+{
+    for ( wxWindowList::compatibility_iterator node = wxTopLevelWindows.GetFirst();
+          node;
+          node = node->GetNext() )
+    {
+        UpdateNativeToolTips(node->GetData(), flag);
+    }
+}
+
+} // namespace
 
 #if wxUSE_TTM_WINDOWFROMPOINT
 
@@ -245,10 +313,18 @@ LRESULT APIENTRY wxToolTipWndProc(HWND hwndTT,
 
 void wxToolTip::Enable(bool flag)
 {
+    ms_enabled = flag;
+
     // Make sure the tooltip has been created
     (void) GetToolTipCtrl();
 
     SendTooltipMessageToAll(ms_hwndTT, TTM_ACTIVATE, flag, 0);
+    UpdateAllNativeToolTips(flag);
+}
+
+bool wxToolTip::IsEnabled()
+{
+    return ms_enabled;
 }
 
 void wxToolTip::SetDelay(long milliseconds)
@@ -319,6 +395,7 @@ WXHWND wxToolTip::GetToolTipCtrl()
        {
            HWND hwnd = (HWND)ms_hwndTT;
            wxMSWDarkMode::AllowForWindow(hwnd);
+           ::SendMessage(hwnd, TTM_ACTIVATE, ms_enabled, 0);
            SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
                         SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
 

@@ -4,6 +4,7 @@
 // Author:      Julian Smart
 // Created:     04/01/98
 // Copyright:   (c) Julian Smart
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -43,6 +44,9 @@
 
 #include "wx/artprov.h"
 #include "wx/sysopt.h"
+#if wxUSE_TOOLTIPS
+    #include "wx/tooltip.h"
+#endif
 #include "wx/dcclient.h"
 #include "wx/rawbmp.h"
 #include "wx/scopedarray.h"
@@ -465,6 +469,7 @@ bool wxToolBar::MSWCreateToolbar(const wxPoint& pos, const wxSize& size)
         long styleTTip = ::GetWindowLong(hwndTTip, GWL_STYLE);
         styleTTip |= TTS_NOPREFIX;
         ::SetWindowLong(hwndTTip, GWL_STYLE, styleTTip);
+        ::SendMessage(hwndTTip, TTM_ACTIVATE, wxToolTip::IsEnabled(), 0);
     }
 #endif // wxUSE_TOOLTIPS
 
@@ -1796,6 +1801,9 @@ bool wxToolBar::MSWOnNotify(int WXUNUSED(idCtrl),
         // in an ANSI application - this seems to be a bug in comctl32.dll v5
         UINT code = hdr->code;
         if ( (code != (UINT) TTN_NEEDTEXTA) && (code != (UINT) TTN_NEEDTEXTW) )
+            return false;
+
+        if ( !wxToolTip::IsEnabled() )
             return false;
 
         HWND toolTipWnd = (HWND)::SendMessage(GetHwnd(), TB_GETTOOLTIPS, 0, 0);
