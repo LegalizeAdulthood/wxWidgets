@@ -17,15 +17,21 @@
 
 #ifndef WX_PRECOMP
     #include "wx/app.h"
+    #include "wx/frame.h"
 #endif // WX_PRECOMP
 
 #include "wx/panel.h"
 
 #include "wx/aui/auibar.h"
 #include "wx/aui/auibook.h"
+#include "wx/aui/framemanager.h"
 #include "wx/aui/serializer.h"
 
 #include "asserthelper.h"
+
+#ifdef __WXMSW__
+    #include "wx/msw/wrapwin.h"
+#endif
 
 #include <memory>
 
@@ -50,9 +56,68 @@ protected:
     wxAuiNotebook* const nb;
 };
 
+class AuiManagerTestCase
+{
+public:
+    AuiManagerTestCase()
+        : frame(new wxFrame(wxTheApp->GetTopWindow(), wxID_ANY, "AUI test"))
+        , mgr(frame)
+        , panel(new wxPanel(frame))
+    {
+        frame->SetClientSize(200, 200);
+    }
+
+    ~AuiManagerTestCase()
+    {
+        wxAuiPaneInfo& pane = mgr.GetPane(panel);
+        if ( pane.IsOk() && pane.IsFloating() )
+        {
+            pane.Dock();
+            mgr.Update();
+        }
+
+        mgr.UnInit();
+        frame->Destroy();
+    }
+
+protected:
+    wxFrame* const frame;
+    wxAuiManager mgr;
+    wxPanel* const panel;
+};
+
 // ----------------------------------------------------------------------------
 // the tests themselves
 // ----------------------------------------------------------------------------
+
+TEST_CASE_METHOD(AuiManagerTestCase, "wxAuiManager::DockFloatingPaneOnDClick", "[aui]")
+{
+    REQUIRE( mgr.AddPane(panel,
+                         wxAuiPaneInfo().Name("pane").Caption("Pane").Left()) );
+    mgr.Update();
+
+    wxAuiPaneInfo& pane = mgr.GetPane(panel);
+    pane.Float();
+    mgr.Update();
+
+    wxFrame * const floatingFrame = pane.frame;
+    REQUIRE( floatingFrame );
+    CHECK( panel->GetParent() == floatingFrame );
+
+#ifdef __WXMSW__
+    (void)::SendMessage((HWND)floatingFrame->GetHWND(),
+                        WM_NCLBUTTONDBLCLK,
+                        HTCAPTION,
+                        0);
+#else
+    wxMouseEvent event(wxEVT_LEFT_DCLICK);
+    floatingFrame->GetEventHandler()->ProcessEvent(event);
+#endif
+
+    CHECK( pane.IsDocked() );
+    CHECK( pane.frame == nullptr );
+    CHECK( panel->GetParent() == frame );
+}
 
 TEST_CASE_METHOD(AuiNotebookTestCase, "wxAuiNotebook::DoGetBestSize", "[aui]")
 {
