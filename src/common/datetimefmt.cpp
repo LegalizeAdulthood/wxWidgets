@@ -11,6 +11,7 @@
 //               so long as the above copyright and this permission statement
 //               are retained in all copies.
 //
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1703,6 +1704,14 @@ wxDateTime::ParseFormat(const wxString& date,
 
         tm.mon = tm2.mon;
         tm.mday = tm2.mday;
+    }
+    else
+    {
+        // The default day can become invalid after replacing the month or
+        // year above, e.g. Feb 29 with a non-leap year.
+        const wxDateTime_t maxMDay = GetNumberOfDays(tm.mon, tm.year);
+        if ( tm.mday > maxMDay )
+            tm.mday = maxMDay;
     }
 
     // deal with AM/PM

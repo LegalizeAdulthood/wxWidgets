@@ -4,6 +4,7 @@
 // Author:      Vadim Zeitlin
 // Created:     2004-06-23 (extracted from samples/console/console.cpp)
 // Copyright:   (c) 2004 Vadim Zeitlin <vadim@wxwidgets.org>
+// Copyright:   (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -861,6 +862,12 @@ TEST_CASE("wxDateTime::ParseFormat", "[datetime]")
         CHECK( dt.GetDay() == 17 );
         CHECK( dt.GetMonth() == wxDateTime::Sep );
         CHECK( dt.GetYear() == 2008 );
+
+        wxDateTime dtLeapDef(29, wxDateTime::Feb, 2012);
+        REQUIRE( dt.ParseFormat("2011", "%Y", dtLeapDef) );
+        CHECK( dt.GetDay() == 28 );
+        CHECK( dt.GetMonth() == wxDateTime::Feb );
+        CHECK( dt.GetYear() == 2011 );
     }
 
     // test some degenerate cases
