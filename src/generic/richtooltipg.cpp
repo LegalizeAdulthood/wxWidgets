@@ -4,6 +4,7 @@
 // Author:      Vadim Zeitlin
 // Created:     2011-10-07
 // Copyright:   (c) 2011 Vadim Zeitlin <vadim@wxwidgets.org>
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -22,6 +23,7 @@
 #if wxUSE_RICHTOOLTIP
 
 #ifndef WX_PRECOMP
+    #include "wx/app.h"
     #include "wx/dcmemory.h"
     #include "wx/icon.h"
     #include "wx/region.h"
@@ -50,6 +52,10 @@
 // ----------------------------------------------------------------------------
 // wxRichToolTipPopup: the popup window used by wxRichToolTip.
 // ----------------------------------------------------------------------------
+
+class wxRichToolTipPopup;
+
+static wxRichToolTipPopup* gs_currentRichToolTipPopup = nullptr;
 
 class wxRichToolTipPopup :
     public wxCustomBackgroundWindow<wxPopupTransientWindow>
@@ -156,6 +162,12 @@ public:
         Layout();
     }
 
+    ~wxRichToolTipPopup()
+    {
+        if ( gs_currentRichToolTipPopup == this )
+            gs_currentRichToolTipPopup = nullptr;
+    }
+
     void SetBackgroundColours(wxColour colStart, wxColour colEnd)
     {
         if ( !colStart.IsOk() )
@@ -229,6 +241,11 @@ public:
         Popup();
     }
 
+    void DismissRichToolTip()
+    {
+        DismissAndNotify();
+    }
+
     void SetTimeoutAndShow(unsigned timeout, unsigned delay)
     {
         if ( !timeout && !delay )
@@ -251,6 +268,12 @@ public:
 protected:
     virtual void OnDismiss() override
     {
+        if ( gs_currentRichToolTipPopup == this )
+            gs_currentRichToolTipPopup = nullptr;
+
+        if ( wxTheApp->IsScheduledForDestruction(this) )
+            return;
+
         Destroy();
     }
 
@@ -574,6 +597,16 @@ private:
     wxDECLARE_NO_COPY_CLASS(wxRichToolTipPopup);
 };
 
+static void DismissCurrentRichToolTipPopup()
+{
+    if ( !gs_currentRichToolTipPopup )
+        return;
+
+    wxRichToolTipPopup* const popup = gs_currentRichToolTipPopup;
+    gs_currentRichToolTipPopup = nullptr;
+    popup->DismissRichToolTip();
+}
+
 // ----------------------------------------------------------------------------
 // wxRichToolTipGenericImpl: generic implementation of wxRichToolTip.
 // ----------------------------------------------------------------------------
@@ -637,6 +670,8 @@ void wxRichToolTipGenericImpl::SetTitleFont(const wxFont& font)
 
 void wxRichToolTipGenericImpl::ShowFor(wxWindow* win, const wxRect* rect)
 {
+    DismissCurrentRichToolTipPopup();
+
     wxRichToolTipPopup* const popup = new wxRichToolTipPopup
                                           (
                                             win,
@@ -646,6 +681,7 @@ void wxRichToolTipGenericImpl::ShowFor(wxWindow* win, const wxRect* rect)
                                             m_tipKind,
                                             m_titleFont
                                           );
+    gs_currentRichToolTipPopup = popup;
 
     popup->SetBackgroundColours(m_colStart, m_colEnd);
 
