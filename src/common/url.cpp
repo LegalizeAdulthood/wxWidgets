@@ -4,6 +4,7 @@
 // Author:      Guilhem Lavaux
 // Created:     20/07/1997
 // Copyright:   (c) 1997, 1998 Guilhem Lavaux
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -183,15 +184,23 @@ bool wxURL::ParseURL()
 #if wxUSE_PROTOCOL_HTTP
     if (m_useProxy)
     {
+        wxString host = m_server;
+        if ( !m_port.empty() &&
+             (!m_protoinfo || m_port != m_protoinfo->m_servname) )
+            host << wxT(":") << m_port;
+
         // Third, we rebuild the URL.
         m_url = m_scheme + wxT(":");
         if (m_protoinfo->m_needhost)
-            m_url = m_url + wxT("//") + m_server;
+            m_url = m_url + wxT("//") + host;
 
         // We initialize specific variables.
         if (m_protocol)
             m_protocol->Destroy();
         m_protocol = m_proxy; // FIXME: we should clone the protocol
+
+        if ( m_proxy )
+            m_proxy->SetHeader(wxT("Host"), host);
     }
 #endif // wxUSE_PROTOCOL_HTTP
 
