@@ -35,7 +35,6 @@ class HtmlWindowTestCase
 public:
     HtmlWindowTestCase();
     ~HtmlWindowTestCase();
-
 protected:
     wxHtmlWindow *m_win;
 
@@ -73,6 +72,16 @@ static const char *TEST_MARKUP =
 static const char *TEST_MARKUP_LINK =
     "<html><body>"
     "<a href=\"link\">link<\\a> "
+    "</body></html>";
+
+static const char *TEST_MARKUP_TABLE_HEIGHT_ABSOLUTE =
+    "<html><body>"
+    "<table><tr><td height=\"100\">Cell</td></tr></table>"
+    "</body></html>";
+
+static const char *TEST_MARKUP_TABLE_HEIGHT_PERCENT =
+    "<html><body>"
+    "<table width=\"200\"><tr><td height=\"50%\">Cell</td></tr></table>"
     "</body></html>";
 
 static const char *TEST_PLAIN_TEXT =
@@ -180,6 +189,20 @@ TEST_CASE_METHOD(HtmlWindowTestCase, "HtmlWindow::InitialLineBreak", "[html][htm
 
     CHECK(rootWithBreak);
     CHECK(rootWithBreak->GetHeight() > plainTextHeight);
+}
+
+TEST_CASE_METHOD(HtmlWindowTestCase, "HtmlWindow::TableCellHeight",
+                 "[html][htmlwindow]")
+{
+    m_win->SetBorders(0);
+
+    m_win->SetPage(TEST_MARKUP_TABLE_HEIGHT_ABSOLUTE);
+    REQUIRE(m_win->GetInternalRepresentation());
+    CHECK(m_win->GetInternalRepresentation()->GetHeight() >= 100);
+
+    m_win->SetPage(TEST_MARKUP_TABLE_HEIGHT_PERCENT);
+    REQUIRE(m_win->GetInternalRepresentation());
+    CHECK(m_win->GetInternalRepresentation()->GetHeight() >= 100);
 }
 
 #if wxUSE_UIACTIONSIMULATOR
