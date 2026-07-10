@@ -5009,6 +5009,7 @@ void wxAuiManager::OnLeftDown(wxMouseEvent& event)
             m_actionPart = part;
             m_actionHintRect = wxRect();
             m_actionStart = wxPoint(event.m_x, event.m_y);
+            m_lastMouseMove = m_actionStart;
             m_actionOffset = wxPoint(event.m_x - part->rect.x,
                                       event.m_y - part->rect.y);
             m_frame->CaptureMouse();
@@ -5320,10 +5321,10 @@ void wxAuiManager::OnLeftUp(wxMouseEvent& event)
 {
     if (m_action == actionResize)
     {
+        m_frame->ReleaseMouse();
+
         const bool wasDragged =
             event.GetPosition() != m_actionStart || m_currentDragItem != -1;
-
-        m_frame->ReleaseMouse();
 
         if (!HasLiveResize())
         {
@@ -5340,7 +5341,6 @@ void wxAuiManager::OnLeftUp(wxMouseEvent& event)
         }
 
         m_currentDragItem = -1;
-
     }
     else if (m_action == actionClickButton)
     {
@@ -5396,7 +5396,6 @@ void wxAuiManager::OnLeftUp(wxMouseEvent& event)
     m_action = actionNone;
     m_lastMouseMove = wxPoint(); // see comment in OnMotion()
 }
-
 
 void wxAuiManager::OnMotion(wxMouseEvent& event)
 {
