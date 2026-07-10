@@ -5,6 +5,7 @@
 // Modified by: Robin Dunn, Vadim Zeitlin, Santiago Palacios
 // Created:     1/08/1999
 // Copyright:   (c) Michael Bedward (mbedward@ozemail.com.au)
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -9776,6 +9777,11 @@ void wxGrid::SetDefaultCellFont( const wxFont& font )
 
 void wxGrid::SetDefaultRenderer(wxGridCellRenderer *renderer)
 {
+    if ( renderer )
+        renderer->IncRef();
+
+    m_defaultCellAttr->SetRenderer(renderer);
+
     RegisterDataType(wxGRID_VALUE_STRING,
                      renderer,
                      GetDefaultEditorForType(wxGRID_VALUE_STRING));
@@ -9783,6 +9789,11 @@ void wxGrid::SetDefaultRenderer(wxGridCellRenderer *renderer)
 
 void wxGrid::SetDefaultEditor(wxGridCellEditor *editor)
 {
+    if ( editor )
+        editor->IncRef();
+
+    m_defaultCellAttr->SetEditor(editor);
+
     RegisterDataType(wxGRID_VALUE_STRING,
                      GetDefaultRendererForType(wxGRID_VALUE_STRING),
                      editor);

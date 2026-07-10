@@ -4,6 +4,7 @@
 // Author:      Steven Lamerton
 // Created:     2010-06-25
 // Copyright:   (c) 2010 Steven Lamerton
+// Copyright:   (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "testprec.h"
@@ -475,6 +476,29 @@ TEST_CASE_METHOD(GridTestCase, "Grid::CellEdit", "[grid]")
     CHECK(changing.GetCount() == 1);
     CHECK(changed.GetCount() == 1);
 #endif
+}
+
+TEST_CASE_METHOD(GridTestCase, "Grid::DefaultRendererEditor", "[grid]")
+{
+    wxGridCellRenderer* const renderer = new wxGridCellAutoWrapStringRenderer;
+    m_grid->SetDefaultRenderer(renderer);
+
+    wxGridCellRendererPtr defaultRenderer(m_grid->GetDefaultRenderer());
+    CHECK(defaultRenderer.get() == renderer);
+
+    wxGridCellRendererPtr stringRenderer(
+        m_grid->GetDefaultRendererForType(wxGRID_VALUE_STRING));
+    CHECK(stringRenderer.get() == renderer);
+
+    wxGridCellEditor* const editor = new wxGridCellTextEditor;
+    m_grid->SetDefaultEditor(editor);
+
+    wxGridCellEditorPtr defaultEditor(m_grid->GetDefaultEditor());
+    CHECK(defaultEditor.get() == editor);
+
+    wxGridCellEditorPtr stringEditor(
+        m_grid->GetDefaultEditorForType(wxGRID_VALUE_STRING));
+    CHECK(stringEditor.get() == editor);
 }
 
 TEST_CASE_METHOD(GridTestCase, "Grid::CellClick", "[grid]")
