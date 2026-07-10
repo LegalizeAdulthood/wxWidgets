@@ -5,6 +5,7 @@
 // Modified by: Santiago Palacios
 // Created:     1/08/1999
 // Copyright:   (c) Michael Bedward
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -380,6 +381,7 @@ public:
     virtual void ApplyEdit(int row, int col, wxGrid* grid) override;
 
     virtual void Reset() override;
+    virtual void StartingClick() override;
 
     // parameters string format is "item1[,item2[...,itemN]]"
     virtual void SetParameters(const wxString& params) override;
@@ -393,7 +395,9 @@ public:
 protected:
     wxComboBox *Combo() const { return (wxComboBox *)m_control; }
 
+    void DismissEditor();
     void OnComboCloseUp(wxCommandEvent& evt);
+    void OnTextEnter(wxCommandEvent& evt);
 
     wxString        m_value;
     wxArrayString   m_choices;
