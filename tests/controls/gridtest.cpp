@@ -491,6 +491,29 @@ TEST_CASE_METHOD(GridTestCase, "Grid::CellEditResize", "[grid]")
     CHECK(editorRect.GetRight() < gridWindow->GetClientSize().x);
 }
 
+TEST_CASE_METHOD(GridTestCase, "Grid::DefaultRendererEditor", "[grid]")
+{
+    wxGridCellRenderer* const renderer = new wxGridCellAutoWrapStringRenderer;
+    m_grid->SetDefaultRenderer(renderer);
+
+    wxGridCellRendererPtr defaultRenderer(m_grid->GetDefaultRenderer());
+    CHECK(defaultRenderer.get() == renderer);
+
+    wxGridCellRendererPtr stringRenderer(
+        m_grid->GetDefaultRendererForType(wxGRID_VALUE_STRING));
+    CHECK(stringRenderer.get() == renderer);
+
+    wxGridCellEditor* const editor = new wxGridCellTextEditor;
+    m_grid->SetDefaultEditor(editor);
+
+    wxGridCellEditorPtr defaultEditor(m_grid->GetDefaultEditor());
+    CHECK(defaultEditor.get() == editor);
+
+    wxGridCellEditorPtr stringEditor(
+        m_grid->GetDefaultEditorForType(wxGRID_VALUE_STRING));
+    CHECK(stringEditor.get() == editor);
+}
+
 TEST_CASE_METHOD(GridTestCase, "Grid::CellClick", "[grid]")
 {
 #if wxUSE_UIACTIONSIMULATOR
