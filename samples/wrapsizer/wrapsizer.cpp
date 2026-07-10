@@ -4,6 +4,7 @@
 // Author:      Arne Steinarson
 // Created:     21.01.2008
 // Copyright:   (c) Arne Steinarson
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -167,7 +168,13 @@ WrapSizerFrame::WrapSizerFrame()
     // Set sizer for the panel
     m_panel->SetSizer(sizerRoot);
 
-    SetClientSize(m_panel->GetBestSize());
+    // Let wxWrapSizer calculate its height for the initial width.
+    const wxSize sizeBest = m_panel->GetBestSize();
+    SetClientSize(sizeBest);
+    Layout();
+    m_panel->Layout();
+    SetClientSize(sizeBest.x, m_panel->GetBestSize().y);
+    Layout();
 
     Show();
 }
