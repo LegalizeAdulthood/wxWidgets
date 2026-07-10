@@ -4,6 +4,7 @@
 // Author:      Julian Smart
 // Created:     04/01/98
 // Copyright:   (c) Julian Smart
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -2406,7 +2407,7 @@ WXHBITMAP wxToolBar::MapBitmap(WXHBITMAP bitmap, int width, int height)
                      abs(GetBValue(pixel) - GetBValue(col)) < 10 )
                 {
                     if ( cmap[k].to != pixel )
-                        ::SetPixel(hdcMem, i, j, cmap[k].to);
+                        ::SetPixelV(hdcMem, i, j, cmap[k].to);
                     break;
                 }
             }
