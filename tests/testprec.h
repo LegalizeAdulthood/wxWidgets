@@ -176,6 +176,13 @@ class TestLogEnabler { };
 // Return true if the UI tests are enabled, used by WXUISIM_TEST().
 extern bool EnableUITests();
 
+#if wxUSE_UIACTIONSIMULATOR
+// Use these helpers for mouse input to respect primary/secondary button
+// assignment on systems configured with swapped mouse buttons.
+int GetMouseButtonPrimary();
+int GetMouseButtonSecondary();
+#endif // wxUSE_UIACTIONSIMULATOR
+
 // Helper function deleting the window without asserts (and hence exceptions
 // thrown from its dtor!) even if it has mouse capture.
 void DeleteTestWindow(wxWindow* win);

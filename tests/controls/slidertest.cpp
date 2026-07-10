@@ -224,7 +224,7 @@ void SliderTestCase::Thumb()
 
     // use the slider real position for dragging the mouse.
     const int ypos = m_slider->GetSize().y / 2;
-    sim.MouseDragDrop(m_slider->ClientToScreen(wxPoint(10, ypos)),m_slider->ClientToScreen(wxPoint(50, ypos)));
+    sim.MouseDragDrop(m_slider->ClientToScreen(wxPoint(10, ypos)),m_slider->ClientToScreen(wxPoint(50, ypos)), GetMouseButtonPrimary());
     wxYield();
 
     CPPUNIT_ASSERT(track.GetCount() != 0);

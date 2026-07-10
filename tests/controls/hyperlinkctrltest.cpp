@@ -93,7 +93,7 @@ TEST_CASE_METHOD(HyperlinkCtrlTestCase, "wxHyperlinkCtrl::Click",
     sim.MouseMove(m_hyperlink->GetScreenPosition() + wxPoint(10, 10));
     wxYield();
 
-    sim.MouseClick();
+    sim.MouseClick(GetMouseButtonPrimary());
     wxYield();
 
     CHECK( hyperlink.GetCount() == 1 );

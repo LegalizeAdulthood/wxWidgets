@@ -80,7 +80,7 @@ void BitmapToggleButtonTestCase::Click()
     sim.MouseMove(pos + wxPoint(10, 10));
     wxYield();
 
-    sim.MouseClick();
+    sim.MouseClick(GetMouseButtonPrimary());
     wxYield();
 
     CPPUNIT_ASSERT_EQUAL(1, clicked.GetCount());
@@ -93,7 +93,7 @@ void BitmapToggleButtonTestCase::Click()
     sim.MouseMove(pos + wxPoint(20, 20));
     wxYield();
 
-    sim.MouseClick();
+    sim.MouseClick(GetMouseButtonPrimary());
     wxYield();
 
     CPPUNIT_ASSERT_EQUAL(1, clicked.GetCount());

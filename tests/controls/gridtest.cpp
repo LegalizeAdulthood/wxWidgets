@@ -497,7 +497,7 @@ TEST_CASE_METHOD(GridTestCase, "Grid::CellClick", "[grid]")
     sim.MouseMove(point);
     wxYield();
 
-    sim.MouseClick();
+    sim.MouseClick(GetMouseButtonPrimary());
     if ( !WaitForEventAt(point, "mouse click to be processed", [&]() {
             return lclick.GetCount() != 0;
         }) )
@@ -505,7 +505,7 @@ TEST_CASE_METHOD(GridTestCase, "Grid::CellClick", "[grid]")
     CHECK(lclick.GetCount() == 1);
     lclick.Clear();
 
-    sim.MouseDblClick();
+    sim.MouseDblClick(GetMouseButtonPrimary());
     if ( !WaitForEventAt(point, "double click to be processed", [&]() {
             return lclick.GetCount() != 0 || ldclick.GetCount() != 0;
         }) )
@@ -516,7 +516,7 @@ TEST_CASE_METHOD(GridTestCase, "Grid::CellClick", "[grid]")
     CHECK(lclick.GetCount() == 1);
     CHECK(ldclick.GetCount() == 1);
 
-    sim.MouseClick(wxMOUSE_BTN_RIGHT);
+    sim.MouseClick(GetMouseButtonSecondary());
     if ( !WaitForEventAt(point, "right click to be processed", [&]() {
             return rclick.GetCount() != 0;
         }) )
@@ -524,7 +524,7 @@ TEST_CASE_METHOD(GridTestCase, "Grid::CellClick", "[grid]")
     CHECK(rclick.GetCount() == 1);
     rclick.Clear();
 
-    sim.MouseDblClick(wxMOUSE_BTN_RIGHT);
+    sim.MouseDblClick(GetMouseButtonSecondary());
     if ( !WaitForEventAt(point, "right double click to be processed", [&]() {
             return rclick.GetCount() != 0 || rdclick.GetCount() != 0;
         }) )
@@ -557,7 +557,7 @@ TEST_CASE_METHOD(GridTestCase, "Grid::ReorderedColumnsCellClick", "[grid]")
     sim.MouseMove(point);
     wxYield();
 
-    sim.MouseClick();
+    sim.MouseClick(GetMouseButtonPrimary());
     if ( !WaitForEventAt(point, "mouse click to be processed", [&]() {
             return click.GetCount() != 0;
         }) )
@@ -582,7 +582,7 @@ TEST_CASE_METHOD(GridTestCase, "Grid::CellSelect", "[grid]")
     sim.MouseMove(point);
     wxYield();
 
-    sim.MouseClick();
+    sim.MouseClick(GetMouseButtonPrimary());
     if ( !WaitForEventAt(point, "mouse click to be processed", [&]() {
             return cell.GetCount() != 0;
         }) )
@@ -603,7 +603,7 @@ TEST_CASE_METHOD(GridTestCase, "Grid::CellSelect", "[grid]")
     sim.MouseMove(point);
     wxYield();
 
-    sim.MouseDblClick();
+    sim.MouseDblClick(GetMouseButtonPrimary());
     if ( !WaitForEventAt(point, "mouse double click to be processed", [&]() {
             return cell.GetCount() != 0;
         }) )
@@ -641,21 +641,21 @@ TEST_CASE_METHOD(GridTestCase, "Grid::LabelClick", "[grid]")
     sim.MouseMove(pos);
     wxYield();
 
-    sim.MouseClick();
+    sim.MouseClick(GetMouseButtonPrimary());
     if ( !WaitForEventAt(pos, "mouse click to be processed", [&]() {
             return lclick.GetCount() != 0;
         }) )
         return;
     CHECK(lclick.GetCount() == 1);
 
-    sim.MouseDblClick();
+    sim.MouseDblClick(GetMouseButtonPrimary());
     if ( !WaitForEventAt(pos, "mouse double click to be processed", [&]() {
             return ldclick.GetCount() != 0;
         }) )
         return;
     CHECK(ldclick.GetCount() == 1);
 
-    sim.MouseClick(wxMOUSE_BTN_RIGHT);
+    sim.MouseClick(GetMouseButtonSecondary());
     if ( !WaitForEventAt(pos, "mouse right click to be processed", [&]() {
             return rclick.GetCount() != 0;
         }) )
@@ -663,7 +663,7 @@ TEST_CASE_METHOD(GridTestCase, "Grid::LabelClick", "[grid]")
     CHECK(rclick.GetCount() == 1);
     rclick.Clear();
 
-    sim.MouseDblClick(wxMOUSE_BTN_RIGHT);
+    sim.MouseDblClick(GetMouseButtonSecondary());
     if ( !WaitForEventAt(pos, "mouse right double click to be processed", [&]() {
             return rclick.GetCount() != 0;
         }) )
@@ -711,7 +711,7 @@ TEST_CASE_METHOD(GridTestCase, "Grid::SortClick", "[grid]")
     sim.MouseMove(pos);
     wxYield();
 
-    sim.MouseClick();
+    sim.MouseClick(GetMouseButtonPrimary());
     if ( !WaitForEventAt(pos, "mouse click to be processed", [&]() {
             return sort.GetCount() != 0;
         }) )
@@ -745,13 +745,13 @@ TEST_CASE_METHOD(GridTestCase, "Grid::Size", "[grid]")
     sim.MouseMove(pt);
     wxYield();
 
-    sim.MouseDown();
+    sim.MouseDown(GetMouseButtonPrimary());
     wxYield();
 
     sim.MouseMove(pt.x + 50, pt.y);
     wxYield();
 
-    sim.MouseUp();
+    sim.MouseUp(GetMouseButtonPrimary());
     WaitFor("mouse release to be processed", [&]() {
         return colsize.GetCount() != 0;
     });
@@ -765,7 +765,7 @@ TEST_CASE_METHOD(GridTestCase, "Grid::Size", "[grid]")
     pt += wxPoint(0, 1); // FIXME: why this is needed?
 #endif
 
-    sim.MouseDragDrop(pt.x, pt.y, pt.x, pt.y + 50);
+    sim.MouseDragDrop(pt.x, pt.y, pt.x, pt.y + 50, GetMouseButtonPrimary());
 
     WaitFor("mouse drag to be processed", [&]() {
         return rowsize.GetCount() != 0;
@@ -808,7 +808,7 @@ TEST_CASE_METHOD(GridTestCase, "Grid::RangeSelect", "[grid]")
     sim.MouseMove(pt);
     wxYield();
 
-    sim.MouseDown();
+    sim.MouseDown(GetMouseButtonPrimary());
     wxYield();
 
     // Move the mouse a bit while staying inside the first cell of the range
@@ -819,7 +819,7 @@ TEST_CASE_METHOD(GridTestCase, "Grid::RangeSelect", "[grid]")
     sim.MouseMove(pt.x + 50, pt.y + 50);
     wxYield();
 
-    sim.MouseUp();
+    sim.MouseUp(GetMouseButtonPrimary());
     WaitFor("mouse up to be processed", [&]() {
         return select.GetCount() != 0;
     });
@@ -1669,13 +1669,13 @@ TEST_CASE_METHOD(GridTestCase, "Grid::ResizeScrolledHeader", "[grid]")
     sim.MouseMove(point);
 
     wxYield();
-    sim.MouseDown();
+    sim.MouseDown(GetMouseButtonPrimary());
 
     wxYield();
     sim.MouseMove(point + wxPoint(draglength, 0));
 
     wxYield();
-    sim.MouseUp();
+    sim.MouseUp(GetMouseButtonPrimary());
 
     wxYield();
 
@@ -1745,11 +1745,11 @@ TEST_CASE_METHOD(GridTestCase, "Grid::ColumnMinWidth", "[grid]")
     wxYield();
     sim.MouseMove(point);
     wxYield();
-    sim.MouseDown();
+    sim.MouseDown(GetMouseButtonPrimary());
     wxYield();
     sim.MouseMove(point - wxPoint(startwidth - startminwidth, 0));
     wxYield();
-    sim.MouseUp();
+    sim.MouseUp(GetMouseButtonPrimary());
     wxYield();
 
 #ifdef __WXQT__

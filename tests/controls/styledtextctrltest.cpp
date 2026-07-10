@@ -84,7 +84,7 @@ TEST_CASE_METHOD(StcPopupWindowsTestCase,
                             zeroPosition.y + textHt + textHt/2);
     wxPoint scrnPoint = m_stc->ClientToScreen(autoCompPoint);
     sim.MouseMove(scrnPoint);
-    sim.MouseDblClick();
+    sim.MouseDblClick(GetMouseButtonPrimary());
 #else
     sim.Char(WXK_TAB);
 #endif // __WXGTK__
@@ -135,7 +135,7 @@ TEST_CASE_METHOD(StcPopupWindowsTestCase,
                             zeroPosition.y + textHt + textHt/2);
     wxPoint scrnPoint = m_stc->ClientToScreen(calltipMidPoint);
     sim.MouseMove(scrnPoint);
-    sim.MouseClick();
+    sim.MouseClick(GetMouseButtonPrimary());
     ::wxYield();
 
     CHECK( m_calltipClickReceived );

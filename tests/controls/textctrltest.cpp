@@ -586,7 +586,7 @@ void TextCtrlTestCase::Url()
 
     EventCounter url(m_text, wxEVT_TEXT_URL);
 
-    sim.MouseClick();
+    sim.MouseClick(GetMouseButtonPrimary());
     wxYield();
 
     CPPUNIT_ASSERT_EQUAL(1, url.GetCount());

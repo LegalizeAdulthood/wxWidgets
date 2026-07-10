@@ -61,7 +61,7 @@ TEST_CASE_METHOD(RadioButtonTestCase, "RadioButton::Click", "[radiobutton]")
     wxYield();
 
     sim.MouseMove(m_radio->GetScreenPosition() + wxPoint(10, 10));
-    sim.MouseClick();
+    sim.MouseClick(GetMouseButtonPrimary());
 
     wxYield();
 

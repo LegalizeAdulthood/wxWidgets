@@ -146,7 +146,7 @@ void DatePickerCtrlTestCase::Focus()
     wxUIActionSimulator sim;
 
     sim.MouseMove(GetRectCenter(m_datepicker->GetScreenRect()));
-    sim.MouseClick();
+    sim.MouseClick(GetMouseButtonPrimary());
     wxYield();
 
     REQUIRE( m_datepicker->HasFocus() );
@@ -154,7 +154,7 @@ void DatePickerCtrlTestCase::Focus()
     CHECK( killFocus.GetCount() == 0 );
 
     sim.MouseMove(GetRectCenter(m_button->GetScreenRect()));
-    sim.MouseClick();
+    sim.MouseClick(GetMouseButtonPrimary());
     wxYield();
 
     CHECK( !m_datepicker->HasFocus() );

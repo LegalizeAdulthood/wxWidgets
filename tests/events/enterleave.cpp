@@ -94,7 +94,7 @@ TEST_CASE("EnterLeaveEvents", "[wxEvent][enter-leave]")
         sim.MouseMove(button->GetScreenPosition() + wxPoint(5, 5));
         YieldForAWhile();
 
-        sim.MouseClick();
+        sim.MouseClick(GetMouseButtonPrimary());
         YieldForAWhile();
 
         CHECK( clicked.GetCount() == 1 );
@@ -102,7 +102,7 @@ TEST_CASE("EnterLeaveEvents", "[wxEvent][enter-leave]")
         enter.Clear();
         leave.Clear();
 
-        sim.MouseDown();
+        sim.MouseDown(GetMouseButtonPrimary());
         YieldForAWhile();
 
 #if defined(__WXGTK__) && !defined(__WXGTK3__)
@@ -138,7 +138,7 @@ TEST_CASE("EnterLeaveEvents", "[wxEvent][enter-leave]")
         CHECK( enter.GetCount() == 0 );
         CHECK( leave.GetCount() == 0 );
 
-        sim.MouseUp();
+        sim.MouseUp(GetMouseButtonPrimary());
         YieldForAWhile();
 
         // wxGTK behaves differently here, as it does not generate a

@@ -464,7 +464,7 @@ private:
         // click doing this.
         sim.MouseMove(m_control->GetScreenPosition() + wxPoint(5, 5));
         wxYield();
-        sim.MouseClick();
+        sim.MouseClick(GetMouseButtonPrimary());
         wxYield();
 
         // Note that clicking it is still not enough to give it focus with

@@ -222,10 +222,10 @@ TEST_CASE_METHOD(TreeCtrlTestCase, "wxTreeCtrl::ItemClick", "[treectrl]")
     sim.MouseMove(point);
     wxYield();
 
-    sim.MouseDblClick();
+    sim.MouseDblClick(GetMouseButtonPrimary());
     wxYield();
 
-    sim.MouseClick(wxMOUSE_BTN_RIGHT);
+    sim.MouseClick(GetMouseButtonSecondary());
     wxYield();
 
     CHECK(activated.GetCount() == 1);
@@ -298,7 +298,7 @@ TEST_CASE_METHOD(TreeCtrlTestCase, "wxTreeCtrl::CollapseExpandEvents", "[treectr
     sim.MouseMove(point);
     wxYield();
 
-    sim.MouseDblClick();
+    sim.MouseDblClick(GetMouseButtonPrimary());
     wxYield();
 
     CHECK(expanding.GetCount() == 1);
@@ -310,7 +310,7 @@ TEST_CASE_METHOD(TreeCtrlTestCase, "wxTreeCtrl::CollapseExpandEvents", "[treectr
     wxMilliSleep(1200);
 #endif
 
-    sim.MouseDblClick();
+    sim.MouseDblClick(GetMouseButtonPrimary());
     wxYield();
 
     CHECK(collapsing.GetCount() == 1);
@@ -375,7 +375,7 @@ TEST_CASE_METHOD(TreeCtrlTestCase, "wxTreeCtrl::SelectionChange", "[treectrl]")
     sim.MouseMove(point1);
     wxYield();
 
-    sim.MouseClick();
+    sim.MouseClick(GetMouseButtonPrimary());
     wxYield();
 
     CHECK(changed == 1);
@@ -384,7 +384,7 @@ TEST_CASE_METHOD(TreeCtrlTestCase, "wxTreeCtrl::SelectionChange", "[treectrl]")
     sim.MouseMove(point2);
     wxYield();
 
-    sim.MouseClick();
+    sim.MouseClick(GetMouseButtonPrimary());
     wxYield();
 
     CHECK(changed == (vetoChange ? 1 : 2));
@@ -439,14 +439,14 @@ TEST_CASE_METHOD(TreeCtrlTestCase, "wxTreeCtrl::SelectItemMultiInteractive", "[t
     sim.MouseMove(point1);
     wxYield();
 
-    sim.MouseClick();
+    sim.MouseClick(GetMouseButtonPrimary());
     wxYield();
 
     sim.MouseMove(point2);
     wxYield();
 
     sim.KeyDown(WXK_CONTROL);
-    sim.MouseClick();
+    sim.MouseClick(GetMouseButtonPrimary());
     sim.KeyUp(WXK_CONTROL);
     wxYield();
 
@@ -460,7 +460,7 @@ TEST_CASE_METHOD(TreeCtrlTestCase, "wxTreeCtrl::SelectItemMultiInteractive", "[t
     const int BEGIN_EDIT_TIMEOUT = 800;
 
     YieldForAWhile(BEGIN_EDIT_TIMEOUT);
-    sim.MouseClick();
+    sim.MouseClick(GetMouseButtonPrimary());
     YieldForAWhile(BEGIN_EDIT_TIMEOUT);
 
     // Only m_child2 should be selected now.
@@ -468,7 +468,7 @@ TEST_CASE_METHOD(TreeCtrlTestCase, "wxTreeCtrl::SelectItemMultiInteractive", "[t
     CHECK( m_tree->IsSelected(m_child2) );
     CHECK( beginedit.GetCount() == 0 ); // No editing should take place in the event of deselection.
 
-    sim.MouseClick();
+    sim.MouseClick(GetMouseButtonPrimary());
     YieldForAWhile(BEGIN_EDIT_TIMEOUT);
 
     CHECK( beginedit.GetCount() == 1 ); // Start editing as usual.
@@ -491,7 +491,7 @@ TEST_CASE_METHOD(TreeCtrlTestCase, "wxTreeCtrl::Menu", "[treectrl]")
     sim.MouseMove(point);
     wxYield();
 
-    sim.MouseClick(wxMOUSE_BTN_RIGHT);
+    sim.MouseClick(GetMouseButtonSecondary());
     wxYield();
 
     CHECK(menu.GetCount() == 1);

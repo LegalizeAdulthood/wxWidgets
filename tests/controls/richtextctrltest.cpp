@@ -233,7 +233,7 @@ void RichTextCtrlTestCase::UrlEvent()
     sim.MouseMove(m_rich->ClientToScreen(wxPoint(10, 10)));
     wxYield();
 
-    sim.MouseClick();
+    sim.MouseClick(GetMouseButtonPrimary());
     wxYield();
 
     CPPUNIT_ASSERT_EQUAL(1, url.GetCount());

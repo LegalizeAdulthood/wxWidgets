@@ -132,7 +132,7 @@ void VirtListCtrlTestCase::DeselectedEvent()
     sim.MouseMove(point);
     wxYield();
 
-    sim.MouseClick();
+    sim.MouseClick(GetMouseButtonPrimary());
     wxYield();
 
     // We want a point within the listctrl but below any items
@@ -141,7 +141,7 @@ void VirtListCtrlTestCase::DeselectedEvent()
     sim.MouseMove(point);
     wxYield();
 
-    sim.MouseClick();
+    sim.MouseClick(GetMouseButtonPrimary());
     wxYield();
 
     CPPUNIT_ASSERT_EQUAL(1, selected.GetCount());

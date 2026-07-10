@@ -68,14 +68,14 @@ void ToggleButtonTestCase::Click()
     sim.MouseMove(m_button->GetScreenPosition() + wxPoint(10, 10));
     wxYield();
 
-    sim.MouseClick();
+    sim.MouseClick(GetMouseButtonPrimary());
     wxYield();
 
     CPPUNIT_ASSERT_EQUAL(1, clicked.GetCount());
     CPPUNIT_ASSERT(m_button->GetValue());
     clicked.Clear();
 
-    sim.MouseClick();
+    sim.MouseClick(GetMouseButtonPrimary());
     wxYield();
 
     CPPUNIT_ASSERT_EQUAL(1, clicked.GetCount());

@@ -64,7 +64,7 @@ TEST_CASE_METHOD(ButtonTestCase, "Button::Click", "[button]")
     sim.MouseMove(m_button->GetScreenPosition() + wxPoint(10, 10));
     wxYield();
 
-    sim.MouseClick();
+    sim.MouseClick(GetMouseButtonPrimary());
 
     // At least under wxMSW calling wxYield() just once doesn't always work, so
     // try for a while.
@@ -98,7 +98,7 @@ TEST_CASE_METHOD(ButtonTestCase, "Button::Disabled", "[button]")
     sim.MouseMove(m_button->GetScreenPosition() + wxPoint(10, 10));
     wxYield();
 
-    sim.MouseClick();
+    sim.MouseClick(GetMouseButtonPrimary());
     wxYield();
 
     CHECK( clicked.GetCount() == 0 );

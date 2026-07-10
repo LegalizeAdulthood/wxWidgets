@@ -177,13 +177,13 @@ TEST_CASE_METHOD(ListCtrlTestCase, "ListCtrl::ColumnDrag", "[listctrl]")
     sim.MouseMove(pt);
     wxYield();
 
-    sim.MouseDown();
+    sim.MouseDown(GetMouseButtonPrimary());
     wxYield();
 
     sim.MouseMove(pt.x + 50, pt.y);
     wxYield();
 
-    sim.MouseUp();
+    sim.MouseUp(GetMouseButtonPrimary());
     wxYield();
 
     CHECK( begindrag.GetCount() == 1 );
@@ -209,8 +209,8 @@ TEST_CASE_METHOD(ListCtrlTestCase, "ListCtrl::ColumnClick", "[listctrl]")
     sim.MouseMove(m_list->ClientToScreen(wxPoint(4, 4)));
     wxYield();
 
-    sim.MouseClick();
-    sim.MouseClick(wxMOUSE_BTN_RIGHT);
+    sim.MouseClick(GetMouseButtonPrimary());
+    sim.MouseClick(GetMouseButtonSecondary());
     wxYield();
 
     CHECK( colclick.GetCount() == 1 );

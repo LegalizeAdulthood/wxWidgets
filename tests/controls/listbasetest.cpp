@@ -210,7 +210,7 @@ void ListBaseTestCase::MultiSelect()
     sim.MouseMove(point);
     wxYield();
 
-    sim.MouseClick(); // select the anchor
+    sim.MouseClick(GetMouseButtonPrimary()); // select the anchor
     wxYield();
 
     list->GetItemRect(5, pos);
@@ -220,7 +220,7 @@ void ListBaseTestCase::MultiSelect()
     wxYield();
 
     sim.KeyDown(WXK_SHIFT);
-    sim.MouseClick();
+    sim.MouseClick(GetMouseButtonPrimary());
     sim.KeyUp(WXK_SHIFT);
     wxYield();
 
@@ -268,7 +268,7 @@ void ListBaseTestCase::MultiSelect()
     sim.MouseMove(point);
     wxYield();
 
-    sim.MouseClick();
+    sim.MouseClick(GetMouseButtonPrimary());
     wxYield();
 
     CHECK( list->GetSelectedItemCount() == 1 ); // anchor is the only selected item
@@ -290,7 +290,7 @@ void ListBaseTestCase::MultiSelect()
         wxYield();
 
         sim.KeyDown(WXK_CONTROL);
-        sim.MouseClick();
+        sim.MouseClick(GetMouseButtonPrimary());
         sim.KeyUp(WXK_CONTROL);
         wxYield();
     }
@@ -299,7 +299,7 @@ void ListBaseTestCase::MultiSelect()
     sim.MouseMove(point);
     wxYield();
 
-    sim.MouseClick();
+    sim.MouseClick(GetMouseButtonPrimary());
     wxYield();
 
     CHECK( list->GetSelectedItemCount() == 1 ); // item 3 is the only selected item
@@ -350,13 +350,13 @@ void ListBaseTestCase::ItemClick()
     sim.MouseMove(point);
     wxYield();
 
-    sim.MouseClick();
+    sim.MouseClick(GetMouseButtonPrimary());
     wxYield();
 
-    sim.MouseDblClick();
+    sim.MouseDblClick(GetMouseButtonPrimary());
     wxYield();
 
-    sim.MouseClick(wxMOUSE_BTN_RIGHT);
+    sim.MouseClick(GetMouseButtonSecondary());
     wxYield();
 
     // We want a point within the listctrl but below any items
@@ -365,7 +365,7 @@ void ListBaseTestCase::ItemClick()
     sim.MouseMove(point);
     wxYield();
 
-    sim.MouseClick();
+    sim.MouseClick(GetMouseButtonPrimary());
     wxYield();
 
     // when the first item was selected the focus changes to it, but not

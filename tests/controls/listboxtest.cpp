@@ -205,12 +205,12 @@ void ListBoxTestCase::ClickEvents()
     sim.MouseMove(m_list->ClientToScreen(wxPoint(10, 10)));
     wxYield();
 
-    sim.MouseClick();
+    sim.MouseClick(GetMouseButtonPrimary());
     wxYield();
 
     CPPUNIT_ASSERT_EQUAL(1, selected.GetCount());
 
-    sim.MouseDblClick();
+    sim.MouseDblClick(GetMouseButtonPrimary());
     wxYield();
 
     CPPUNIT_ASSERT_EQUAL(1, dclicked.GetCount());
@@ -248,10 +248,10 @@ void ListBoxTestCase::ClickNotOnItem()
     sim.MouseMove(m_list->ClientToScreen(wxPoint(m_list->GetSize().x - 10, m_list->GetSize().y - 10)));
     wxYield();
 
-    sim.MouseClick();
+    sim.MouseClick(GetMouseButtonPrimary());
     wxYield();
 
-    sim.MouseDblClick();
+    sim.MouseDblClick(GetMouseButtonPrimary());
     wxYield();
 
     //If we are not clicking on an item we shouldn't have any events
