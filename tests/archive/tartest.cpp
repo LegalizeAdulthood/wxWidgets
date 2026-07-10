@@ -3,6 +3,7 @@
 // Purpose:     Test the tar classes
 // Author:      Mike Wetherell
 // Copyright:   (c) 2004 Mike Wetherell
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -233,6 +234,33 @@ TEST_CASE("Tar::BadExtendedHeaderRecordLen", "[tar][error]")
     // header; with it the bad record is skipped and the normal entry is read.
     REQUIRE( entry );
     CHECK( entry->GetInternalName() == "a.txt" );
+}
+
+TEST_CASE("Tar::PaxHeaderDateUsesCLocale", "[tar]")
+{
+    if ( !wxLocale::IsAvailable(wxLANGUAGE_FRENCH) )
+        return;
+
+    wxLocale locale;
+    CHECK( locale.Init(wxLANGUAGE_FRENCH, wxLOCALE_DONT_LOAD_DEFAULT) );
+
+    wxMemoryOutputStream tarStream;
+    wxTarOutputStream tar(tarStream);
+
+    wxTarEntry *entry =
+        new wxTarEntry("a.txt", wxDateTime(wxLongLong(1234)), 0);
+    entry->SetAccessTime(wxDateTime(wxLongLong(1234)));
+
+    REQUIRE( tar.PutNextEntry(entry) );
+    CHECK( tar.CloseEntry() );
+    CHECK( tar.Close() );
+
+    const char *data = static_cast<const char *>(
+        tarStream.GetOutputStreamBuffer()->GetBufferStart());
+    const std::string archive(data, tarStream.GetSize());
+
+    CHECK( archive.find("atime=1.234\n") != std::string::npos );
+    CHECK( archive.find("atime=1,234\n") == std::string::npos );
 }
 
 // This can be used to test loading an arbitrary tar file by setting the

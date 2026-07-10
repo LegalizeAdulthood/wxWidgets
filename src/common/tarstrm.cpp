@@ -3,6 +3,7 @@
 // Purpose:     Streams for Tar files
 // Author:      Mike Wetherell
 // Copyright:   (c) 2004 Mike Wetherell
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -1419,7 +1420,7 @@ void wxTarOutputStream::SetHeaderDate(const wxString& key,
     {
         wxString str;
         if (ll >= LONG_MIN && ll <= LONG_MAX) {
-            str.Printf(wxT("%g"), ll.ToLong() / 1000.0);
+            str = wxString::FromCDouble(ll.ToLong() / 1000.0);
         } else {
             str = ll.ToString();
             str.insert(str.end() - 3, '.');
