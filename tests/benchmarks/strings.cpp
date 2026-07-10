@@ -275,6 +275,12 @@ BENCHMARK_FUNC(ReplaceSome)
     return str.Replace("7", "8") != 0;
 }
 
+BENCHMARK_FUNC(ReplaceSameLength)
+{
+    wxString str(asciistr);
+    return str.Replace("line", "rows") != 0;
+}
+
 BENCHMARK_FUNC(ReplaceAll)
 {
     wxString str('x', ASCIISTR_LEN);
