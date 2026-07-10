@@ -4,6 +4,7 @@
 // Author:      Marcin Wojdyr
 // Created:     2007-07-07
 // Copyright:   (c) 2007 Marcin Wojdyr
+// Copyright:   (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // NOTE: this test is compiled both as part of the non-GUI test and test_gui
@@ -26,6 +27,8 @@
 #endif // WX_PRECOMP
 
 #include "wx/config.h"
+#include "wx/scopeguard.h"
+#include "wx/utils.h"
 
 // Tests using wxColour can only be done when using GUI library and they
 // require template functions that are not supported by some ancient compilers.
@@ -40,6 +43,22 @@
 // --------------------------------------------------------------------------
 // the tests
 // --------------------------------------------------------------------------
+
+#ifdef __WINDOWS__
+
+TEST_CASE("wxExpandEnvVars::Parentheses", "[config][envvars]")
+{
+    REQUIRE( wxSetEnv("WX_TEST_EXPAND_ENV", "prefix") );
+    REQUIRE( wxSetEnv("WX_TEST_EXPAND_ENV(WITH_PARENS)", "full") );
+    wxON_BLOCK_EXIT1( wxUnsetEnv, "WX_TEST_EXPAND_ENV" );
+    wxON_BLOCK_EXIT1( wxUnsetEnv, "WX_TEST_EXPAND_ENV(WITH_PARENS)" );
+
+    CHECK( wxExpandEnvVars("%WX_TEST_EXPAND_ENV(WITH_PARENS)%") == "full" );
+    CHECK( wxExpandEnvVars("$WX_TEST_EXPAND_ENV(WITH_PARENS)") ==
+           "prefix(WITH_PARENS)" );
+}
+
+#endif // __WINDOWS__
 
 TEST_CASE("wxConfig::ReadWriteLocal", "[config]")
 {

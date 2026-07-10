@@ -5,6 +5,7 @@
 // Created:     07.04.98
 // Copyright:   (c) 1997 Karsten Ballueder  Ballueder@usa.net
 //                       Vadim Zeitlin      <zeitlin@dptmaths.ens-cachan.fr>
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -488,8 +489,18 @@ wxString wxExpandEnvVars(const wxString& str)
 
           m = n + 1;
 
-          while ( m < str.length() && (wxIsalnum(str[m]) || str[m] == wxT('_')) )
-            m++;
+#ifdef __WINDOWS__
+          if ( bracket == Bracket_Windows )
+          {
+            while ( m < str.length() && str[m] != wxT('%') )
+              m++;
+          }
+          else
+#endif // __WINDOWS__
+          {
+            while ( m < str.length() && (wxIsalnum(str[m]) || str[m] == wxT('_')) )
+              m++;
+          }
 
           wxString strVarName(str.c_str() + n + 1, m - n - 1);
 
