@@ -4,6 +4,7 @@
 // Author:      Vadim Zeitlin
 // Created:     31.01.99
 // Copyright:   (c) 1999 Vadim Zeitlin
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -34,6 +35,8 @@
 #include "wx/vector.h"
 #include "wx/msw/private.h"
 #include "wx/msw/private/darkmode.h"
+
+#include <limits.h>     // for SHRT_MAX
 
 #ifndef TTTOOLINFO_V1_SIZE
     #define TTTOOLINFO_V1_SIZE 0x28
@@ -184,6 +187,25 @@ SendTooltipMessageToAll(WXHWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         ::SendMessage((HWND)hwnd, msg, wParam, lParam);
 }
 
+static LPARAM GetTooltipDelayParam(long milliseconds)
+{
+    if ( milliseconds < 0 )
+        return milliseconds;
+
+    // The native tooltip control treats delays greater than SHRT_MAX as
+    // negative values and restores the default delay instead of using them.
+    if ( milliseconds > SHRT_MAX )
+        milliseconds = SHRT_MAX;
+
+    return MAKELPARAM(milliseconds, 0);
+}
+
+static void SetTooltipDelay(WXHWND hwnd, WPARAM delayType, long milliseconds)
+{
+    SendTooltipMessageToAll(hwnd, TTM_SETDELAYTIME, delayType,
+                            GetTooltipDelayParam(milliseconds));
+}
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -256,20 +278,23 @@ void wxToolTip::SetDelay(long milliseconds)
     // Make sure the tooltip has been created
     (void) GetToolTipCtrl();
 
-    SendTooltipMessageToAll(ms_hwndTT, TTM_SETDELAYTIME,
-                            TTDT_INITIAL, milliseconds);
+    SetTooltipDelay(ms_hwndTT, TTDT_INITIAL, milliseconds);
 }
 
 void wxToolTip::SetAutoPop(long milliseconds)
 {
-    SendTooltipMessageToAll(ms_hwndTT, TTM_SETDELAYTIME,
-                            TTDT_AUTOPOP, milliseconds);
+    // Make sure the tooltip has been created
+    (void) GetToolTipCtrl();
+
+    SetTooltipDelay(ms_hwndTT, TTDT_AUTOPOP, milliseconds);
 }
 
 void wxToolTip::SetReshow(long milliseconds)
 {
-    SendTooltipMessageToAll(ms_hwndTT, TTM_SETDELAYTIME,
-                            TTDT_RESHOW, milliseconds);
+    // Make sure the tooltip has been created
+    (void) GetToolTipCtrl();
+
+    SetTooltipDelay(ms_hwndTT, TTDT_RESHOW, milliseconds);
 }
 
 void wxToolTip::SetMaxWidth(int width)
