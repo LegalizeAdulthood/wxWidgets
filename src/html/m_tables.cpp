@@ -3,6 +3,7 @@
 // Purpose:     wxHtml module for tables
 // Author:      Vaclav Slavik
 // Copyright:   (c) 1999 Vaclav Slavik
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -57,7 +58,7 @@ struct cellStruct
 {
     wxHtmlContainerCell *cont;
     int colspan, rowspan;
-    int minheight, valign;
+    int minheight, minheightUnits, valign;
     cellState flag;
     bool nowrap;
 };
@@ -283,6 +284,7 @@ void wxHtmlTableCell::AddCell(wxHtmlContainerCell *cell, const wxHtmlTag& tag)
     m_CellInfo[r][c].rowspan = 1;
     m_CellInfo[r][c].flag = cellUsed;
     m_CellInfo[r][c].minheight = 0;
+    m_CellInfo[r][c].minheightUnits = wxHTML_UNITS_PIXELS;
     m_CellInfo[r][c].valign = wxHTML_ALIGN_TOP;
 
     /* scan for parameters: */
@@ -313,6 +315,24 @@ void wxHtmlTableCell::AddCell(wxHtmlContainerCell *cell, const wxHtmlTag& tag)
         }
     }
 
+    // height:
+    {
+        int height = 0;
+        bool hpercent = false;
+        if ( tag.GetParamAsIntOrPercent(wxT("HEIGHT"), &height, hpercent) )
+        {
+            if ( hpercent )
+            {
+                m_CellInfo[r][c].minheight = height;
+                m_CellInfo[r][c].minheightUnits = wxHTML_UNITS_PERCENT;
+            }
+            else
+            {
+                m_CellInfo[r][c].minheight = (int)(m_PixelScale * (double)height);
+                m_CellInfo[r][c].minheightUnits = wxHTML_UNITS_PIXELS;
+            }
+        }
+    }
 
     // spanning:
     {
@@ -431,6 +451,14 @@ void wxHtmlTableCell::ComputeMinMaxWidths()
         m_MaxTotalWidth = m_MaxTotalWidth * 100 / (100 - percentage);
 
     m_MaxTotalWidth += (m_NumCols + 1) * m_Spacing +  2 * m_Border;
+}
+
+static int GetCellMinHeight(const cellStruct& cell, int tableWidth)
+{
+    if ( cell.minheightUnits == wxHTML_UNITS_PERCENT )
+        return wxMin(cell.minheight, 100) * tableWidth / 100;
+
+    return cell.minheight;
 }
 
 void wxHtmlTableCell::Layout(int w)
@@ -627,7 +655,10 @@ void wxHtmlTableCell::Layout(int w)
                 for (int i = actcol; i < m_CellInfo[actrow][actcol].colspan + actcol; i++)
                     fullwid += m_ColsInfo[i].pixwidth;
                 fullwid += (m_CellInfo[actrow][actcol].colspan - 1) * m_Spacing;
-                actcell->SetMinHeight(m_CellInfo[actrow][actcol].minheight, m_CellInfo[actrow][actcol].valign);
+                const int minheight =
+                    GetCellMinHeight(m_CellInfo[actrow][actcol], m_Width);
+                actcell->SetMinHeight(minheight,
+                                      m_CellInfo[actrow][actcol].valign);
                 actcell->Layout(fullwid);
 
                 if (ypos[actrow] + actcell->GetHeight() + m_CellInfo[actrow][actcol].rowspan * m_Spacing > ypos[actrow + m_CellInfo[actrow][actcol].rowspan])

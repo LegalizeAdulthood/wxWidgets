@@ -4,6 +4,7 @@
 // Author:      Vaclav Slavik
 // Created:     2008-10-15
 // Copyright:   (c) 2008 Vaclav Slavik <vslavik@fastmail.fm>
+// Copyright:   (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -39,6 +40,7 @@ private:
     CPPUNIT_TEST_SUITE( HtmlWindowTestCase );
         CPPUNIT_TEST( SelectionToText );
         CPPUNIT_TEST( Title );
+        CPPUNIT_TEST( TableCellHeight );
 #if wxUSE_UIACTIONSIMULATOR
         WXUISIM_TEST( CellClick );
         WXUISIM_TEST( LinkClick );
@@ -48,6 +50,7 @@ private:
 
     void SelectionToText();
     void Title();
+    void TableCellHeight();
     void CellClick();
     void LinkClick();
     void AppendToPage();
@@ -96,6 +99,16 @@ static const char *TEST_MARKUP_LINK =
     "<a href=\"link\">link<\\a> "
     "</body></html>";
 
+static const char *TEST_MARKUP_TABLE_HEIGHT_ABSOLUTE =
+    "<html><body>"
+    "<table><tr><td height=\"100\">Cell</td></tr></table>"
+    "</body></html>";
+
+static const char *TEST_MARKUP_TABLE_HEIGHT_PERCENT =
+    "<html><body>"
+    "<table width=\"200\"><tr><td height=\"50%\">Cell</td></tr></table>"
+    "</body></html>";
+
 static const char *TEST_PLAIN_TEXT =
     "Title\nA longer line\nand the last line.";
 
@@ -114,6 +127,19 @@ void HtmlWindowTestCase::Title()
     m_win->SetPage(TEST_MARKUP);
 
     CPPUNIT_ASSERT_EQUAL("Page", m_win->GetOpenedPageTitle());
+}
+
+void HtmlWindowTestCase::TableCellHeight()
+{
+    m_win->SetBorders(0);
+
+    m_win->SetPage(TEST_MARKUP_TABLE_HEIGHT_ABSOLUTE);
+    CPPUNIT_ASSERT( m_win->GetInternalRepresentation() );
+    CPPUNIT_ASSERT( m_win->GetInternalRepresentation()->GetHeight() >= 100 );
+
+    m_win->SetPage(TEST_MARKUP_TABLE_HEIGHT_PERCENT);
+    CPPUNIT_ASSERT( m_win->GetInternalRepresentation() );
+    CPPUNIT_ASSERT( m_win->GetInternalRepresentation()->GetHeight() >= 100 );
 }
 
 #if wxUSE_UIACTIONSIMULATOR
