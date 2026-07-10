@@ -48,6 +48,8 @@ public:
         remains visible.
 
         @note May not be supported on all platforms (eg. wxCocoa, GTK).
+        @note Under wxMSW, positive delay values greater than the native
+              control limit are clamped to the largest supported value.
     */
     static void SetAutoPop(long msecs);
 
@@ -55,6 +57,8 @@ public:
         Set the delay after which the tooltip appears.
 
         @note May not be supported on all platforms.
+        @note Under wxMSW, positive delay values greater than the native
+              control limit are clamped to the largest supported value.
     */
     static void SetDelay(long msecs);
 
@@ -77,6 +81,8 @@ public:
         Set the delay between subsequent tooltips to appear.
 
         @note May not be supported on all platforms (eg. wxCocoa, GTK).
+        @note Under wxMSW, positive delay values greater than the native
+              control limit are clamped to the largest supported value.
     */
     static void SetReshow(long msecs);
 
