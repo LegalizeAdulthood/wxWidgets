@@ -436,6 +436,12 @@ public:
     This class may be used to format string data in a cell; it is the default
     for string cells.
 
+    Notice that, under wxMSW, trying to show extremely long strings in grid
+    cells can make drawing very slow or prevent the cell contents from being
+    displayed at all. The value is still stored by the grid, but applications
+    should avoid displaying such values directly, e.g. by using a custom
+    renderer to abbreviate them.
+
     @library{wxcore}
     @category{grid}
 
