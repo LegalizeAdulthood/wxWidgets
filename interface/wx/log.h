@@ -1463,8 +1463,8 @@ const wxChar* wxSysErrorMsg(unsigned long errCode = 0);
 
     @header{wx/log.h}
 */
-void wxLogGeneric(wxLogLevel level, const char* formatString, ... );
-void wxVLogGeneric(wxLogLevel level, const char* formatString, va_list argPtr);
+void wxLogGeneric(wxLogLevel level, const wxString& formatString, ... );
+void wxVLogGeneric(wxLogLevel level, const wxString& formatString, va_list argPtr);
 ///@}
 
 /** @addtogroup group_funcmacro_log */
@@ -1475,8 +1475,8 @@ void wxVLogGeneric(wxLogLevel level, const char* formatString, va_list argPtr);
 
     @header{wx/log.h}
 */
-void wxLogMessage(const char* formatString, ... );
-void wxVLogMessage(const char* formatString, va_list argPtr);
+void wxLogMessage(const wxString& formatString, ... );
+void wxVLogMessage(const wxString& formatString, va_list argPtr);
 ///@}
 
 /** @addtogroup group_funcmacro_log */
@@ -1489,8 +1489,8 @@ void wxVLogMessage(const char* formatString, va_list argPtr);
 
     @header{wx/log.h}
 */
-void wxLogInfo(const char* formatString, ... );
-void wxVLogInfo(const char* formatString, va_list argPtr);
+void wxLogInfo(const wxString& formatString, ... );
+void wxVLogInfo(const wxString& formatString, va_list argPtr);
 ///@}
 
 /** @addtogroup group_funcmacro_log */
@@ -1510,8 +1510,8 @@ void wxVLogInfo(const char* formatString, va_list argPtr);
 
     @header{wx/log.h}
 */
-void wxLogVerbose(const char* formatString, ... );
-void wxVLogVerbose(const char* formatString, va_list argPtr);
+void wxLogVerbose(const wxString& formatString, ... );
+void wxVLogVerbose(const wxString& formatString, va_list argPtr);
 ///@}
 
 /** @addtogroup group_funcmacro_log */
@@ -1525,8 +1525,8 @@ void wxVLogVerbose(const char* formatString, va_list argPtr);
 
     @header{wx/log.h}
 */
-void wxLogWarning(const char* formatString, ... );
-void wxVLogWarning(const char* formatString, va_list argPtr);
+void wxLogWarning(const wxString& formatString, ... );
+void wxVLogWarning(const wxString& formatString, va_list argPtr);
 ///@}
 
 /** @addtogroup group_funcmacro_log */
@@ -1538,8 +1538,8 @@ void wxVLogWarning(const char* formatString, va_list argPtr);
 
     @header{wx/log.h}
 */
-void wxLogFatalError(const char* formatString, ... );
-void wxVLogFatalError(const char* formatString, va_list argPtr);
+void wxLogFatalError(const wxString& formatString, ... );
+void wxVLogFatalError(const wxString& formatString, va_list argPtr);
 ///@}
 
 /** @addtogroup group_funcmacro_log */
@@ -1551,8 +1551,8 @@ void wxVLogFatalError(const char* formatString, va_list argPtr);
 
     @header{wx/log.h}
 */
-void wxLogError(const char* formatString, ... );
-void wxVLogError(const char* formatString, va_list argPtr);
+void wxLogError(const wxString& formatString, ... );
+void wxVLogError(const wxString& formatString, va_list argPtr);
 ///@}
 
 /** @addtogroup group_funcmacro_log */
@@ -1590,8 +1590,8 @@ void wxVLogError(const char* formatString, va_list argPtr);
 
     @header{wx/log.h}
 */
-void wxLogTrace(const char* mask, const char* formatString, ... );
-void wxVLogTrace(const char* mask, const char* formatString, va_list argPtr);
+void wxLogTrace(const char* mask, const wxString& formatString, ... );
+void wxVLogTrace(const char* mask, const wxString& formatString, va_list argPtr);
 ///@}
 
 /** @addtogroup group_funcmacro_log */
@@ -1606,7 +1606,7 @@ void wxVLogTrace(const char* mask, const char* formatString, va_list argPtr);
     This version of wxLogTrace() only logs the message if all the bits
     corresponding to the @a mask are set in the wxLog trace mask which can be
     set by calling wxLog::SetTraceMask(). This version is less flexible than
-    wxLogTrace(const char*,const char*,...) because it doesn't allow defining
+    the string-mask overload of wxLogTrace() because it doesn't allow defining
     the user trace masks easily. This is why it is deprecated in favour of
     using string trace masks.
 
@@ -1622,8 +1622,8 @@ void wxVLogTrace(const char* mask, const char* formatString, va_list argPtr);
 
     @header{wx/log.h}
 */
-void wxLogTrace(wxTraceMask mask, const char* formatString, ... );
-void wxVLogTrace(wxTraceMask mask, const char* formatString, va_list argPtr);
+void wxLogTrace(wxTraceMask mask, const wxString& formatString, ... );
+void wxVLogTrace(wxTraceMask mask, const wxString& formatString, va_list argPtr);
 ///@}
 
 /** @addtogroup group_funcmacro_log */
@@ -1639,8 +1639,8 @@ void wxVLogTrace(wxTraceMask mask, const char* formatString, va_list argPtr);
 
     @header{wx/log.h}
 */
-void wxLogDebug(const char* formatString, ... );
-void wxVLogDebug(const char* formatString, va_list argPtr);
+void wxLogDebug(const wxString& formatString, ... );
+void wxVLogDebug(const wxString& formatString, va_list argPtr);
 ///@}
 
 /** @addtogroup group_funcmacro_log */
@@ -1654,10 +1654,10 @@ void wxVLogDebug(const char* formatString, va_list argPtr);
 
     @header{wx/log.h}
 */
-void wxLogStatus(wxFrame* frame, const char* formatString, ... );
-void wxVLogStatus(wxFrame* frame, const char* formatString, va_list argPtr);
-void wxLogStatus(const char* formatString, ... );
-void wxVLogStatus(const char* formatString, va_list argPtr);
+void wxLogStatus(wxFrame* frame, const wxString& formatString, ... );
+void wxVLogStatus(wxFrame* frame, const wxString& formatString, va_list argPtr);
+void wxLogStatus(const wxString& formatString, ... );
+void wxVLogStatus(const wxString& formatString, va_list argPtr);
 ///@}
 
 /** @addtogroup group_funcmacro_log */
@@ -1674,8 +1674,8 @@ void wxVLogStatus(const char* formatString, va_list argPtr);
 
     @header{wx/log.h}
 */
-void wxLogSysError(const char* formatString, ... );
-void wxVLogSysError(const char* formatString, va_list argPtr);
+void wxLogSysError(const wxString& formatString, ... );
+void wxVLogSysError(const wxString& formatString, va_list argPtr);
 ///@}
 
 /** @addtogroup group_funcmacro_debug */
