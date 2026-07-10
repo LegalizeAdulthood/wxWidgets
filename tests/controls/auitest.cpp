@@ -4,6 +4,7 @@
 // Author:      Sebastian Walderich
 // Created:     2018-12-19
 // Copyright:   (c) 2018 Sebastian Walderich
+// Copyright:   (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -19,6 +20,7 @@
     #include "wx/app.h"
 #endif // WX_PRECOMP
 
+#include "wx/button.h"
 #include "wx/panel.h"
 
 #include "wx/aui/auibar.h"
@@ -26,6 +28,7 @@
 #include "wx/aui/serializer.h"
 
 #include "asserthelper.h"
+#include "waitfor.h"
 
 #include <memory>
 
@@ -167,6 +170,36 @@ TEST_CASE_METHOD(AuiNotebookTestCase, "wxAuiNotebook::FindPage", "[aui]")
     CHECK( nb->FindPage(p1) == 0 );
     CHECK( nb->FindPage(p2) == 1 );
     CHECK( nb->FindPage(p3) == wxNOT_FOUND );
+}
+
+TEST_CASE_METHOD(AuiNotebookTestCase,
+                 "wxAuiNotebook::ChildFocusUsesCurrentFocus", "[aui][focus]")
+{
+    wxPanel *const page1 = new wxPanel(nb);
+    wxButton *const button1 = new wxButton(page1, wxID_ANY, "Button 1");
+    wxPanel *const page2 = new wxPanel(nb);
+    wxButton *const button2 = new wxButton(page2, wxID_ANY, "Button 2");
+
+    REQUIRE( nb->AddPage(page1, "Page 1", true) );
+    REQUIRE( nb->AddPage(page2, "Page 2") );
+
+    nb->SetSize(nb->FromDIP(wxSize(400, 300)));
+
+    REQUIRE( nb->SetSelection(1) == 0 );
+
+    button2->SetFocus();
+
+    if ( !WaitFor("second page button focus",
+                  [button2]() { return wxWindow::FindFocus() == button2; }) )
+    {
+        WARN("Skipping stale child focus test: couldn't focus the button");
+        return;
+    }
+
+    wxChildFocusEvent event(button1);
+    nb->ProcessWindowEvent(event);
+
+    CHECK( nb->GetSelection() == 1 );
 }
 
 TEST_CASE_METHOD(AuiNotebookTestCase, "wxAuiNotebook::Layout", "[aui]")
