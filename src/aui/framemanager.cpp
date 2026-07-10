@@ -4,6 +4,7 @@
 // Author:      Benjamin I. Williams
 // Created:     2005-05-17
 // Copyright:   (C) Copyright 2005-2006, Kirix Corporation, All Rights Reserved
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows Library Licence, Version 3.1
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -4721,6 +4722,7 @@ void wxAuiManager::OnLeftDown(wxMouseEvent& event)
             m_actionPart = part;
             m_actionHintRect = wxRect();
             m_actionStart = wxPoint(event.m_x, event.m_y);
+            m_lastMouseMove = m_actionStart;
             m_actionOffset = wxPoint(event.m_x - part->rect.x,
                                       event.m_y - part->rect.y);
             m_frame->CaptureMouse();
@@ -5034,6 +5036,9 @@ void wxAuiManager::OnLeftUp(wxMouseEvent& event)
     {
         m_frame->ReleaseMouse();
 
+        const bool was_dragged = m_currentDragItem != -1 ||
+                                 event.GetPosition() != m_actionStart;
+
         if (!HasLiveResize())
         {
             // get rid of the hint rectangle
@@ -5042,7 +5047,8 @@ void wxAuiManager::OnLeftUp(wxMouseEvent& event)
         if (m_currentDragItem != -1 && HasLiveResize())
             m_actionPart = & (m_uiParts.Item(m_currentDragItem));
 
-        DoEndResizeAction(event);
+        if ( was_dragged )
+            DoEndResizeAction(event);
 
         m_currentDragItem = -1;
 
