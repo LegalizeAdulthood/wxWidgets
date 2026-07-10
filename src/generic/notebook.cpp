@@ -4,6 +4,7 @@
 // Author:      Julian Smart
 // Created:     17/09/98
 // Copyright:   (c) Julian Smart
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -98,6 +99,11 @@ static int GetPageId(wxTabView *tabview, wxNotebookPage *page)
     return static_cast<wxNotebookTabView*>(tabview)->GetId(page);
 }
 
+static void InsetRectForBorder(wxRect& rect, const wxWindow *win)
+{
+    rect.Deflate(win->GetWindowBorderSize() / 2);
+}
+
 // ----------------------------------------------------------------------------
 // wxNotebook construction
 // ----------------------------------------------------------------------------
@@ -144,7 +150,11 @@ bool wxNotebook::Create(wxWindow *parent,
 
     m_windowId = id == wxID_ANY ? NewControlId() : id;
 
-    if (!wxControl::Create(parent, id, pos, size, style|wxNO_BORDER, wxDefaultValidator, name))
+    if ( (style & wxBORDER_MASK) == wxBORDER_DEFAULT )
+        style |= wxNO_BORDER;
+
+    if ( !wxControl::Create(parent, id, pos, size, style,
+                            wxDefaultValidator, name) )
         return false;
 
     SetTabView(new wxNotebookTabView(this));
@@ -495,6 +505,7 @@ bool wxNotebook::RefreshLayout(bool force)
         rect.y = tabHeight + 4;
         rect.width = cw - 8;
         rect.height = ch - 4 - rect.y ;
+        InsetRectForBorder(rect, this);
 
         m_tabView->SetViewRect(rect);
 
@@ -508,6 +519,7 @@ bool wxNotebook::RefreshLayout(bool force)
         rect.y = tabHeight + 4;
         rect.width = cw - 8;
         rect.height = ch - 4 - rect.y ;
+        InsetRectForBorder(rect, this);
 
         m_tabView->SetViewRect(rect);
 
@@ -645,7 +657,8 @@ wxSize wxNotebook::CalcSizeFromPage(const wxSize& sizePage) const
     // implementation will suffice, provided the wxNotebook has been
     // created with a sensible initial width.
     return wxSize( sizePage.x + 12,
-                   sizePage.y + m_tabView->GetTotalTabHeight() + 6 + 4 );
+                   sizePage.y + m_tabView->GetTotalTabHeight() + 6 + 4 )
+           + GetWindowBorderSize();
 }
 
 wxRect wxNotebook::GetAvailableClientSize()
@@ -661,6 +674,7 @@ wxRect wxNotebook::GetAvailableClientSize()
     rect.y = tabHeight + 6;
     rect.width = cw - 12;
     rect.height = ch - 4 - rect.y ;
+    InsetRectForBorder(rect, this);
 
     return rect;
 }
