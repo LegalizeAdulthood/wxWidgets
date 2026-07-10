@@ -4,6 +4,7 @@
 // Author:      Benjamin I. Williams
 // Created:     2005-05-17
 // Copyright:   (C) Copyright 2005, Kirix Corporation, All Rights Reserved.
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows Library Licence, Version 3.1
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -56,12 +57,20 @@ protected:
     virtual void OnMoveFinished();
 
 private:
+    bool DockPane();
     void OnSize(wxSizeEvent& event);
     void OnClose(wxCloseEvent& event);
     void OnMoveEvent(wxMoveEvent& event);
+    void OnLeftDClick(wxMouseEvent& event);
     void OnIdle(wxIdleEvent& event);
     void OnActivate(wxActivateEvent& event);
     static bool isMouseDown();
+
+#ifdef __WXMSW__
+    virtual WXLRESULT MSWWindowProc(WXUINT message,
+                                    WXWPARAM wParam,
+                                    WXLPARAM lParam) override;
+#endif
 
 private:
     wxWindow* m_paneWindow;    // pane window being managed
