@@ -277,6 +277,10 @@ public:
             The address of the document.
             See the @ref overview_fs for details on the address format
             and wxFileSystem for a description of how the file is opened.
+            To navigate to an anchor in the current page, use a location
+            beginning with @c "#", for example @c "#anchor". To navigate to
+            an anchor in another page, append it to the page URL, for example
+            @c "page.htm#anchor".
 
         @return @false if an error occurred, @true otherwise
 
