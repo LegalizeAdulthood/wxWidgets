@@ -5,6 +5,7 @@
 // Modified by: Jens Lody
 // Created:     2006-06-28
 // Copyright:   (C) Copyright 2006, Kirix Corporation, All Rights Reserved
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows Library Licence, Version 3.1
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -2438,6 +2439,7 @@ wxWindow* wxAuiNotebook::DoRemovePage(size_t page_idx)
     wxWindow* active_wnd = nullptr;
     if (m_curPage >= 0)
         active_wnd = m_tabs.GetWindowFromIdx(m_curPage);
+    const int old_curpage = m_curPage;
 
     // save pointer of window being deleted
     wxWindow* wnd = m_tabs.GetWindowFromIdx(page_idx);
@@ -2523,8 +2525,18 @@ wxWindow* wxAuiNotebook::DoRemovePage(size_t page_idx)
     m_curPage = wxNOT_FOUND;
 
     // set new active pane unless we're being destroyed anyhow
-    if (new_active && !m_isBeingDeleted)
+    if ( new_active && !m_isBeingDeleted )
+    {
         SetSelectionToWindow(new_active);
+    }
+    else if ( old_curpage != wxNOT_FOUND && !m_isBeingDeleted )
+    {
+        wxAuiNotebookEvent evt(wxEVT_AUINOTEBOOK_PAGE_CHANGED, m_windowId);
+        evt.SetSelection(wxNOT_FOUND);
+        evt.SetOldSelection(old_curpage);
+        evt.SetEventObject(this);
+        (void)ProcessWindowEvent(evt);
+    }
 
     return wnd;
 }
