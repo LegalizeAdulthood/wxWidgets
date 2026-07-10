@@ -683,6 +683,14 @@ bool wxAuiManager::CanDockPanel(const wxAuiPaneInfo & WXUNUSED(p))
     return !(wxGetKeyState(WXK_CONTROL) || wxGetKeyState(WXK_ALT));
 }
 
+bool wxAuiManager::CanAddPane(wxWindow* window,
+                              const wxAuiPaneInfo& WXUNUSED(paneInfo)) const
+{
+    wxCHECK_MSG(window, false, wxT("null window ptrs are not allowed"));
+
+    return true;
+}
+
 // GetPane() looks up a wxAuiPaneInfo structure based
 // on the supplied window pointer.  Upon failure, GetPane()
 // returns an empty wxAuiPaneInfo, a condition which can be checked
@@ -995,10 +1003,7 @@ void wxAuiManager::SetArtProvider(wxAuiDockArt* art_provider)
 
 bool wxAuiManager::AddPane(wxWindow* window, const wxAuiPaneInfo& paneInfo)
 {
-    wxASSERT_MSG(window, wxT("null window ptrs are not allowed"));
-
-    // check if the pane has a valid window
-    if (!window)
+    if ( !CanAddPane(window, paneInfo) )
         return false;
 
     // check if the window is already managed by us
@@ -1164,6 +1169,9 @@ bool wxAuiManager::InsertPane(wxWindow* window, const wxAuiPaneInfo& paneInfo,
                                 int insert_level)
 {
     wxASSERT_MSG(window, wxT("null window ptrs are not allowed"));
+
+    if ( !GetPane(window).IsOk() && !CanAddPane(window, paneInfo) )
+        return false;
 
     // shift the panes around, depending on the insert level
     switch (insert_level)
