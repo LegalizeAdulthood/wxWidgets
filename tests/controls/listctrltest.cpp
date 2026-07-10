@@ -5,6 +5,7 @@
 // Created:     2008-11-26
 // Copyright:   (c) 2008 Vadim Zeitlin <vadim@wxwidgets.org>
 //              (c) 2010 Steven Lamerton
+//              (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -23,9 +24,31 @@
 #include "wx/listctrl.h"
 #include "wx/artprov.h"
 #include "wx/imaglist.h"
+#if wxUSE_TOOLTIPS
+    #include "wx/tooltip.h"
+#endif
 #include "listbasetest.h"
 #include "testableframe.h"
 #include "wx/uiaction.h"
+
+#ifdef __WXMSW__
+    #include "wx/msw/wrapcctl.h"
+#endif
+
+#if wxUSE_TOOLTIPS && defined(__WXMSW__)
+
+namespace
+{
+
+bool ListCtrlHasLabelTipStyle(wxListCtrl* list)
+{
+    return (ListView_GetExtendedListViewStyle((HWND)list->GetHWND()) &
+            LVS_EX_LABELTIP) != 0;
+}
+
+} // namespace
+
+#endif // wxUSE_TOOLTIPS && __WXMSW__
 
 // ----------------------------------------------------------------------------
 // test class
@@ -152,6 +175,42 @@ TEST_CASE_METHOD(ListCtrlTestCase, "ListCtrl::ColumnCount", "[listctrl]")
                             wxLC_SMALL_ICON);
     CHECK(m_list->GetColumnCount() == 0);
 }
+
+#if wxUSE_TOOLTIPS && defined(__WXMSW__)
+
+TEST_CASE_METHOD(ListCtrlTestCase, "ListCtrl::GlobalToolTips", "[listctrl][tooltip]")
+{
+    class EnableToolTipsOnExit
+    {
+    public:
+        ~EnableToolTipsOnExit() { wxToolTip::Enable(true); }
+    } enableToolTipsOnExit;
+
+    wxToolTip::Enable(true);
+
+    CHECK(ListCtrlHasLabelTipStyle(m_list));
+
+    wxToolTip::Enable(false);
+    CHECK(!ListCtrlHasLabelTipStyle(m_list));
+
+    delete m_list;
+    m_list = new wxListCtrl(wxTheApp->GetTopWindow());
+    m_list->SetWindowStyle(wxLC_REPORT);
+    m_list->SetSize(400, 200);
+
+    CHECK(!ListCtrlHasLabelTipStyle(m_list));
+
+    wxToolTip::Enable(true);
+    CHECK(ListCtrlHasLabelTipStyle(m_list));
+
+    m_list->SetToolTip("custom");
+    CHECK(!ListCtrlHasLabelTipStyle(m_list));
+
+    m_list->UnsetToolTip();
+    CHECK(ListCtrlHasLabelTipStyle(m_list));
+}
+
+#endif // wxUSE_TOOLTIPS && __WXMSW__
 
 #if wxUSE_UIACTIONSIMULATOR
 

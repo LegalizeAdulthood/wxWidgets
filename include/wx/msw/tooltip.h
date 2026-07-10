@@ -14,6 +14,8 @@
 #include "wx/gdicmn.h"
 
 class WXDLLIMPEXP_FWD_CORE wxWindow;
+class WXDLLIMPEXP_FWD_CORE wxListCtrl;
+class WXDLLIMPEXP_FWD_CORE wxToolBar;
 class wxToolTipOtherWindows;
 
 class WXDLLIMPEXP_CORE wxToolTip : public wxObject
@@ -74,6 +76,8 @@ public:
 private:
     // This module calls our DeleteToolTipCtrl().
     friend class wxToolTipModule;
+    friend class wxListCtrl;
+    friend class wxToolBar;
 
     // Adds a window other than our main m_window to this tooltip.
     void DoAddHWND(WXHWND hWnd);
@@ -96,8 +100,12 @@ private:
     // to be used in wxModule for deleting tooltip ctrl window when exiting mainloop
     static void DeleteToolTipCtrl();
 
+    static bool IsEnabled();
+
     // new tooltip maximum width, defaults to min(display width, 400)
     static int ms_maxWidth;
+
+    static bool ms_enabled;
 
     // remove this tooltip from the tooltip control
     void Remove();
