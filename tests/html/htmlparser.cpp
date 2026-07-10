@@ -4,6 +4,7 @@
 // Author:      Vadim Zeitlin
 // Created:     2011-01-13
 // Copyright:   (c) 2011 Vadim Zeitlin <vadim@wxwidgets.org>
+// Copyright:   (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -19,20 +20,71 @@
     #include "wx/dcmemory.h"
 #endif // WX_PRECOMP
 
+#include "wx/html/htmlwin.h"
 #include "wx/html/winpars.h"
 
 #include <memory>
 
+class TestHtmlWindowInterface : public wxHtmlWindowInterface
+{
+public:
+    virtual void SetHTMLWindowTitle(const wxString& WXUNUSED(title)) override { }
+
+    virtual void OnHTMLLinkClicked(const wxHtmlLinkInfo& WXUNUSED(link)) override { }
+
+    virtual wxHtmlOpeningStatus OnHTMLOpeningURL(wxHtmlURLType type,
+                                                 const wxString& url,
+                                                 wxString *WXUNUSED(redirect)) const override
+    {
+        if ( type == wxHTML_URL_IMAGE )
+            m_imageUrl = url;
+        else if ( type == wxHTML_URL_PAGE )
+            m_pageUrl = url;
+
+        return wxHTML_BLOCK;
+    }
+
+    virtual wxPoint HTMLCoordsToWindow(wxHtmlCell *WXUNUSED(cell),
+                                       const wxPoint& WXUNUSED(pos)) const override
+        { return wxPoint(); }
+
+    virtual wxWindow* GetHTMLWindow() override { return nullptr; }
+
+    virtual wxColour GetHTMLBackgroundColour() const override { return *wxWHITE; }
+
+    virtual void SetHTMLBackgroundColour(const wxColour& WXUNUSED(clr)) override { }
+
+    virtual void SetHTMLBackgroundImage(const wxBitmapBundle& WXUNUSED(bmpBg)) override { }
+
+    virtual void SetHTMLStatusText(const wxString& WXUNUSED(text)) override { }
+
+    virtual wxCursor GetHTMLCursor(HTMLCursor WXUNUSED(type)) const override
+        { return wxCursor(); }
+
+    const wxString& GetImageUrl() const { return m_imageUrl; }
+    const wxString& GetPageUrl() const { return m_pageUrl; }
+
+private:
+    mutable wxString m_imageUrl;
+    mutable wxString m_pageUrl;
+};
+
+class TestHtmlParser : public wxHtmlWinParser
+{
+public:
+    explicit TestHtmlParser(wxHtmlWindowInterface *windowInterface = nullptr)
+        : wxHtmlWinParser(windowInterface)
+    {
+    }
+
+protected:
+    virtual void AddText(const wxString& WXUNUSED(txt)) override { }
+};
+
 // Test that parsing invalid HTML simply fails but doesn't crash for example.
 TEST_CASE("wxHtmlParser::ParseInvalid", "[html][parser][error]")
 {
-    class NullParser : public wxHtmlWinParser
-    {
-    protected:
-        virtual void AddText(const wxString& WXUNUSED(txt)) override { }
-    };
-
-    NullParser p;
+    TestHtmlParser p;
     wxMemoryDC dc;
     p.SetDC(&dc);
 
@@ -40,6 +92,28 @@ TEST_CASE("wxHtmlParser::ParseInvalid", "[html][parser][error]")
     delete p.Parse("<foo");
     delete p.Parse("<!--");
     delete p.Parse("<!---");
+}
+
+TEST_CASE("wxHtmlParser::BaseHref", "[html][parser]")
+{
+    TestHtmlWindowInterface windowInterface;
+    TestHtmlParser p(&windowInterface);
+    wxFileSystem fs;
+    wxMemoryDC dc;
+
+    fs.ChangePathTo("http://example.com/original/page.html");
+    p.SetDC(&dc);
+    p.SetFS(&fs);
+
+    delete p.Parse(
+        "<html><head><base href=\"http://example.com/base/\"></head>"
+        "<body><img src=\"image.png\"></body></html>");
+
+    CHECK( windowInterface.GetImageUrl() == "http://example.com/base/image.png" );
+
+    delete p.OpenURL(wxHTML_URL_PAGE, "linked.html");
+
+    CHECK( windowInterface.GetPageUrl() == "http://example.com/base/linked.html" );
 }
 
 TEST_CASE("wxHtmlCell::Detach", "[html][cell]")

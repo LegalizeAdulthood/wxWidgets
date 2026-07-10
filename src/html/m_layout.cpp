@@ -3,6 +3,7 @@
 // Purpose:     wxHtml module for basic paragraphs/layout handling
 // Author:      Vaclav Slavik
 // Copyright:   (c) 1999 Vaclav Slavik
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -19,6 +20,7 @@
 #include "wx/html/m_templ.h"
 
 #include "wx/html/htmlwin.h"
+#include "wx/uri.h"
 
 FORCE_LINK_ME(m_layout)
 
@@ -273,8 +275,41 @@ TAG_HANDLER_BEGIN(DIV, "DIV")
 
 TAG_HANDLER_END(DIV)
 
+static wxString wxHtmlResolveBaseHref(wxFileSystem *fs, const wxString& href)
+{
+    wxURI hrefUri(href);
+    if ( hrefUri.IsRelative() )
+    {
+        const wxString basepath = fs->GetPath();
+        wxURI base(basepath);
 
+        if ( !base.IsReference() )
+        {
+            hrefUri.Resolve(base);
+            return hrefUri.BuildUnescapedURI();
+        }
 
+        return basepath + href;
+    }
+
+    return href;
+}
+
+TAG_HANDLER_BEGIN(BASE, "BASE")
+    TAG_HANDLER_CONSTR(BASE) { }
+
+    TAG_HANDLER_PROC(tag)
+    {
+        wxString href;
+        wxFileSystem *fs = m_WParser->GetFS();
+
+        if ( fs && tag.GetParamAsString(wxT("HREF"), &href) && !href.empty() )
+            fs->ChangePathTo(wxHtmlResolveBaseHref(fs, href));
+
+        return false;
+    }
+
+TAG_HANDLER_END(BASE)
 
 TAG_HANDLER_BEGIN(TITLE, "TITLE")
     TAG_HANDLER_CONSTR(TITLE) { }
@@ -438,6 +473,7 @@ TAGS_MODULE_BEGIN(Layout)
     TAGS_MODULE_ADD(BR)
     TAGS_MODULE_ADD(CENTER)
     TAGS_MODULE_ADD(DIV)
+    TAGS_MODULE_ADD(BASE)
     TAGS_MODULE_ADD(TITLE)
     TAGS_MODULE_ADD(BODY)
     TAGS_MODULE_ADD(BLOCKQUOTE)
