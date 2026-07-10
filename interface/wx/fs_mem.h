@@ -2,6 +2,7 @@
 // Name:        fs_mem.h
 // Purpose:     interface of wxMemoryFSHandler
 // Author:      wxWidgets team
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -14,7 +15,11 @@
     It is particularly suitable for storing bitmaps from resources or included XPM
     files so that they can be used with wxHTML or wxWebView.
 
-    Filenames are prefixed with @c "memory:", e.g. @c "memory:myfile.html".
+    The names used with this handler are the part of the URL following the
+    @c "memory:" prefix, e.g. a file added as @c "myfile.html" is accessed as
+    @c "memory:myfile.html". They are URL paths, not native file names, so use
+    forward slashes as path separators even on platforms using backslashes in
+    file names.
 
     Example:
 
@@ -83,6 +88,10 @@ public:
         Stored data (bitmap, text or raw data) will be copied into private memory
         stream and available under name @c "memory:" + @e filename.
 
+        Here @e filename is the part of the URL following @c "memory:", not a
+        native file name. It must use URL syntax, including forward slashes as
+        path separators.
+
         When using the overload taking @c wxString data, if the string contains
         only Latin-1 characters (which includes strings created using
         wxString::From8BitData()), its data is used as is. Otherwise, the UTF-8
@@ -123,6 +132,9 @@ public:
 
     /**
         Removes a file from memory FS and frees the occupied memory.
+
+        The @a filename parameter must be the same URL path passed to AddFile(),
+        without the @c "memory:" prefix.
     */
     static void RemoveFile(const wxString& filename);
 };
