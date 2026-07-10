@@ -1419,7 +1419,7 @@ void wxTarOutputStream::SetHeaderDate(const wxString& key,
     {
         wxString str;
         if (ll >= LONG_MIN && ll <= LONG_MAX) {
-            str.Printf(wxT("%g"), ll.ToLong() / 1000.0);
+            str = wxString::FromCDouble(ll.ToLong() / 1000.0);
         } else {
             str = ll.ToString();
             str.insert(str.end() - 3, '.');
