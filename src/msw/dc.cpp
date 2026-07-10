@@ -4,6 +4,7 @@
 // Author:      Julian Smart
 // Created:     01/02/97
 // Copyright:   (c) Julian Smart
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -1339,6 +1340,18 @@ void wxMSWDCImpl::DoDrawText(const wxString& text, wxCoord x, wxCoord y)
 
 void wxMSWDCImpl::DrawAnyText(const wxString& text, wxCoord x, wxCoord y)
 {
+    if ( text.find('\t') != wxString::npos )
+    {
+        if ( ::TabbedTextOut(GetHdc(), XLOG2DEV(x), YLOG2DEV(y),
+                             text.c_str(), static_cast<int>(text.length()),
+                             0, nullptr, XLOG2DEV(x)) == 0 )
+        {
+            wxLogLastError(wxT("TabbedTextOut"));
+        }
+
+        return;
+    }
+
     if ( ::ExtTextOut(GetHdc(), XLOG2DEV(x), YLOG2DEV(y), 0, nullptr,
                    text.c_str(), text.length(), nullptr) == 0 )
     {
