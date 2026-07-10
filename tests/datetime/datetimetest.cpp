@@ -833,6 +833,12 @@ TEST_CASE("wxDateTime::ParseFormat", "[datetime]")
         CHECK( dt.GetDay() == 17 );
         CHECK( dt.GetMonth() == wxDateTime::Sep );
         CHECK( dt.GetYear() == 2008 );
+
+        wxDateTime dtLeapDef(29, wxDateTime::Feb, 2012);
+        REQUIRE( dt.ParseFormat("2011", "%Y", dtLeapDef) );
+        CHECK( dt.GetDay() == 28 );
+        CHECK( dt.GetMonth() == wxDateTime::Feb );
+        CHECK( dt.GetYear() == 2011 );
     }
 
     // test some degenerate cases
