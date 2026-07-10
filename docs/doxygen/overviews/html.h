@@ -51,6 +51,10 @@ mywin->SetPage("htmlbody"
                "/body/hmtl");
 @endcode
 
+Use wxHtmlWindow::LoadPage("#anchor") to navigate to an anchor in the current
+page. To navigate to an anchor in another page, append it to the page URL, as
+in wxHtmlWindow::LoadPage("test.htm#anchor").
+
 @subsection overview_html_quickstart_settingup Setting up wxHtmlWindow
 
 Because wxHtmlWindow is derived from ::wxScrolledWindow and not from
