@@ -647,6 +647,16 @@ void RichTextCtrlTestCase::NumberedBullet()
     CPPUNIT_ASSERT_EQUAL(15, bullet.GetLeftIndent());
     CPPUNIT_ASSERT_EQUAL(20, bullet.GetLeftSubIndent());
 
+    wxRichTextParagraph* firstPara =
+        m_rich->GetFocusObject()->GetParagraphAtPosition(5);
+    wxRichTextAttr nextBullet;
+
+    CPPUNIT_ASSERT(m_rich->GetFocusObject()->FindNextParagraphNumber(firstPara,
+                                                                     nextBullet));
+    CPPUNIT_ASSERT(nextBullet.HasBulletStyle());
+    CPPUNIT_ASSERT(nextBullet.HasBulletNumber());
+    CPPUNIT_ASSERT_EQUAL(2, nextBullet.GetBulletNumber());
+
     m_rich->GetStyle(15, bullet);
 
     CPPUNIT_ASSERT(bullet.HasBulletStyle());
