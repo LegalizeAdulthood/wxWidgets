@@ -339,6 +339,24 @@ TEST_CASE("StringReplace", "[wxString]")
     TEST_WXREPLACE( "xx", 2, "x", "yy", true, "yyyy", 4 );
     TEST_WXREPLACE( "xxx", 3, "xx", "z", true, "zx", 2 );
 
+    {
+        wxString s("foo foo foo");
+        CHECK( s.Replace("foo", "bar", false) == 1 );
+        CHECK( s == "bar foo foo" );
+    }
+
+    {
+        wxString s("foo foo foo");
+        CHECK( s.Replace("foo", "bar") == 3 );
+        CHECK( s == "bar bar bar" );
+    }
+
+    {
+        wxString s("aaaa");
+        CHECK( s.Replace("aa", "bb") == 2 );
+        CHECK( s == "bbbb" );
+    }
+
     #undef TEST_WXREPLACE
     #undef TEST_NULLCHARREPLACE
     #undef TEST_REPLACE
