@@ -5,6 +5,7 @@
 // Created:     29/01/98
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 //              (c) 2004 Ryan Norton <wxprojects@comcast.net>
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -1191,6 +1192,8 @@ size_t wxString::Replace(const wxString& strOld,
     wxSTRING_INVALIDATE_CACHE();
 
     size_t uiCount = 0;   // count of replacements made
+    const size_t uiOldLen = strOld.m_impl.length();
+    const size_t uiNewLen = strNew.m_impl.length();
 
     // optimize the special common case: replacement of one character by
     // another one (in UTF-8 case we can only do this for ASCII characters)
@@ -1198,7 +1201,7 @@ size_t wxString::Replace(const wxString& strOld,
     // benchmarks show that this special version is around 3 times faster
     // (depending on the proportion of matching characters and UTF-8/wchar_t
     // build)
-    if ( strOld.m_impl.length() == 1 && strNew.m_impl.length() == 1 )
+    if ( uiOldLen == 1 && uiNewLen == 1 )
     {
         const wxStringCharType chOld = strOld.m_impl[0],
                                chNew = strNew.m_impl[0];
@@ -1218,6 +1221,24 @@ size_t wxString::Replace(const wxString& strOld,
                 break;
         }
     }
+    else if ( uiOldLen == uiNewLen )
+    {
+        for ( size_t pos = 0; ; )
+        {
+            pos = m_impl.find(strOld.m_impl, pos);
+            if ( pos == npos )
+                break;
+
+            for ( size_t n = 0; n < uiOldLen; n++ )
+                m_impl[pos + n] = strNew.m_impl[n];
+
+            pos += uiOldLen;
+            uiCount++;
+
+            if ( !bReplaceAll )
+                break;
+        }
+    }
     else if ( !bReplaceAll)
     {
         size_t pos = m_impl.find(strOld.m_impl, 0);
@@ -1229,9 +1250,6 @@ size_t wxString::Replace(const wxString& strOld,
     }
     else // replace all occurrences
     {
-        const size_t uiOldLen = strOld.m_impl.length();
-        const size_t uiNewLen = strNew.m_impl.length();
-
         // first scan the string to find all positions at which the replacement
         // should be made
         wxVector<size_t> replacePositions;

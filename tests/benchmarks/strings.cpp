@@ -4,6 +4,7 @@
 // Author:      Vadim Zeitlin
 // Created:     2008-07-19
 // Copyright:   (c) 2008 Vadim Zeitlin <vadim@wxwidgets.org>
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -273,6 +274,12 @@ BENCHMARK_FUNC(ReplaceSome)
 {
     wxString str(asciistr);
     return str.Replace("7", "8") != 0;
+}
+
+BENCHMARK_FUNC(ReplaceSameLength)
+{
+    wxString str(asciistr);
+    return str.Replace("line", "rows") != 0;
 }
 
 BENCHMARK_FUNC(ReplaceAll)
