@@ -4,6 +4,7 @@
 // Author:      Steven Lamerton
 // Created:     2010-07-07
 // Copyright:   (c) 2010 Steven Lamerton
+// Copyright:   (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "testprec.h"
@@ -53,6 +54,7 @@ private:
         CPPUNIT_TEST( LineSpacing );
         CPPUNIT_TEST( ParagraphSpacing );
         CPPUNIT_TEST( TextColour );
+        CPPUNIT_TEST( AppendTextStyle );
         CPPUNIT_TEST( NumberedBullet );
         CPPUNIT_TEST( SymbolBullet );
         CPPUNIT_TEST( FontSize );
@@ -84,6 +86,7 @@ private:
     void LineSpacing();
     void ParagraphSpacing();
     void TextColour();
+    void AppendTextStyle();
     void NumberedBullet();
     void SymbolBullet();
     void FontSize();
@@ -627,6 +630,26 @@ void RichTextCtrlTestCase::TextColour()
 
     CPPUNIT_ASSERT_EQUAL(m_rich->GetBasicStyle().GetTextColour(),
                          colour.GetTextColour());
+}
+
+void RichTextCtrlTestCase::AppendTextStyle()
+{
+    m_rich->BeginTextColour(*wxRED);
+    m_rich->WriteText("red");
+    m_rich->EndTextColour();
+
+    m_rich->BeginTextColour(*wxBLUE);
+    m_rich->AppendText("blue");
+    m_rich->EndTextColour();
+
+    wxTextAttr colour;
+    m_rich->GetStyle(1, colour);
+
+    CPPUNIT_ASSERT_EQUAL(*wxRED, colour.GetTextColour());
+
+    m_rich->GetStyle(5, colour);
+
+    CPPUNIT_ASSERT_EQUAL(*wxBLUE, colour.GetTextColour());
 }
 
 void RichTextCtrlTestCase::NumberedBullet()

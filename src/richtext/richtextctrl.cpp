@@ -4,6 +4,7 @@
 // Author:      Julian Smart
 // Created:     2005-09-30
 // Copyright:   (c) Julian Smart
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -3340,7 +3341,13 @@ void wxRichTextCtrl::DoWriteText(const wxString& value, int flags)
 
 void wxRichTextCtrl::AppendText(const wxString& text)
 {
+    const bool hasStyleStack = GetBuffer().GetStyleStackSize() > 0;
+    const wxRichTextAttr defaultStyle = GetDefaultStyleEx();
+
     SetInsertionPointEnd();
+
+    if ( hasStyleStack )
+        SetDefaultStyle(defaultStyle);
 
     WriteText(text);
 }
