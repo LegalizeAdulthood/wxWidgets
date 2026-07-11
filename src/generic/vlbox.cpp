@@ -4,6 +4,7 @@
 // Author:      Vadim Zeitlin
 // Created:     31.05.03
 // Copyright:   (c) 2003 Vadim Zeitlin <vadim@wxwidgets.org>
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -629,6 +630,9 @@ void wxVListBox::OnKeyDown(wxKeyEvent& event)
         case WXK_PAGEDOWN:
         case WXK_NUMPAD_PAGEDOWN:
         {
+            if ( !GetRowCount() )
+                return;
+
             size_t oldBegin = GetVisibleBegin();
             PageDown();
             if (GetVisibleBegin() > oldBegin)
@@ -644,6 +648,9 @@ void wxVListBox::OnKeyDown(wxKeyEvent& event)
 
         case WXK_PAGEUP:
         case WXK_NUMPAD_PAGEUP:
+            if ( !GetRowCount() )
+                return;
+
             if ( m_current == (int)GetVisibleBegin() )
             {
                 PageUp();
