@@ -4,6 +4,7 @@
 // Author:      Vadim Zeitlin
 // Created:     11.06.98
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1562,7 +1563,12 @@ void wxNotebook::OnSize(wxSizeEvent& event)
             // btn
             if ( !childWindow )
             {
-                // subclass the spin button to override WM_ERASEBKGND
+                // keep the hidden spin button out of TAB traversal and
+                // subclass it to override WM_ERASEBKGND
+                const long style = ::GetWindowLong(child, GWL_STYLE);
+                if ( style & WS_TABSTOP )
+                    ::SetWindowLong(child, GWL_STYLE, style & ~WS_TABSTOP);
+
                 if ( !gs_wndprocNotebookSpinBtn )
                     gs_wndprocNotebookSpinBtn = wxGetWindowProc(child);
 

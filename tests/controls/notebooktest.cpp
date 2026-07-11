@@ -4,6 +4,7 @@
 // Author:      Steven Lamerton
 // Created:     2010-07-02
 // Copyright:   (c) 2010 Steven Lamerton
+// Copyright:   (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "testprec.h"
@@ -17,6 +18,10 @@
 #endif // WX_PRECOMP
 
 #include "wx/notebook.h"
+
+#ifdef __WXMSW__
+    #include "wx/msw/private.h"
+#endif // __WXMSW__
 
 #include "asserthelper.h"
 #include "bookctrlbasetest.h"
@@ -49,12 +54,18 @@ private:
         CPPUNIT_TEST( NoEventsOnDestruction );
         CPPUNIT_TEST( GetTabRect );
         CPPUNIT_TEST( HitTestFlags );
+#ifdef __WXMSW__
+        CPPUNIT_TEST( HiddenSpinButtonNotFocusable );
+#endif // __WXMSW__
     CPPUNIT_TEST_SUITE_END();
 
     void RowCount();
     void NoEventsOnDestruction();
     void GetTabRect();
     void HitTestFlags();
+#ifdef __WXMSW__
+    void HiddenSpinButtonNotFocusable();
+#endif // __WXMSW__
 
     void OnPageChanged(wxNotebookEvent&) { m_numPageChanges++; }
 
@@ -300,5 +311,42 @@ void NotebookTestCase::HitTestFlags()
     WX_ASSERT_FAILS_WITH_ASSERT(notebook->GetTabRect(0));
 #endif // ports
 }
+
+#ifdef __WXMSW__
+
+void NotebookTestCase::HiddenSpinButtonNotFocusable()
+{
+    if ( wxIsRunningUnderWine() )
+        return;
+
+    wxDELETE(m_notebook);
+    m_notebook = new wxNotebook(wxTheApp->GetTopWindow(), wxID_ANY,
+                                wxPoint(0, 0), wxSize(80, 200));
+
+    for ( size_t i = 0; i < 30; i++ )
+        m_notebook->AddPage(new wxPanel(m_notebook), "Page");
+
+    m_notebook->SendSizeEvent();
+    m_notebook->Update();
+
+    bool foundNativeChild = false;
+
+    for ( HWND child = ::GetWindow(GetHwndOf(m_notebook), GW_CHILD);
+          child;
+          child = ::GetWindow(child, GW_HWNDNEXT) )
+    {
+        if ( wxFindWinFromHandle((WXHWND)child) )
+            continue;
+
+        foundNativeChild = true;
+
+        const long style = ::GetWindowLong(child, GWL_STYLE);
+        CHECK( !(style & WS_TABSTOP) );
+    }
+
+    REQUIRE( foundNativeChild );
+}
+
+#endif // __WXMSW__
 
 #endif //wxUSE_NOTEBOOK
