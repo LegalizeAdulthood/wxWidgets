@@ -4,6 +4,7 @@
 // Author:      Benjamin I. Williams
 // Created:     2005-05-17
 // Copyright:   (C) Copyright 2005-2006, Kirix Corporation, All Rights Reserved
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows Library Licence, Version 3.1
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -107,6 +108,9 @@ void wxAuiFloatingFrame::SetPaneWindow(const wxAuiPaneInfo& pane)
     m_mgr.AddPane(m_paneWindow, contained_pane);
     m_mgr.Update();
 
+    const wxSize floatingSize = pane.floating_size;
+    const wxSize floatingClientSize = pane.floating_client_size;
+
     if (pane.min_size.IsFullySpecified())
     {
         // because SetSizeHints() calls Fit() too (which sets the window
@@ -128,8 +132,8 @@ void wxAuiFloatingFrame::SetPaneWindow(const wxAuiPaneInfo& pane)
     // So we must call it first but doing it generates a size event and updates
     // pane.floating_size from inside it so we must also record its original
     // value before doing it.
-    const bool hasFloatingSize = pane.floating_size != wxDefaultSize ||
-                                    pane.floating_client_size != wxDefaultSize;
+    const bool hasFloatingSize =
+        floatingSize != wxDefaultSize || floatingClientSize != wxDefaultSize;
     if (pane.IsFixed())
     {
         SetWindowStyleFlag(GetWindowStyleFlag() & ~wxRESIZE_BORDER);
@@ -138,13 +142,13 @@ void wxAuiFloatingFrame::SetPaneWindow(const wxAuiPaneInfo& pane)
     if ( hasFloatingSize )
     {
         // give floating_client_size precedence over floating_size
-        if (pane.floating_client_size != wxDefaultSize)
+        if ( floatingClientSize != wxDefaultSize )
         {
-            SetClientSize(pane.floating_client_size);
+            SetClientSize(floatingClientSize);
         }
         else
         {
-            SetSize(pane.floating_size);
+            SetSize(floatingSize);
         }
     }
     else

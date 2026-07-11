@@ -4,6 +4,7 @@
 // Author:      Sebastian Walderich
 // Created:     2018-12-19
 // Copyright:   (c) 2018 Sebastian Walderich
+// Copyright:   (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -19,10 +20,12 @@
     #include "wx/app.h"
 #endif // WX_PRECOMP
 
+#include "wx/frame.h"
 #include "wx/panel.h"
 
 #include "wx/aui/auibar.h"
 #include "wx/aui/auibook.h"
+#include "wx/aui/floatpane.h"
 #include "wx/aui/serializer.h"
 
 #include "asserthelper.h"
@@ -344,6 +347,46 @@ TEST_CASE_METHOD(AuiNotebookTestCase, "wxAuiNotebook::Layout", "[aui]")
     CHECK( nb->GetPageKind(2) == wxAuiTabKind::Normal );
     CHECK( nb->GetPageKind(3) == wxAuiTabKind::Normal );
     CHECK( nb->GetPageKind(4) == wxAuiTabKind::Locked );
+}
+
+TEST_CASE("wxAuiFloatingFrame::SetPaneWindow", "[aui]")
+{
+    wxFrame * const frame = new wxFrame(wxTheApp->GetTopWindow(), wxID_ANY,
+                                        "wxAuiFloatingFrame test");
+    wxAuiManager manager(frame);
+
+    wxPanel * const paneWindow = new wxPanel(frame);
+    const wxSize floatingSize(300, 250);
+
+    wxAuiPaneInfo paneInfo;
+    paneInfo.Name("pane").
+             Float().
+             FloatingSize(floatingSize).
+             MinSize(100, 100);
+
+    REQUIRE( manager.AddPane(paneWindow, paneInfo) );
+
+    wxAuiPaneInfo& pane = manager.GetPane(paneWindow);
+    wxAuiFloatingFrame * const floatingFrame =
+        manager.CreateFloatingFrame(frame, pane);
+
+    bool paneSizeChanged = false;
+    floatingFrame->Bind(wxEVT_SIZE,
+        [&](wxSizeEvent& event)
+        {
+            manager.GetPane(paneWindow).FloatingSize(10, 10);
+            paneSizeChanged = true;
+            event.Skip();
+        });
+
+    floatingFrame->SetPaneWindow(pane);
+
+    CHECK( paneSizeChanged );
+    CHECK( floatingFrame->GetSize() == floatingSize );
+
+    delete floatingFrame;
+    manager.UnInit();
+    delete frame;
 }
 
 TEST_CASE("wxAuiToolBar::Items", "[aui][toolbar]")
