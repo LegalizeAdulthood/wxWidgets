@@ -13,10 +13,15 @@
 
 #ifndef WX_PRECOMP
     #include "wx/app.h"
+    #include "wx/button.h"
     #include "wx/checkbox.h"
+    #include "wx/panel.h"
+    #include "wx/sizer.h"
+    #include "wx/stattext.h"
 #endif // WX_PRECOMP
 
 #include "testableframe.h"
+#include "waitfor.h"
 
 #include <memory>
 
@@ -78,6 +83,46 @@ TEST_CASE_METHOD(CheckBoxTestCase, "CheckBox::Check", "[checkbox]")
 
     //None of these should send events
     CHECK(clicked.GetCount() == 0);
+}
+
+TEST_CASE_METHOD(CheckBoxTestCase, "CheckBox::MnemonicFromStaticText", "[checkbox]")
+{
+#ifdef __WXMSW__
+    wxWindow* const tlw = wxTheApp->GetTopWindow();
+    std::unique_ptr<wxPanel> panel(new wxPanel(tlw));
+
+    wxStaticText* const label =
+        new wxStaticText(panel.get(), wxID_ANY, "&Enabled");
+    wxCheckBox* const check =
+        new wxCheckBox(panel.get(), wxID_ANY, wxEmptyString);
+    wxButton* const button = new wxButton(panel.get(), wxID_ANY, "Other");
+
+    wxSizer* const sizer = new wxBoxSizer(wxVERTICAL);
+    wxSizer* const row = new wxBoxSizer(wxHORIZONTAL);
+    row->Add(label);
+    row->Add(check);
+    sizer->Add(row);
+    sizer->Add(button);
+    panel->SetSizer(sizer);
+    panel->SetSize(tlw->GetClientSize());
+    panel->Layout();
+
+    button->SetFocus();
+    wxYield();
+    REQUIRE(wxWindow::FindFocus() == button);
+
+    WXMSG msg = { };
+    msg.hwnd = (HWND)button->GetHWND();
+    msg.message = WM_SYSCHAR;
+    msg.wParam = 'e';
+
+    REQUIRE(panel->MSWProcessMessage(&msg));
+
+    REQUIRE(WaitFor("checkbox to receive focus",
+                    [check]() { return wxWindow::FindFocus() == check; }));
+
+    CHECK(wxWindow::FindFocus() == check);
+#endif // __WXMSW__
 }
 
 #ifdef wxHAS_3STATE_CHECKBOX
