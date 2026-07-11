@@ -17,6 +17,8 @@
 
 #include "wx/treelist.h"
 
+#include "wx/dataview.h"
+
 #include "wx/app.h"
 
 #include <memory>
@@ -123,6 +125,18 @@ TreeListCtrlTestCase::TreeListCtrlTestCase()
 // ----------------------------------------------------------------------------
 // the tests themselves
 // ----------------------------------------------------------------------------
+
+TEST_CASE_METHOD(TreeListCtrlTestCase, "TreeListCtrl::InitialSize",
+                 "[treelistctrl]")
+{
+    const wxSize size = m_treelist->GetClientSize();
+
+    CHECK( m_treelist->GetDataView()->GetSize() == size );
+    CHECK( m_treelist->GetView()->GetSize().GetWidth() >
+           size.GetWidth() / 2 );
+    CHECK( m_treelist->GetView()->GetSize().GetHeight() >
+           size.GetHeight() / 2 );
+}
 
 // Test various tree traversal methods.
 TEST_CASE_METHOD(TreeListCtrlTestCase, "TreeListCtrl::Traversal", "[treelistctrl]")

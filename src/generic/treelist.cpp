@@ -850,6 +850,10 @@ bool wxTreeListCtrl::Create(wxWindow* parent,
     m_model = new wxTreeListModel(this);
     m_view->AssociateModel(m_model);
 
+    // Ensure that the embedded control is laid out even if no external size
+    // event is sent to this composite control, e.g. when it has no sizer.
+    m_view->SetSize(GetClientRect(), wxSIZE_FORCE_EVENT);
+
     return true;
 }
 
