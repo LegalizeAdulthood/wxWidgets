@@ -259,6 +259,33 @@ TEST_CASE("wxHtmlWinParser::OpenURLAbsoluteArchivePath",
     CHECK(file->GetLocation() == expected);
 }
 
+TEST_CASE("wxHtmlParser::UnderlineKerning", "[html][parser]")
+{
+    wxMemoryDC dc;
+    wxHtmlWinParser p;
+    p.SetDC(&dc);
+
+    std::unique_ptr<wxHtmlContainerCell> const top(
+        static_cast<wxHtmlContainerCell *>(p.Parse("<u>A</u>dd")));
+    REQUIRE(top);
+
+    top->Layout(1000);
+
+    wxHtmlCell *a = FindTextCell(top.get(), "A");
+    wxHtmlCell *dd = FindTextCell(top.get(), "dd");
+
+    REQUIRE(a);
+    REQUIRE(dd);
+
+    wxCoord ddWidth, combinedWidth, height;
+    dc.GetTextExtent("dd", &ddWidth, &height);
+    dc.GetTextExtent("Add", &combinedWidth, &height);
+
+    const int expectedDdX = a->GetAbsPos(top.get()).x + combinedWidth - ddWidth;
+
+    CHECK(dd->GetAbsPos(top.get()).x == expectedDdX);
+}
+
 TEST_CASE("wxHtmlCell::Detach", "[html][cell]")
 {
     wxMemoryDC dc;
