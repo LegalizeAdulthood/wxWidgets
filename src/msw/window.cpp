@@ -5,6 +5,7 @@
 // Modified by: VZ on 13.05.99: no more Default(), MSWOnXXX() reorganisation
 // Created:     04/01/98
 // Copyright:   (c) Julian Smart
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -42,6 +43,7 @@
     #include "wx/msgdlg.h"
     #include "wx/settings.h"
     #include "wx/statbox.h"
+    #include "wx/stattext.h"
     #include "wx/sizer.h"
     #include "wx/intl.h"
     #include "wx/log.h"
@@ -176,6 +178,78 @@ MSWMessageHandlers gs_messageHandlers;
 // hash containing all our windows, it uses HWND keys and wxWindow* values
 using WindowHandles = std::unordered_map<HWND, wxWindow*>;
 WindowHandles gs_windowHandles;
+
+#if wxUSE_STATTEXT
+
+enum StaticTextMnemonicResult
+{
+    StaticTextMnemonic_NotFound,
+    StaticTextMnemonic_Handled,
+    StaticTextMnemonic_OtherWindow
+};
+
+bool wxMSWLabelMatchesMnemonic(const wxWindow *win, wxChar chAccel)
+{
+    wxString labelOnly;
+    const int indexAccel =
+        wxControl::FindAccelIndex(win->GetLabel(), &labelOnly);
+    if ( indexAccel == wxNOT_FOUND )
+        return false;
+
+    return (wchar_t)wxToupper(labelOnly[(size_t)indexAccel]) ==
+           (wchar_t)wxToupper(chAccel);
+}
+
+bool wxMSWFocusNextMnemonicTarget(wxWindow *win)
+{
+    for ( wxWindow *target = win->GetNextSibling(); target;
+          target = target->GetNextSibling() )
+    {
+        if ( target->CanAcceptFocusFromKeyboard() )
+        {
+            target->SetFocusFromKbd();
+            return true;
+        }
+    }
+
+    return false;
+}
+
+StaticTextMnemonicResult wxMSWHandleStaticTextMnemonic(wxWindow *parent,
+                                                       wxChar chAccel)
+{
+    for ( wxWindowList::compatibility_iterator node =
+              parent->GetChildren().GetFirst();
+          node; node = node->GetNext() )
+    {
+        wxWindow * const child = node->GetData();
+        if ( !child->IsShown() || !child->IsEnabled() )
+            continue;
+
+        if ( wxMSWLabelMatchesMnemonic(child, chAccel) )
+        {
+            if ( wxDynamicCast(child, wxStaticText) &&
+                 wxMSWFocusNextMnemonicTarget(child) )
+            {
+                return StaticTextMnemonic_Handled;
+            }
+
+            return StaticTextMnemonic_OtherWindow;
+        }
+
+        if ( !child->IsTopLevel() )
+        {
+            const StaticTextMnemonicResult result =
+                wxMSWHandleStaticTextMnemonic(child, chAccel);
+            if ( result != StaticTextMnemonic_NotFound )
+                return result;
+        }
+    }
+
+    return StaticTextMnemonic_NotFound;
+}
+
+#endif // wxUSE_STATTEXT
 
 #ifdef wxHAS_MSW_BACKGROUND_ERASE_HOOK
 
@@ -2724,6 +2798,19 @@ bool wxWindowMSW::MSWProcessMessage(WXMSG* pMsg)
                 }
             }
         }
+
+#if wxUSE_STATTEXT
+        if ( msg->message == WM_SYSCHAR )
+        {
+            wxWindow * const tlw = wxGetTopLevelParent(this);
+            if ( tlw &&
+                 wxMSWHandleStaticTextMnemonic(tlw, (wxChar)msg->wParam) ==
+                     StaticTextMnemonic_Handled )
+            {
+                return true;
+            }
+        }
+#endif // wxUSE_STATTEXT
 
         if ( MSWSafeIsDialogMessage(msg) )
         {

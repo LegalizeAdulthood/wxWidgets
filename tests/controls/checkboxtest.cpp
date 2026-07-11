@@ -4,6 +4,7 @@
 // Author:      Steven Lamerton
 // Created:     2010-07-14
 // Copyright:   (c) 2010 Steven Lamerton
+// Copyright:   (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "testprec.h"
@@ -13,10 +14,17 @@
 
 #ifndef WX_PRECOMP
     #include "wx/app.h"
+    #include "wx/button.h"
     #include "wx/checkbox.h"
+    #include "wx/panel.h"
+    #include "wx/sizer.h"
+    #include "wx/stattext.h"
 #endif // WX_PRECOMP
 
 #include "testableframe.h"
+#include "waitfor.h"
+
+#include <memory>
 
 class CheckBoxTestCase : public CppUnit::TestCase
 {
@@ -29,6 +37,7 @@ public:
 private:
     CPPUNIT_TEST_SUITE( CheckBoxTestCase );
         CPPUNIT_TEST( Check );
+        CPPUNIT_TEST( MnemonicFromStaticText );
 #ifdef wxHAS_3STATE_CHECKBOX
         CPPUNIT_TEST( ThirdState );
         CPPUNIT_TEST( ThirdStateUser );
@@ -37,6 +46,7 @@ private:
     CPPUNIT_TEST_SUITE_END();
 
     void Check();
+    void MnemonicFromStaticText();
 #ifdef wxHAS_3STATE_CHECKBOX
     void ThirdState();
     void ThirdStateUser();
@@ -103,6 +113,46 @@ void CheckBoxTestCase::Check()
 
     //None of these should send events
     CPPUNIT_ASSERT_EQUAL(0, clicked.GetCount());
+}
+
+void CheckBoxTestCase::MnemonicFromStaticText()
+{
+#ifdef __WXMSW__
+    wxWindow* const tlw = wxTheApp->GetTopWindow();
+    std::unique_ptr<wxPanel> panel(new wxPanel(tlw));
+
+    wxStaticText* const label =
+        new wxStaticText(panel.get(), wxID_ANY, "&Enabled");
+    wxCheckBox* const check =
+        new wxCheckBox(panel.get(), wxID_ANY, wxEmptyString);
+    wxButton* const button = new wxButton(panel.get(), wxID_ANY, "Other");
+
+    wxSizer* const sizer = new wxBoxSizer(wxVERTICAL);
+    wxSizer* const row = new wxBoxSizer(wxHORIZONTAL);
+    row->Add(label);
+    row->Add(check);
+    sizer->Add(row);
+    sizer->Add(button);
+    panel->SetSizer(sizer);
+    panel->SetSize(tlw->GetClientSize());
+    panel->Layout();
+
+    button->SetFocus();
+    wxYield();
+    CPPUNIT_ASSERT_EQUAL(button, wxWindow::FindFocus());
+
+    WXMSG msg = { };
+    msg.hwnd = (HWND)button->GetHWND();
+    msg.message = WM_SYSCHAR;
+    msg.wParam = 'e';
+
+    CPPUNIT_ASSERT(panel->MSWProcessMessage(&msg));
+
+    WaitFor("checkbox to receive focus",
+            [check]() { return wxWindow::FindFocus() == check; });
+
+    CPPUNIT_ASSERT_EQUAL(check, wxWindow::FindFocus());
+#endif // __WXMSW__
 }
 
 #ifdef wxHAS_3STATE_CHECKBOX
