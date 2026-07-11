@@ -119,6 +119,23 @@ TEST_CASE( "wxAcceleratorTable::Create", "[accelentry]" )
     };
 
     CHECK( wxAcceleratorTable(WXSIZEOF(entries), entries).IsOk() );
+
+#ifdef __WXMSW__
+    SECTION( "Invalid zero key code" )
+    {
+        const wxAcceleratorEntry invalid(0, 0, wxID_ANY);
+        CHECK( !wxAcceleratorTable(1, &invalid).IsOk() );
+
+        const wxAcceleratorEntry entriesWithInvalid[] =
+        {
+            invalid,
+            wxAcceleratorEntry(wxACCEL_CTRL, 'A')
+        };
+
+        CHECK( wxAcceleratorTable(WXSIZEOF(entriesWithInvalid),
+                                  entriesWithInvalid).IsOk() );
+    }
+#endif // __WXMSW__
 }
 
 TEST_CASE( "wxAcceleratorEntry::MatchesEvent", "[accelentry]" )
