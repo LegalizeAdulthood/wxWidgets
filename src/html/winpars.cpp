@@ -3,6 +3,7 @@
 // Purpose:     wxHtmlParser class (generic parser)
 // Author:      Vaclav Slavik
 // Copyright:   (c) 1999 Vaclav Slavik
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -418,6 +419,8 @@ void wxHtmlWinParser::AddWord(wxHtmlWordCell *word)
 
     m_Container->InsertCell(word);
     word->SetPreviousWord(m_lastWordCell);
+    if ( m_lastWordCell && !word->m_allowLinebreak )
+        m_lastWordCell->AdjustWidthForKerning(*(GetDC()), word->m_Word);
     m_lastWordCell = word;
 }
 

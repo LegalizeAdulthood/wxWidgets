@@ -4,6 +4,7 @@
 // Author:      Vadim Zeitlin
 // Created:     2011-01-13
 // Copyright:   (c) 2011 Vadim Zeitlin <vadim@wxwidgets.org>
+// Copyright:   (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -23,6 +24,23 @@
 
 #include <memory>
 
+static wxHtmlCell *FindTextCell(wxHtmlCell *cell, const wxString& text)
+{
+    if ( cell->ConvertToText(nullptr) == text )
+        return cell;
+
+    for ( wxHtmlCell *child = cell->GetFirstChild();
+          child;
+          child = child->GetNext() )
+    {
+        wxHtmlCell *found = FindTextCell(child, text);
+        if ( found )
+            return found;
+    }
+
+    return nullptr;
+}
+
 // Test that parsing invalid HTML simply fails but doesn't crash for example.
 TEST_CASE("wxHtmlParser::ParseInvalid", "[html][parser][error]")
 {
@@ -40,6 +58,34 @@ TEST_CASE("wxHtmlParser::ParseInvalid", "[html][parser][error]")
     delete p.Parse("<foo");
     delete p.Parse("<!--");
     delete p.Parse("<!---");
+}
+
+TEST_CASE("wxHtmlParser::UnderlineKerning", "[html][parser]")
+{
+    wxMemoryDC dc;
+    wxHtmlWinParser p;
+    p.SetDC(&dc);
+
+    std::unique_ptr<wxHtmlContainerCell> const top(
+        static_cast<wxHtmlContainerCell*>(p.Parse("<u>A</u>dd")));
+    REQUIRE( top );
+
+    top->Layout(1000);
+
+    wxHtmlCell *a = FindTextCell(top.get(), "A");
+    wxHtmlCell *dd = FindTextCell(top.get(), "dd");
+
+    REQUIRE( a );
+    REQUIRE( dd );
+
+    wxCoord ddWidth, combinedWidth, height;
+    dc.GetTextExtent("dd", &ddWidth, &height);
+    dc.GetTextExtent("Add", &combinedWidth, &height);
+
+    const int expectedDdX = a->GetAbsPos(top.get()).x +
+                            combinedWidth - ddWidth;
+
+    CHECK( dd->GetAbsPos(top.get()).x == expectedDdX );
 }
 
 TEST_CASE("wxHtmlCell::Detach", "[html][cell]")

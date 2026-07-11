@@ -3,6 +3,7 @@
 // Purpose:     wxHtmlCell - basic element of HTML output
 // Author:      Vaclav Slavik
 // Copyright:   (c) 1999 Vaclav Slavik
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -325,6 +326,26 @@ void wxHtmlWordCell::SetPreviousWord(wxHtmlWordCell *cell)
     {
         m_allowLinebreak = false;
     }
+}
+
+void wxHtmlWordCell::AdjustWidthForKerning(const wxDC& dc,
+                                           const wxString& nextWord)
+{
+    wxCoord thisWidth, nextWidth, combinedWidth, height;
+
+    dc.GetTextExtent(m_Word, &thisWidth, &height);
+    if ( thisWidth != m_Width )
+        return;
+
+    dc.GetTextExtent(nextWord, &nextWidth, &height);
+
+    wxString combinedWord(m_Word);
+    combinedWord += nextWord;
+    dc.GetTextExtent(combinedWord, &combinedWidth, &height);
+
+    const int adjustment = thisWidth + nextWidth - combinedWidth;
+    if ( adjustment > 0 && adjustment < m_Width )
+        m_Width -= adjustment;
 }
 
 // Splits m_Word into up to three parts according to selection, returns
