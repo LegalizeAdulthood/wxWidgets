@@ -4,6 +4,7 @@
 // Author:      Steven Lamerton
 // Created:     2010-06-25
 // Copyright:   (c) 2010 Steven Lamerton
+// Copyright:   (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "testprec.h"
@@ -2172,6 +2173,28 @@ TEST_CASE_METHOD(GridTestCase, "Grid::SetTable_ClearAttrCache", "[grid]")
     // Remove the grid table before our local objects go out of scope
     m_grid->SetTable(nullptr);
 #endif // !__WXOSX__
+}
+
+TEST_CASE_METHOD(GridTestCase, "Grid::SetTable_PreservesSizes", "[grid]")
+{
+    const int rowHeight = m_grid->GetDefaultRowSize() + 10;
+    const int colWidth = m_grid->GetDefaultColSize() + 10;
+
+    m_grid->SetRowSize(0, rowHeight);
+    m_grid->SetColSize(0, colWidth);
+    m_grid->HideRow(1);
+    m_grid->HideCol(1);
+
+    wxGridStringTable table(m_grid->GetNumberRows(), m_grid->GetNumberCols());
+    m_grid->SetTable(&table);
+
+    CHECK(m_grid->GetRowSize(0) == rowHeight);
+    CHECK(m_grid->GetColSize(0) == colWidth);
+    CHECK(m_grid->GetRowSize(1) == 0);
+    CHECK(m_grid->GetColSize(1) == 0);
+
+    // Remove the grid table before our local object goes out of scope.
+    m_grid->SetTable(nullptr);
 }
 
 #define CHECK_MULTICELL() CHECK_THAT( *m_grid, HasMulticellOnly(multi) )

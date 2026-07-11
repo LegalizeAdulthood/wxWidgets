@@ -5,6 +5,7 @@
 // Modified by: Robin Dunn, Vadim Zeitlin, Santiago Palacios
 // Created:     1/08/1999
 // Copyright:   (c) Michael Bedward (mbedward@ozemail.com.au)
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -3084,6 +3085,19 @@ wxGrid::SetTable(wxGridTableBase *table,
                  bool takeOwnership,
                  wxGrid::wxGridSelectionModes selmode )
 {
+    const int newNumRows = table ? table->GetNumberRows() : 0;
+    const int newNumCols = table ? table->GetNumberCols() : 0;
+
+    const bool restoreSizes = m_created &&
+                              newNumRows == m_numRows &&
+                              newNumCols == m_numCols;
+    wxGridSizesInfo colSizes, rowSizes;
+    if ( restoreSizes )
+    {
+        colSizes = GetColSizes();
+        rowSizes = GetRowSizes();
+    }
+
     if ( m_created )
     {
         // stop all processing
@@ -3128,8 +3142,8 @@ wxGrid::SetTable(wxGridTableBase *table,
 
     if (table)
     {
-        m_numRows = table->GetNumberRows();
-        m_numCols = table->GetNumberCols();
+        m_numRows = newNumRows;
+        m_numCols = newNumCols;
 
         m_table = table;
         m_table->SetView( this );
@@ -3144,6 +3158,12 @@ wxGrid::SetTable(wxGridTableBase *table,
         CalcDimensions();
 
         m_created = true;
+
+        if ( restoreSizes )
+        {
+            SetColSizes(colSizes);
+            SetRowSizes(rowSizes);
+        }
     }
 
     InvalidateBestSize();
