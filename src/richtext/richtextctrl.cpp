@@ -4,6 +4,7 @@
 // Author:      Julian Smart
 // Created:     2005-09-30
 // Copyright:   (c) Julian Smart
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -2314,7 +2315,7 @@ bool wxRichTextCtrl::MoveDown(int noLines, int flags)
         if (lineObj)
         {
             pt.y = lineObj->GetAbsolutePosition().y + 2;
-            if (lineObj->GetRange().GetStart() == lineObj->GetRange().GetEnd())
+            if ( lineObj->GetRange().GetLength() == 0 )
                 lineIsEmpty = true;
         }
         else
