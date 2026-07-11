@@ -5,6 +5,7 @@
 // Modified by: Robin Dunn, Vadim Zeitlin, Santiago Palacios
 // Created:     1/08/1999
 // Copyright:   (c) Michael Bedward (mbedward@ozemail.com.au)
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -10861,11 +10862,23 @@ wxGrid::AutoSizeColOrRow(int colOrRow, bool setAsMin, wxGridDirection direction)
 
         if ( renderer )
         {
-            extent = column
-                        ? renderer->GetBestWidth(*this, *attr, dc, row, col,
-                                                 GetRowHeight(row))
-                        : renderer->GetBestHeight(*this, *attr, dc, row, col,
-                                                  GetColWidth(col));
+            int availableExtent = 0;
+            if ( column )
+            {
+                for ( int n = 0; n < numRows; n++ )
+                    availableExtent += GetRowHeight(row + n);
+
+                extent = renderer->GetBestWidth(*this, *attr, dc, row, col,
+                                                availableExtent);
+            }
+            else
+            {
+                for ( int n = 0; n < numCols; n++ )
+                    availableExtent += GetColWidth(col + n);
+
+                extent = renderer->GetBestHeight(*this, *attr, dc, row, col,
+                                                 availableExtent);
+            }
 
             if ( span != CellSpan_None )
             {

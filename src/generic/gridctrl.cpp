@@ -4,6 +4,7 @@
 // Author:      Paul Gammans, Roger Gammans
 // Created:     11/04/2001
 // Copyright:   (c) The Computer Surgery (paul@compsurg.co.uk)
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -537,6 +538,8 @@ wxGridCellAutoWrapStringRenderer::GetBestSize(wxGrid& grid,
                                               wxDC& dc,
                                               int row, int col)
 {
+    dc.SetFont(attr.GetFont());
+
     // We have to make a choice here and fix either width or height because we
     // don't have any naturally best size. This choice is mostly arbitrary, but
     // we need to be consistent about it, otherwise wxGrid auto-sizing code
@@ -556,6 +559,8 @@ wxGridCellAutoWrapStringRenderer::GetBestHeight(wxGrid& grid,
                                                 int row, int col,
                                                 int width)
 {
+    dc.SetFont(attr.GetFont());
+
     const int lineHeight = dc.GetCharHeight();
 
     // Use as many lines as we need for this width and add a small border to
@@ -571,6 +576,8 @@ wxGridCellAutoWrapStringRenderer::GetBestWidth(wxGrid& grid,
                                                int row, int col,
                                                int height)
 {
+    dc.SetFont(attr.GetFont());
+
     const int lineHeight = dc.GetCharHeight();
 
     // Base the maximal number of lines either on how many fit or how many
