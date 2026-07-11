@@ -181,7 +181,7 @@ message log level.
 
 There are some predefined classes deriving from wxLog and which might be
 helpful to see how you can create a new log target class and, of course, may
-also be used without any change. There are:
+also be used without any change. They include:
 
 @li wxLogStderr: This class logs messages to a <tt>FILE *</tt>, using stderr by
     default as its name suggests.
@@ -196,25 +196,36 @@ also be used without any change. There are:
     the log, close it completely or save all messages to file.
 @li wxLogBuffer: This target collects all the logged messages in an internal
     buffer allowing to show them later to the user all at once.
-@li wxLogNull: The last log class is quite particular: it doesn't do anything.
-    The objects of this class may be instantiated to (temporarily) suppress
-    output of @e wxLogXXX() functions. As an example, trying to open a
-    non-existing file will usually provoke an error message, but if for some
-    reasons it is unwanted, just use this construction:
-    @code
-    wxFile file;
 
-    // wxFile.Open() normally complains if file can't be opened, we don't want it
+Creating one of these log target objects doesn't make it active by itself. To
+use a target such as wxLogStderr or wxLogStream, install it with
+wxLog::SetActiveTarget():
+
+@code
+wxLog* const oldLog = wxLog::SetActiveTarget(new wxLogStderr);
+delete oldLog;
+@endcode
+
+wxLogNull is different: it is not a log target and is not installed with
+wxLog::SetActiveTarget(). Instead, objects of this class may be instantiated
+to temporarily suppress output of @e wxLogXXX() functions. As an example,
+trying to open a non-existing file will usually provoke an error message, but
+if for some reasons it is unwanted, just use this construction:
+
+@code
+wxFile file;
+
+// wxFile.Open() normally complains if file can't be opened, we don't want it
+{
+    wxLogNull logNo;
+    if ( !file.Open("bar") )
     {
-        wxLogNull logNo;
-        if ( !file.Open("bar") )
-        {
-            // ... process error ourselves ...
-        }
-    } // ~wxLogNull called, old log sink restored
+        // ... process error ourselves ...
+    }
+} // ~wxLogNull called, old log sink restored
 
-    wxLogMessage("..."); // ok
-    @endcode
+wxLogMessage("..."); // ok
+@endcode
 
 @see @ref group_class_logging "Logging Classes"
 
