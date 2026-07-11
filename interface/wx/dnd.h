@@ -2,6 +2,7 @@
 // Name:        dnd.h
 // Purpose:     interface of wxDropSource and wx*DropTarget
 // Author:      wxWidgets team
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -403,6 +404,11 @@ public:
     /**
         See wxDropTarget::OnDrop(). This function is implemented appropriately
         for files, and calls OnDropFiles().
+
+        @param x
+            The x coordinate of the mouse.
+        @param y
+            The y coordinate of the mouse.
     */
     virtual bool OnDrop(wxCoord x, wxCoord y);
 
