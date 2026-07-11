@@ -4,6 +4,7 @@
 // Author:      Vadim Zeitlin, Robert Roebling
 // Created:     26.05.99
 // Copyright:   (c) wxWidgets Team
+//              (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -378,8 +379,9 @@ public:
     // implement base class pure virtuals
     // ----------------------------------
 
-    // non-MSW platforms need to support wxDF_TEXT in addition to wxDF_UNICODETEXT
-#if defined(wxNEEDS_UTF8_FOR_TEXT_DATAOBJ) || defined(wxNEEDS_UTF16_FOR_TEXT_DATAOBJ)
+    // some platforms need to support wxDF_TEXT in addition to wxDF_UNICODETEXT
+#if defined(wxNEEDS_UTF8_FOR_TEXT_DATAOBJ) || \
+    defined(wxNEEDS_UTF16_FOR_TEXT_DATAOBJ) || defined(__WXMSW__)
     virtual size_t GetFormatCount(Direction WXUNUSED(dir) = Get) const override { return 2; }
     virtual void GetAllFormats(wxDataFormat *formats,
                                wxDataObjectBase::Direction WXUNUSED(dir) = Get) const override
