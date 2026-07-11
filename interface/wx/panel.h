@@ -79,6 +79,11 @@ public:
         and returns @true only if there is no child window in the panel which
         can accept the focus. This is reevaluated each time a child
         window is added or removed from the panel.
+
+        When deriving from wxPanel, overriding this method alone is not enough
+        to remove the panel from keyboard navigation. Override
+        wxWindow::AcceptsFocusFromKeyboard() too if the panel should not
+        receive focus from TAB traversal.
     */
     bool AcceptsFocus() const;
 
