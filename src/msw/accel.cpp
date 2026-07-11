@@ -4,6 +4,7 @@
 // Author:      Julian Smart
 // Created:     04/01/98
 // Copyright:   (c) Julian Smart
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -99,10 +100,16 @@ wxAcceleratorTable::wxAcceleratorTable(int n, const wxAcceleratorEntry entries[]
 
     wxCHECK_RET( n > 0, "Invalid number of accelerator entries" );
 
-    std::vector<ACCEL> arr(n);
+    std::vector<ACCEL> arr;
+    arr.reserve(n);
+
     for ( int i = 0; i < n; i++ )
     {
-        int flags = entries[i].GetFlags();
+        const wxAcceleratorEntry& entry = entries[i];
+        if ( !entry.IsOk() )
+            continue;
+
+        int flags = entry.GetFlags();
 
         BYTE fVirt = FVIRTKEY;
         if ( flags & wxACCEL_ALT )
@@ -112,14 +119,20 @@ wxAcceleratorTable::wxAcceleratorTable(int n, const wxAcceleratorEntry entries[]
         if ( flags & wxACCEL_CTRL )
             fVirt |= FCONTROL;
 
-        WORD key = wxMSWKeyboard::WXToVK(entries[i].GetKeyCode());
+        WORD key = wxMSWKeyboard::WXToVK(entry.GetKeyCode());
 
-        arr[i].fVirt = fVirt;
-        arr[i].key = key;
-        arr[i].cmd = (WORD)entries[i].GetCommand();
+        ACCEL accel;
+        accel.fVirt = fVirt;
+        accel.key = key;
+        accel.cmd = (WORD)entry.GetCommand();
+        arr.push_back(accel);
     }
 
-    const HACCEL hAccel = ::CreateAcceleratorTable(&arr[0], n);
+    if ( arr.empty() )
+        return;
+
+    const HACCEL hAccel =
+        ::CreateAcceleratorTable(&arr[0], static_cast<int>(arr.size()));
     if ( hAccel )
         m_refData = new wxAcceleratorRefData(hAccel);
 }
