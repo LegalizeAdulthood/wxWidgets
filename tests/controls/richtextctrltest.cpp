@@ -4,6 +4,7 @@
 // Author:      Steven Lamerton
 // Created:     2010-07-07
 // Copyright:   (c) 2010 Steven Lamerton
+//              (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "testprec.h"
@@ -20,6 +21,37 @@
 #include "testableframe.h"
 #include "asserthelper.h"
 #include "wx/uiaction.h"
+
+class RefreshCountingRichTextCtrl : public wxRichTextCtrl
+{
+public:
+    RefreshCountingRichTextCtrl(wxWindow* parent)
+        : wxRichTextCtrl(parent, wxID_ANY, "", wxDefaultPosition,
+                         wxSize(400, 200), wxWANTS_CHARS),
+          m_refreshCount(0)
+    {
+    }
+
+    void Refresh(bool eraseBackground = true,
+                 const wxRect *rect = nullptr) override
+    {
+        m_refreshCount++;
+        wxRichTextCtrl::Refresh(eraseBackground, rect);
+    }
+
+    int GetRefreshCount() const
+    {
+        return m_refreshCount;
+    }
+
+    void ResetRefreshCount()
+    {
+        m_refreshCount = 0;
+    }
+
+private:
+    int m_refreshCount;
+};
 
 class RichTextCtrlTestCase : public CppUnit::TestCase
 {
@@ -58,6 +90,7 @@ private:
         CPPUNIT_TEST( FontSize );
         CPPUNIT_TEST( Font );
         CPPUNIT_TEST( Delete );
+        CPPUNIT_TEST( DeleteParagraphEndRefresh );
         CPPUNIT_TEST( Url );
         CPPUNIT_TEST( Table );
     CPPUNIT_TEST_SUITE_END();
@@ -89,6 +122,7 @@ private:
     void FontSize();
     void Font();
     void Delete();
+    void DeleteParagraphEndRefresh();
     void Url();
     void Table();
 
@@ -105,8 +139,7 @@ CPPUNIT_TEST_SUITE_NAMED_REGISTRATION( RichTextCtrlTestCase, "RichTextCtrlTestCa
 
 void RichTextCtrlTestCase::setUp()
 {
-    m_rich = new wxRichTextCtrl(wxTheApp->GetTopWindow(), wxID_ANY, "",
-                                wxDefaultPosition, wxSize(400, 200), wxWANTS_CHARS);
+    m_rich = new RefreshCountingRichTextCtrl(wxTheApp->GetTopWindow());
 }
 
 void RichTextCtrlTestCase::tearDown()
@@ -731,6 +764,28 @@ void RichTextCtrlTestCase::Delete()
     m_rich->Delete(wxRichTextRange(14, 29));
 
     CPPUNIT_ASSERT_EQUAL("long long line", m_rich->GetValue());
+}
+
+void RichTextCtrlTestCase::DeleteParagraphEndRefresh()
+{
+    RefreshCountingRichTextCtrl* const rich =
+        static_cast<RefreshCountingRichTextCtrl*>(m_rich);
+
+    m_rich->AddParagraph("first paragraph");
+    const wxRichTextRange range = m_rich->AddParagraph("second paragraph");
+    m_rich->AddParagraph("third paragraph");
+
+    rich->ResetRefreshCount();
+
+    m_rich->SetSelection(range.GetStart(), range.GetEnd() + 1);
+    CPPUNIT_ASSERT( m_rich->HasSelection() );
+
+    m_rich->DeleteSelectedContent();
+
+    CPPUNIT_ASSERT( rich->GetRefreshCount() > 0 );
+    CPPUNIT_ASSERT( m_rich->GetValue().Contains("first paragraph") );
+    CPPUNIT_ASSERT( !m_rich->GetValue().Contains("second paragraph") );
+    CPPUNIT_ASSERT( m_rich->GetValue().Contains("third paragraph") );
 }
 
 void RichTextCtrlTestCase::Url()
