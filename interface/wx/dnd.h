@@ -403,6 +403,11 @@ public:
     /**
         See wxDropTarget::OnDrop(). This function is implemented appropriately
         for files, and calls OnDropFiles().
+
+        @param x
+            The x coordinate of the mouse.
+        @param y
+            The y coordinate of the mouse.
     */
     virtual bool OnDrop(wxCoord x, wxCoord y);
 
