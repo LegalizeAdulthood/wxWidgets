@@ -4,6 +4,7 @@
 // Author:      Sebastian Walderich
 // Created:     2018-12-19
 // Copyright:   (c) 2018 Sebastian Walderich
+// Copyright:   (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -48,6 +49,26 @@ public:
 
 protected:
     wxAuiNotebook* const nb;
+};
+
+class TestAuiTabCtrl : public wxAuiTabCtrl
+{
+public:
+    explicit TestAuiTabCtrl(wxAuiNotebook* parent)
+        : wxAuiTabCtrl(parent, wxID_ANY)
+    {
+        SetRect(wxRect(0, 0, 20, 20));
+        AddButton(wxAUI_BUTTON_RIGHT, wxRIGHT);
+        m_buttons.back().rect = wxRect(5, 5, 10, 10);
+    }
+
+    void LeftDClickButton()
+    {
+        wxMouseEvent event(wxEVT_LEFT_DCLICK);
+        event.SetPosition(m_buttons.back().rect.GetPosition() + wxPoint(1, 1));
+
+        OnLeftDClick(event);
+    }
 };
 
 // ----------------------------------------------------------------------------
@@ -344,6 +365,15 @@ TEST_CASE_METHOD(AuiNotebookTestCase, "wxAuiNotebook::Layout", "[aui]")
     CHECK( nb->GetPageKind(2) == wxAuiTabKind::Normal );
     CHECK( nb->GetPageKind(3) == wxAuiTabKind::Normal );
     CHECK( nb->GetPageKind(4) == wxAuiTabKind::Locked );
+}
+
+TEST_CASE_METHOD(AuiNotebookTestCase, "wxAuiNotebook::ScrollButtonDClick", "[aui]")
+{
+    TestAuiTabCtrl tabCtrl(nb);
+
+    tabCtrl.LeftDClickButton();
+
+    CHECK( tabCtrl.GetTabOffset() == 1 );
 }
 
 TEST_CASE("wxAuiToolBar::Items", "[aui][toolbar]")
