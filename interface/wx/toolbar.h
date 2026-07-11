@@ -73,13 +73,19 @@ enum
     popped up when the mouse pointer enters the tool and the long help string
     for the applications status bar.
 
-    Notice that the toolbar can @e not be modified by changing its tools via
-    the (intentionally undocumented here) setter methods of this class, all the
-    modifications must be done using the methods of wxToolBar itself.
+    Notice that changing the state stored in this object doesn't update a
+    realized toolbar. All visible modifications must be done using the methods
+    of wxToolBar itself.
 */
 class wxToolBarToolBase : public wxObject
 {
 public:
+    /**
+        Constructor for a toolbar button or separator.
+
+        Applications normally obtain tool objects from wxToolBar::AddTool()
+        instead of constructing them directly.
+     */
     wxToolBarToolBase(wxToolBarBase *tbar = nullptr,
                       int toolid = wxID_SEPARATOR,
                       const wxString& label = wxEmptyString,
@@ -90,26 +96,102 @@ public:
                       const wxString& shortHelpString = wxEmptyString,
                       const wxString& longHelpString = wxEmptyString);
 
+    /**
+        Constructor for a toolbar control.
+
+        Applications normally obtain control tools from
+        wxToolBar::AddControl() instead of constructing them directly.
+     */
     wxToolBarToolBase(wxToolBarBase *tbar,
                       wxControl *control,
                       const wxString& label);
 
+    /**
+        Return the tool id.
+
+        Separators have wxID_SEPARATOR as their id.
+     */
     int GetId() const;
 
+    /**
+        Return the control associated with this tool.
+
+        This method can only be used with tools for which IsControl() returns
+        true.
+     */
     wxControl *GetControl() const;
+
+    /**
+        Return the toolbar containing this tool, or @NULL if the tool isn't
+        attached to any toolbar.
+     */
     wxToolBarBase *GetToolBar() const;
 
+    /**
+        Return true if this separator occupies all available space.
+     */
     bool IsStretchable() const;
+
+    /**
+        Return true if this tool is a normal toolbar button.
+     */
     bool IsButton() const;
+
+    /**
+        Return true if this tool contains a control.
+     */
     bool IsControl() const;
+
+    /**
+        Return true if this tool is a separator.
+     */
     bool IsSeparator() const;
+
+    /**
+        Return true if this tool is a stretchable separator.
+     */
     bool IsStretchableSpace() const;
+
+    /**
+        Return the toolbar tool style.
+
+        The returned value is one of wxTOOL_STYLE_BUTTON,
+        wxTOOL_STYLE_SEPARATOR or wxTOOL_STYLE_CONTROL.
+     */
     int GetStyle() const;
+
+    /**
+        Return the button kind.
+
+        This method can only be used with tools for which IsButton() returns
+        true.
+     */
     wxItemKind GetKind() const;
+
+    /**
+        Make a separator stretchable.
+
+        This method can only be used with tools for which IsSeparator()
+        returns true. Use wxToolBar::AddStretchableSpace() when adding new
+        stretchable separators to a toolbar.
+     */
     void MakeStretchable();
 
+    /**
+        Return true if the tool is enabled.
+     */
     bool IsEnabled() const;
+
+    /**
+        Return true if the tool is toggled.
+     */
     bool IsToggled() const;
+
+    /**
+        Return true if this tool can be toggled.
+
+        This is true for wxITEM_CHECK and wxITEM_RADIO tools.
+     */
     bool CanBeToggled() const;
 
     /**
@@ -132,32 +214,148 @@ public:
      */
     wxBitmapBundle GetDisabledBitmapBundle() const;
 
+    /**
+        Return the bitmap shown for the normal tool state.
+     */
     wxBitmap GetNormalBitmap() const;
+
+    /**
+        Return the bitmap shown for the disabled tool state.
+     */
     wxBitmap GetDisabledBitmap() const;
 
+    /**
+        Return the bitmap appropriate for the current enabled state.
+     */
     wxBitmap GetBitmap() const;
+
+    /**
+        Return the tool label.
+     */
     const wxString& GetLabel() const;
 
+    /**
+        Return the short help string, used for the tooltip by default.
+     */
     const wxString& GetShortHelp() const;
+
+    /**
+        Return the long help string, used for the status bar by default.
+     */
     const wxString& GetLongHelp() const;
 
+    /**
+        Return the client data associated with this tool.
+
+        For control tools, this returns the client data of the control itself.
+     */
     wxObject *GetClientData() const;
 
+    /**
+        Change the enabled state stored in this tool object.
+
+        Return true if the state changed. This doesn't update a realized
+        toolbar, use wxToolBar::EnableTool() for visible toolbar changes.
+     */
     bool Enable(bool enable);
+
+    /**
+        Change the toggled state stored in this tool object.
+
+        Return true if the state changed. This doesn't update a realized
+        toolbar, use wxToolBar::ToggleTool() for visible toolbar changes.
+     */
     bool Toggle(bool toggle);
+
+    /**
+        Set the toggled state stored in this tool object.
+
+        This is the same as Toggle(bool).
+     */
     bool SetToggle(bool toggle);
+
+    /**
+        Change the short help string stored in this tool object.
+
+        Return true if the value changed. This doesn't update a realized
+        toolbar, use wxToolBar::SetToolShortHelp() for visible toolbar
+        changes.
+     */
     bool SetShortHelp(const wxString& help);
+
+    /**
+        Change the long help string stored in this tool object.
+
+        Return true if the value changed. This doesn't update a realized
+        toolbar, use wxToolBar::SetToolLongHelp() for visible toolbar changes.
+     */
     bool SetLongHelp(const wxString& help);
+
+    /**
+        Toggle the state stored in this tool object.
+
+        This doesn't update a realized toolbar, use wxToolBar::ToggleTool()
+        for visible toolbar changes.
+     */
     void Toggle();
+
+    /**
+        Change the normal bitmap stored in this tool object.
+
+        This doesn't update a realized toolbar, use
+        wxToolBar::SetToolNormalBitmap() for visible toolbar changes.
+     */
     void SetNormalBitmap(const wxBitmapBundle& bmp);
+
+    /**
+        Change the disabled bitmap stored in this tool object.
+
+        This doesn't update a realized toolbar, use
+        wxToolBar::SetToolDisabledBitmap() for visible toolbar changes.
+     */
     void SetDisabledBitmap(const wxBitmapBundle& bmp);
+
+    /**
+        Change the label stored in this tool object.
+
+        This doesn't update a realized toolbar, use wxToolBar methods for
+        visible toolbar changes.
+     */
     void SetLabel(const wxString& label);
+
+    /**
+        Change the client data associated with this tool.
+
+        For control tools, this changes the client data of the control itself.
+     */
     void SetClientData(wxObject *clientData);
 
+    /**
+        Detach this tool from its toolbar.
+
+        This method is intended for wxToolBar implementations.
+     */
     void Detach();
+
+    /**
+        Attach this tool to the specified toolbar.
+
+        This method is intended for wxToolBar implementations.
+     */
     void Attach(wxToolBarBase *tbar);
 
+    /**
+        Set the menu associated with this dropdown tool.
+
+        This method is only meaningful for wxITEM_DROPDOWN tools. Applications
+        should normally call wxToolBar::SetDropdownMenu().
+     */
     void SetDropdownMenu(wxMenu *menu);
+
+    /**
+        Return the menu associated with this dropdown tool, or @NULL if there
+        is none.
+     */
     wxMenu *GetDropdownMenu() const;
 };
 
@@ -183,8 +381,8 @@ public:
     toolbar item, providing access to its id and position within the toolbar.
     Changes to the item's state should be made through calls to wxToolBar methods,
     for example wxToolBar::EnableTool.
-    Calls to @c wxToolBarToolBase methods (undocumented by purpose) will not change
-    the visible state of the item within the tool bar.
+    Calls to mutating @c wxToolBarToolBase methods will not change the visible
+    state of the item within the tool bar.
 
     After you have added all the tools you need, you must call Realize() to
     effectively construct and display the toolbar.
