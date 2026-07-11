@@ -42,6 +42,7 @@ private:
         CPPUNIT_TEST( CutCopyPaste );
         CPPUNIT_TEST( UndoRedo );
         CPPUNIT_TEST( CaretPosition );
+        CPPUNIT_TEST( MoveDownToSingleCharacterLine );
         CPPUNIT_TEST( Selection );
         WXUISIM_TEST( Editable );
         CPPUNIT_TEST( Range );
@@ -73,6 +74,7 @@ private:
     void CutCopyPaste();
     void UndoRedo();
     void CaretPosition();
+    void MoveDownToSingleCharacterLine();
     void Selection();
     void Editable();
     void Range();
@@ -369,6 +371,19 @@ void RichTextCtrlTestCase::CaretPosition()
     m_rich->MoveToLineEnd();
 
     CPPUNIT_ASSERT_EQUAL(21, m_rich->GetCaretPosition());
+}
+
+void RichTextCtrlTestCase::MoveDownToSingleCharacterLine()
+{
+    m_rich->SetValue("This line contains several characters.\nX");
+
+    m_rich->SetInsertionPointEnd();
+    const long endOfSingleCharacterLine = m_rich->GetCaretPosition();
+
+    m_rich->SetInsertionPoint(10);
+    CPPUNIT_ASSERT(m_rich->MoveDown());
+
+    CPPUNIT_ASSERT_EQUAL(endOfSingleCharacterLine, m_rich->GetCaretPosition());
 }
 
 void RichTextCtrlTestCase::Selection()
