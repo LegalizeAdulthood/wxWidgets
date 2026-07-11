@@ -2314,7 +2314,7 @@ bool wxRichTextCtrl::MoveDown(int noLines, int flags)
         if (lineObj)
         {
             pt.y = lineObj->GetAbsolutePosition().y + 2;
-            if (lineObj->GetRange().GetStart() == lineObj->GetRange().GetEnd())
+            if ( lineObj->GetRange().GetLength() == 0 )
                 lineIsEmpty = true;
         }
         else
