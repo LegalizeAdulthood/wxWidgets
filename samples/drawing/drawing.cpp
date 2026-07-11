@@ -4,6 +4,7 @@
 // Author:      Robert Roebling
 // Created:     04/01/98
 // Copyright:   (c) Robert Roebling
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -189,6 +190,10 @@ protected:
     bool StopRubberBanding();
 
 private:
+#if wxUSE_GRAPHICS_CONTEXT
+    bool ShouldUseGraphicRenderer() const;
+#endif
+
     MyFrame *m_owner;
 
     int          m_show;
@@ -2137,6 +2142,25 @@ wxSize MyCanvas::GetDIPDrawingSize() const
     return m_sizeDIP;
 }
 
+#if wxUSE_GRAPHICS_CONTEXT
+bool MyCanvas::ShouldUseGraphicRenderer() const
+{
+    if ( !m_renderer )
+        return false;
+
+    switch ( m_show )
+    {
+        case File_ShowMask:
+        case File_ShowMaskStretch:
+        case File_ShowOps:
+            return false;
+
+        default:
+            return true;
+    }
+}
+#endif // wxUSE_GRAPHICS_CONTEXT
+
 void MyCanvas::OnPaint(wxPaintEvent &WXUNUSED(event))
 {
     if ( m_useBuffer )
@@ -2156,7 +2180,8 @@ void MyCanvas::Draw(wxDC& pdc)
 #if wxUSE_GRAPHICS_CONTEXT
     wxGCDC gdc;
 
-    if ( m_renderer )
+    const bool useGraphicRenderer = ShouldUseGraphicRenderer();
+    if ( useGraphicRenderer )
     {
         wxGraphicsContext* context;
         if ( wxPaintDC *paintdc = wxDynamicCast(&pdc, wxPaintDC) )
@@ -2191,7 +2216,7 @@ void MyCanvas::Draw(wxDC& pdc)
         gdc.SetGraphicsContext(context);
     }
 
-    wxDC &dc = m_renderer ? static_cast<wxDC&>(gdc) : pdc;
+    wxDC &dc = useGraphicRenderer ? static_cast<wxDC&>(gdc) : pdc;
 #else
     wxDC &dc = pdc ;
 #endif
