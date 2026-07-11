@@ -5,6 +5,7 @@
 // Modified by: Bo Yang
 // Created:     08.01.06
 // Copyright:   (c) Robert Roebling
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -1159,16 +1160,32 @@ public:
     int ItemToRow(const wxDataViewItem &item) const
         { return item.IsOk() ? (int)GetStore()->GetRow(item) : wxNOT_FOUND; }
     wxDataViewItem RowToItem(int row) const
-        { return row == wxNOT_FOUND ? wxDataViewItem() : GetStore()->GetItem(row); }
+    {
+        if ( row < 0 )
+            return wxDataViewItem();
+
+        unsigned int urow = static_cast<unsigned int>(row);
+        return urow < GetStore()->GetItemCount() ? GetStore()->GetItem(urow)
+                                                 : wxDataViewItem();
+    }
 
     int GetSelectedRow() const
         { return ItemToRow(GetSelection()); }
     void SelectRow(unsigned row)
-        { Select(RowToItem(row)); }
+    {
+        if ( row < GetStore()->GetItemCount() )
+            Select(GetStore()->GetItem(row));
+    }
     void UnselectRow(unsigned row)
-        { Unselect(RowToItem(row)); }
+    {
+        if ( row < GetStore()->GetItemCount() )
+            Unselect(GetStore()->GetItem(row));
+    }
     bool IsRowSelected(unsigned row) const
-        { return IsSelected(RowToItem(row)); }
+    {
+        return row < GetStore()->GetItemCount() &&
+               IsSelected(GetStore()->GetItem(row));
+    }
 
     bool AppendColumn( wxDataViewColumn *column, const wxString &varianttype );
     bool PrependColumn( wxDataViewColumn *column, const wxString &varianttype );

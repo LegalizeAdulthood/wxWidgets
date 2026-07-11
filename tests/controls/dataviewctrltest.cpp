@@ -4,6 +4,7 @@
 // Author:      Vaclav Slavik
 // Created:     2011-08-08
 // Copyright:   (c) 2011 Vaclav Slavik <vslavik@gmail.com>
+// Copyright:   (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -859,6 +860,33 @@ TEST_CASE_METHOD(MultiColumnsDataViewCtrlTestCase,
     const int lastColumnMinWidth = lastColumnMaxWidth - 10;
     CHECK( m_lastColumn->GetWidth() <= lastColumnMaxWidth );
     CHECK( m_lastColumn->GetWidth() >= lastColumnMinWidth );
+}
+
+TEST_CASE_METHOD(MultiColumnsDataViewCtrlTestCase,
+                 "wxDVC::InvalidListRows",
+                 "[wxDataViewCtrl][selection]")
+{
+    CHECK( m_dvc->GetItemCount() == 0 );
+
+    CHECK( !m_dvc->RowToItem(0).IsOk() );
+    CHECK( !m_dvc->IsRowSelected(0) );
+    m_dvc->SelectRow(0);
+    CHECK( m_dvc->GetSelectedRow() == wxNOT_FOUND );
+    m_dvc->UnselectRow(0);
+    CHECK( m_dvc->GetSelectedRow() == wxNOT_FOUND );
+
+    wxVector<wxVariant> values;
+    values.push_back("first");
+    values.push_back("second");
+    m_dvc->AppendItem(values);
+
+    CHECK( m_dvc->GetItemCount() == 1 );
+    CHECK( !m_dvc->RowToItem(1).IsOk() );
+    CHECK( !m_dvc->IsRowSelected(1) );
+    m_dvc->SelectRow(1);
+    CHECK( m_dvc->GetSelectedRow() == wxNOT_FOUND );
+    m_dvc->UnselectRow(1);
+    CHECK( m_dvc->GetSelectedRow() == wxNOT_FOUND );
 }
 
 #if wxUSE_UIACTIONSIMULATOR
