@@ -484,6 +484,11 @@ public:
         indicate that while this control can, in principle, have focus if the user
         clicks it with the mouse, it shouldn't be included in the TAB traversal chain
         when using the keyboard.
+
+        Notice that some container windows, notably wxPanel, override this
+        method independently from AcceptsFocus(). When deriving from such
+        classes, override this method too if the window should be skipped by
+        keyboard navigation.
     */
     virtual bool AcceptsFocusFromKeyboard() const;
 
