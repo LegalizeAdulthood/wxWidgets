@@ -4,6 +4,7 @@
 // Author:      Vadim Zeitlin
 // Created:     2011-08-27
 // Copyright:   (c) 2011 Vadim Zeitlin <vadim@wxwidgets.org>
+// Copyright:   (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -16,6 +17,8 @@
 
 
 #include "wx/treelist.h"
+
+#include "wx/dataview.h"
 
 #include "wx/app.h"
 
@@ -33,6 +36,7 @@ public:
 
 private:
     CPPUNIT_TEST_SUITE( TreeListCtrlTestCase );
+        CPPUNIT_TEST( InitialSize );
         CPPUNIT_TEST( Traversal );
         CPPUNIT_TEST( ItemText );
         CPPUNIT_TEST( ItemCheck );
@@ -49,6 +53,7 @@ private:
 
 
     // Tests:
+    void InitialSize();
     void Traversal();
     void ItemText();
     void ItemCheck();
@@ -145,6 +150,17 @@ void TreeListCtrlTestCase::tearDown()
 // ----------------------------------------------------------------------------
 // the tests themselves
 // ----------------------------------------------------------------------------
+
+void TreeListCtrlTestCase::InitialSize()
+{
+    const wxSize size = m_treelist->GetClientSize();
+
+    CPPUNIT_ASSERT( m_treelist->GetDataView()->GetSize() == size );
+    CPPUNIT_ASSERT( m_treelist->GetView()->GetSize().GetWidth() >
+                    size.GetWidth() / 2 );
+    CPPUNIT_ASSERT( m_treelist->GetView()->GetSize().GetHeight() >
+                    size.GetHeight() / 2 );
+}
 
 // Test various tree traversal methods.
 void TreeListCtrlTestCase::Traversal()

@@ -4,6 +4,7 @@
 // Author:      Vadim Zeitlin
 // Created:     2011-08-19
 // Copyright:   (c) 2011 Vadim Zeitlin <vadim@wxwidgets.org>
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -849,6 +850,10 @@ bool wxTreeListCtrl::Create(wxWindow* parent,
     // Set up the model for wxDataViewCtrl.
     m_model = new wxTreeListModel(this);
     m_view->AssociateModel(m_model);
+
+    // Ensure that the embedded control is laid out even if no external size
+    // event is sent to this composite control, e.g. when it has no sizer.
+    m_view->SetSize(GetClientRect(), wxSIZE_FORCE_EVENT);
 
     return true;
 }
