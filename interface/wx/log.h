@@ -831,6 +831,9 @@ public:
 
     This class can be used to redirect the log messages to a C++ stream.
 
+    Constructing an object of this class doesn't make it the active log
+    target, use wxLog::SetActiveTarget() to do it.
+
     @note
         This class is not available if `wxUSE_STD_IOSTREAM` is set to 0 (which
         is done by `--disable-std_iostreams` option when using configure).
@@ -876,6 +879,9 @@ public:
 
     It is the default log target for the non-GUI wxWidgets applications which
     send all the output to @c stderr.
+
+    Constructing an object of this class doesn't make it the active log
+    target, use wxLog::SetActiveTarget() to do it.
 
     @library{wxbase}
     @category{logging}
@@ -1027,6 +1033,11 @@ public:
 
     This class allows you to temporarily suspend logging. All calls to the log
     functions during the life time of an object of this class are just ignored.
+
+    Unlike wxLogStderr, wxLogStream and the other classes deriving from wxLog,
+    this class is not a log target and is not used with
+    wxLog::SetActiveTarget(). Instead, it suppresses logging while the
+    wxLogNull object exists.
 
     In particular, it can be used to suppress the log messages given by wxWidgets
     itself but it should be noted that it is rarely the best way to cope with this
