@@ -4,6 +4,7 @@
 // Author:      Vadim Zeitlin
 // Created:     2008-09-22
 // Copyright:   (c) 2008 Vadim Zeitlin
+//              (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -82,6 +83,37 @@ TEST_CASE("GUI::TextDataObject", "[guifuncs][clipboard]")
     REQUIRE( wxTheClipboard->GetData(dobj2) );
     CHECK( dobj2.GetText() == text );
 }
+
+#ifdef __WXMSW__
+TEST_CASE("GUI::TextDataObject::TextFormat", "[guifuncs][dataobj]")
+{
+    const wxString expected("Hello ANSI text!");
+    const wxCharBuffer text(expected.mb_str(wxConvLocal));
+    wxTextDataObject dobj;
+
+    CHECK( dobj.GetFormatCount(wxDataObject::Set) == 2 );
+
+    wxDataFormat formats[2];
+    dobj.GetAllFormats(formats, wxDataObject::Set);
+    CHECK( formats[0] == wxDF_UNICODETEXT );
+    CHECK( formats[1] == wxDF_TEXT );
+
+    CHECK( dobj.IsSupported(wxDF_TEXT, wxDataObject::Set) );
+    CHECK( dobj.IsSupported(wxDF_TEXT, wxDataObject::Get) );
+
+    REQUIRE( dobj.SetData(wxDF_TEXT, text.length() + 1, text) );
+    CHECK( dobj.GetText() == expected );
+
+    const size_t size = dobj.GetDataSize(wxDF_TEXT);
+    REQUIRE( size > 0 );
+
+    wxCharBuffer buf(size);
+    REQUIRE( dobj.GetDataHere(wxDF_TEXT, buf.data()) );
+
+    CHECK( wxString(buf.data(), wxConvLocal) == expected );
+    CHECK( buf.data()[size - 1] == '\0' );
+}
+#endif // __WXMSW__
 
 TEST_CASE("GUI::URLDataObject", "[guifuncs][clipboard]")
 {
