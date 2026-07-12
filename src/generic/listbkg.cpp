@@ -4,6 +4,7 @@
 // Author:      Vadim Zeitlin
 // Created:     19.08.03
 // Copyright:   (c) 2003 Vadim Zeitlin <vadim@wxwidgets.org>
+//              (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -142,6 +143,16 @@ long wxListbook::GetListCtrlFlags(bool hasImages) const
     return flags | wxLC_SINGLE_SEL;
 }
 
+static void wxListbookUpdateColumnWidth(wxListView *list)
+{
+#ifdef __WXMSW__
+    if ( list->InReportView() )
+        list->SetColumnWidth(0, wxLIST_AUTOSIZE);
+#else
+    wxUnusedVar(list);
+#endif
+}
+
 // ----------------------------------------------------------------------------
 // wxListbook geometry management
 // ----------------------------------------------------------------------------
@@ -220,6 +231,7 @@ void wxListbook::UpdateSize()
 bool wxListbook::SetPageText(size_t n, const wxString& strText)
 {
     GetListView()->SetItemText(n, RemoveMnemonics(strText));
+    wxListbookUpdateColumnWidth(GetListView());
 
     return true;
 }
@@ -283,6 +295,8 @@ void wxListbook::OnImagesChanged()
         list->SetNormalImages(images);
     else
         list->SetImageList(GetImageList(), wxIMAGE_LIST_NORMAL);
+
+    wxListbookUpdateColumnWidth(list);
 }
 
 // ----------------------------------------------------------------------------
@@ -321,6 +335,7 @@ wxListbook::InsertPage(size_t n,
         return false;
 
     GetListView()->InsertItem(n, RemoveMnemonics(text), imageId);
+    wxListbookUpdateColumnWidth(GetListView());
 
     // if the inserted page is before the selected one, we must update the
     // index of the selected page
@@ -347,6 +362,7 @@ wxWindow *wxListbook::DoRemovePage(size_t page)
     if ( win )
     {
         GetListView()->DeleteItem(page);
+        wxListbookUpdateColumnWidth(GetListView());
 
         DoSetSelectionAfterRemoval(page);
 
