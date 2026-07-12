@@ -41,6 +41,46 @@ protected:
     wxDECLARE_NO_COPY_CLASS(RichTextCtrlTestCase);
 };
 
+class RefreshRecordingRichTextCtrl : public wxRichTextCtrl
+{
+public:
+    RefreshRecordingRichTextCtrl() : m_hasRefreshRect(false)
+    {
+    }
+
+    void ClearRefreshRecord()
+    {
+        m_hasRefreshRect = false;
+        m_refreshRect = wxRect();
+    }
+
+    bool HasRefreshRect() const
+    {
+        return m_hasRefreshRect;
+    }
+    wxRect GetRefreshRect() const
+    {
+        return m_refreshRect;
+    }
+
+    virtual void Refresh(bool eraseBackground = true,
+                         const wxRect *rect = nullptr) override
+    {
+        if ( rect )
+        {
+            m_hasRefreshRect = true;
+            m_refreshRect = *rect;
+        }
+
+        wxRichTextCtrl::Refresh(eraseBackground, rect);
+    }
+private:
+    bool m_hasRefreshRect;
+    wxRect m_refreshRect;
+
+    wxDECLARE_NO_COPY_CLASS(RefreshRecordingRichTextCtrl);
+};
+
 #if wxUSE_CLIPBOARD && wxUSE_DATAOBJ && !defined(__WXOSX__)
 
 namespace
@@ -569,6 +609,35 @@ TEST_CASE_METHOD(RichTextCtrlTestCase, "RichTextCtrl::Underline",
     m_rich->SetSelection(40, 45);
 
     CHECK(!m_rich->IsSelectionUnderlined());
+}
+
+TEST_CASE_METHOD(RichTextCtrlTestCase,
+                 "RichTextCtrl::UnderlineSelectionRefresh",
+                 "[richtextctrl]")
+{
+    std::unique_ptr<RefreshRecordingRichTextCtrl> rich =
+        make_unique<RefreshRecordingRichTextCtrl>();
+    REQUIRE( rich->Create(wxTheApp->GetTopWindow(), wxID_ANY, "",
+                          wxDefaultPosition, wxSize(400, 200), wxWANTS_CHARS) );
+
+    rich->SetValue("text to underline");
+    rich->SetSelection(8, 17);
+    REQUIRE( rich->ApplyUnderlineToSelection() );
+
+    wxRichTextLine* const line = rich->GetFocusObject()->GetLineAtPosition(8);
+    REQUIRE(line);
+
+    const wxPoint linePos = rich->GetPhysicalPoint(
+        rich->GetScaledPoint(line->GetAbsolutePosition()));
+    const int lineHeight = (int) (0.5 + line->GetSize().y * rich->GetScale());
+
+    rich->ClearRefreshRecord();
+    rich->SelectNone();
+
+    REQUIRE( rich->HasRefreshRect() );
+    const wxRect rect = rich->GetRefreshRect();
+    CHECK( rect.GetTop() < linePos.y );
+    CHECK( rect.GetBottom() > linePos.y + lineHeight - 1 );
 }
 
 TEST_CASE_METHOD(RichTextCtrlTestCase, "RichTextCtrl::Indent",
