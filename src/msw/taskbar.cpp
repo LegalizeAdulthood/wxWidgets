@@ -6,6 +6,7 @@
 // Modified by: Vaclav Slavik
 // Created:     24/3/98
 // Copyright:   (c)
+//              (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////
 
@@ -382,6 +383,10 @@ long wxTaskBarIcon::WindowProc(unsigned int msg,
 
         case WM_RBUTTONUP:
             eventType = wxEVT_TASKBAR_RIGHT_UP;
+            break;
+
+        case WM_CONTEXTMENU:
+            eventType = wxEVT_TASKBAR_CLICK;
             break;
 
         case WM_LBUTTONDBLCLK:
