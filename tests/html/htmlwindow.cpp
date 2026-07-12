@@ -4,6 +4,7 @@
 // Author:      Vaclav Slavik
 // Created:     2008-10-15
 // Copyright:   (c) 2008 Vaclav Slavik <vslavik@fastmail.fm>
+//              (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -44,6 +45,7 @@ private:
         WXUISIM_TEST( LinkClick );
 #endif // wxUSE_UIACTIONSIMULATOR
         CPPUNIT_TEST( AppendToPage );
+        CPPUNIT_TEST( TableCellPadding );
     CPPUNIT_TEST_SUITE_END();
 
     void SelectionToText();
@@ -51,6 +53,7 @@ private:
     void CellClick();
     void LinkClick();
     void AppendToPage();
+    void TableCellPadding();
 
     wxHtmlWindow *m_win;
 
@@ -98,6 +101,51 @@ static const char *TEST_MARKUP_LINK =
 
 static const char *TEST_PLAIN_TEXT =
     "Title\nA longer line\nand the last line.";
+
+static const char *TEST_MARKUP_TABLE_PADDING =
+    "<html><body>"
+    "<table border=\"4\" cellpadding=\"0\" cellspacing=\"1\">"
+    "<tr><td id=\"cell\">Text</td></tr>"
+    "</table>"
+    "</body></html>";
+
+static wxHtmlCell *FindCellById(wxHtmlCell *cell, const wxString& id)
+{
+    if ( !cell )
+        return nullptr;
+
+    if ( cell->GetId() == id )
+        return cell;
+
+    for ( wxHtmlCell *child = cell->GetFirstChild(); child;
+          child = child->GetNext() )
+    {
+        wxHtmlCell *found = FindCellById(child, id);
+        if ( found )
+            return found;
+    }
+
+    return nullptr;
+}
+
+static wxHtmlCell *FindFirstTerminal(wxHtmlCell *cell)
+{
+    if ( !cell )
+        return nullptr;
+
+    if ( cell->IsTerminalCell() )
+        return cell;
+
+    for ( wxHtmlCell *child = cell->GetFirstChild(); child;
+          child = child->GetNext() )
+    {
+        wxHtmlCell *found = FindFirstTerminal(child);
+        if ( found )
+            return found;
+    }
+
+    return nullptr;
+}
 
 void HtmlWindowTestCase::SelectionToText()
 {
@@ -164,6 +212,23 @@ void HtmlWindowTestCase::AppendToPage()
 
     CPPUNIT_ASSERT_EQUAL("link A new paragraph", m_win->ToText());
 #endif // wxUSE_CLIPBOARD
+}
+
+void HtmlWindowTestCase::TableCellPadding()
+{
+    m_win->SetPage(TEST_MARKUP_TABLE_PADDING);
+
+    wxHtmlCell * const cell =
+        FindCellById(m_win->GetInternalRepresentation(), "cell");
+    CPPUNIT_ASSERT(cell);
+
+    wxHtmlCell * const text = FindFirstTerminal(cell);
+    CPPUNIT_ASSERT(text);
+
+    const wxPoint textPos = text->GetAbsPos(cell);
+
+    CPPUNIT_ASSERT(textPos.x > 0);
+    CPPUNIT_ASSERT(textPos.y > 0);
 }
 
 #endif //wxUSE_HTML
