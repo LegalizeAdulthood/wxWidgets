@@ -26,6 +26,7 @@ wxRichTextCtrlXmlHandler::wxRichTextCtrlXmlHandler() : wxXmlResourceHandler()
     XRC_ADD_STYLE(wxTE_READONLY);
 
     XRC_ADD_STYLE(wxRE_CENTRE_CARET);
+    XRC_ADD_STYLE(wxRE_MULTILINE);
     XRC_ADD_STYLE(wxRE_READONLY);
 
     AddWindowStyles();
