@@ -3,6 +3,7 @@
 // Purpose:     wxANIDecoder, ANI reader for wxImage and wxAnimation
 // Author:      Francesco Montorsi
 // Copyright:   (c) Francesco Montorsi
+//              (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -10,7 +11,7 @@
 #include "wx/wxprec.h"
 
 
-#if wxUSE_STREAMS && wxUSE_ICO_CUR
+#if wxUSE_STREAMS && wxUSE_IMAGE && wxUSE_ICO_CUR
 
 #include "wx/anidecod.h"
 
@@ -369,4 +370,4 @@ bool wxANIDecoder::Load( wxInputStream& stream )
     return m_szAnimation != wxDefaultSize;
 }
 
-#endif // wxUSE_STREAMS && wxUSE_ICO_CUR
+#endif // wxUSE_STREAMS && wxUSE_IMAGE && wxUSE_ICO_CUR
