@@ -693,6 +693,7 @@ TEST_CASE_METHOD(RichTextCtrlTestCase, "RichTextCtrl::SymbolBullet",
     m_rich->BeginSymbolBullet("*", 15, 20);
     m_rich->AddParagraph("bullet one");
     m_rich->EndSymbolBullet();
+    m_rich->AddParagraph("not bullet");
     m_rich->BeginSymbolBullet("%", 25, -5);
     m_rich->AddParagraph("bullet two");
     m_rich->EndSymbolBullet();
@@ -706,7 +707,19 @@ TEST_CASE_METHOD(RichTextCtrlTestCase, "RichTextCtrl::SymbolBullet",
     CHECK(bullet.GetLeftIndent() == 15);
     CHECK(bullet.GetLeftSubIndent() == 20);
 
-    m_rich->GetStyle(15, bullet);
+    const long plainPos = m_rich->GetValue().Find("not bullet");
+    REQUIRE(plainPos != wxNOT_FOUND);
+
+    m_rich->GetStyle(plainPos + 1, bullet);
+
+    CHECK(!bullet.HasBulletStyle());
+    CHECK(bullet.GetLeftIndent() == 0);
+    CHECK(bullet.GetLeftSubIndent() == 0);
+
+    const long secondBulletPos = m_rich->GetValue().Find("bullet two");
+    REQUIRE(secondBulletPos != wxNOT_FOUND);
+
+    m_rich->GetStyle(secondBulletPos + 1, bullet);
 
     CHECK(bullet.HasBulletStyle());
     CHECK(bullet.HasBulletText());
