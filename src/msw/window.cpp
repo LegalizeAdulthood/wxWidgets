@@ -1618,6 +1618,10 @@ bool wxWindowMSW::Reparent(wxWindowBase *parent)
         EnsureParentHasControlParentStyle(GetParent());
     }
 
+    // Reparenting the native HWND can leave stale pixels until the next
+    // incidental redraw, e.g. after selecting text in wxRichTextCtrl.
+    Refresh(false);
+
     return true;
 }
 
