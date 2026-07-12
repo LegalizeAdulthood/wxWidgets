@@ -1966,6 +1966,15 @@
 #        endif
 #   endif
 
+#   if wxUSE_ICO_CUR
+#        ifdef wxABORT_ON_CONFIG_ERROR
+#            error "wxUSE_ICO_CUR requires wxUSE_IMAGE"
+#        else
+#            undef wxUSE_ICO_CUR
+#            define wxUSE_ICO_CUR 0
+#        endif
+#   endif
+
 #   if wxUSE_PNM
 #        ifdef wxABORT_ON_CONFIG_ERROR
 #            error "wxUSE_PNM requires wxUSE_IMAGE"
