@@ -5,6 +5,7 @@
 // Created:     2008-11-26
 // Copyright:   (c) 2008 Vadim Zeitlin <vadim@wxwidgets.org>
 //              (c) 2010 Steven Lamerton
+//              (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -218,6 +219,45 @@ TEST_CASE_METHOD(ListCtrlTestCase, "ListCtrl::ColumnClick", "[listctrl]")
 
     m_list->ClearAll();
 }
+
+#if !(defined(__WXMSW__) || defined(__WXQT__)) || defined(__WXUNIVERSAL__)
+
+TEST_CASE_METHOD(ListCtrlTestCase, "ListCtrl::SingleItemArrowSelect", "[listctrl]")
+{
+    if ( !EnableUITests() )
+        return;
+
+    int key = WXK_DOWN;
+
+    SECTION("Up") { key = WXK_UP; }
+    SECTION("Down") { key = WXK_DOWN; }
+    SECTION("Left") { key = WXK_LEFT; }
+    SECTION("Right") { key = WXK_RIGHT; }
+
+    m_list->InsertColumn(0, "Header");
+    m_list->InsertItem(0, "Only");
+
+    EventCounter selected(m_list, wxEVT_LIST_ITEM_SELECTED);
+    wxUIActionSimulator sim;
+
+    CHECK(m_list->GetSelectedItemCount() == 0);
+
+    m_list->SetFocus();
+    wxYield();
+
+    CHECK(m_list->GetItemState(0, wxLIST_STATE_FOCUSED) == wxLIST_STATE_FOCUSED);
+    CHECK(m_list->GetSelectedItemCount() == 0);
+
+    sim.Char(key);
+    wxYield();
+
+    CHECK(m_list->GetSelectedItemCount() == 1);
+    CHECK(m_list->GetItemState(0, wxLIST_STATE_SELECTED) == wxLIST_STATE_SELECTED);
+    CHECK(selected.GetCount() == 1);
+}
+
+#endif // generic wxListCtrl
+
 #endif // wxUSE_UIACTIONSIMULATOR
 
 #endif // wxUSE_LISTCTRL
