@@ -4,6 +4,7 @@
 // Author:      Julian Smart
 // Created:     04/01/98
 // Copyright:   (c) Julian Smart
+//              (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -2105,6 +2106,19 @@ bool wxTextCtrl::MSWShouldPreProcessMessage(WXMSG* msg)
     {
         switch ( msg->wParam )
         {
+            case VK_SPACE:
+                if ( !wxIsShiftDown() && !wxIsCtrlDown() )
+                    return false;
+                break;
+
+            case VK_LEFT:
+            case VK_RIGHT:
+            case VK_HOME:
+            case VK_END:
+                if ( wxIsShiftDown() && wxIsCtrlDown() )
+                    return false;
+                break;
+
             case VK_RETURN:
                 // This key must be handled only by multiline controls and only
                 // if it's pressed on its own, not with some modifier.

@@ -4,6 +4,7 @@
 // Author:      Vadim Zeitlin
 // Created:     2007-09-25
 // Copyright:   (c) 2007 Vadim Zeitlin <vadim@wxwidgets.org>
+//              (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -1533,6 +1534,73 @@ TEST_CASE("wxTextCtrl::LongPaste", "[wxTextCtrl][clipboard][paste]")
 }
 
 #endif // wxUSE_CLIPBOARD
+
+#ifdef __WXMSW__
+
+namespace
+{
+
+class MSWKeyboardStateChanger
+{
+public:
+    MSWKeyboardStateChanger(bool ctrl, bool shift)
+    {
+        ::GetKeyboardState(m_stateOld);
+
+        BYTE state[256];
+        ::GetKeyboardState(state);
+
+        const BYTE keyPressed = 0x80;
+        state[VK_CONTROL] = ctrl ? keyPressed : 0;
+        state[VK_LCONTROL] = ctrl ? keyPressed : 0;
+        state[VK_RCONTROL] = ctrl ? keyPressed : 0;
+        state[VK_SHIFT] = shift ? keyPressed : 0;
+        state[VK_LSHIFT] = shift ? keyPressed : 0;
+        state[VK_RSHIFT] = shift ? keyPressed : 0;
+
+        ::SetKeyboardState(state);
+    }
+
+    ~MSWKeyboardStateChanger()
+    {
+        ::SetKeyboardState(m_stateOld);
+    }
+
+private:
+    BYTE m_stateOld[256];
+};
+
+bool MSWShouldPreProcessTextCtrlKey(wxTextCtrl& text, WPARAM vkey,
+                                    bool ctrl = false, bool shift = false)
+{
+    MSWKeyboardStateChanger changeState(ctrl, shift);
+
+    WXMSG msg = { };
+    msg.hwnd = GetHwndOf(&text);
+    msg.message = WM_KEYDOWN;
+    msg.wParam = vkey;
+
+    return text.MSWShouldPreProcessMessage(&msg);
+}
+
+} // anonymous namespace
+
+TEST_CASE("wxTextCtrl::MSWPreProcessAccelerators", "[wxTextCtrl][msw]")
+{
+    wxWindow* const parent = wxTheApp->GetTopWindow();
+
+    std::unique_ptr<wxTextCtrl> text(new wxTextCtrl(parent, wxID_ANY, "Hello"));
+
+    CHECK_FALSE(MSWShouldPreProcessTextCtrlKey(*text, VK_LEFT, true));
+    CHECK_FALSE(MSWShouldPreProcessTextCtrlKey(*text, VK_RIGHT, false, true));
+    CHECK_FALSE(MSWShouldPreProcessTextCtrlKey(*text, VK_LEFT, true, true));
+    CHECK_FALSE(MSWShouldPreProcessTextCtrlKey(*text, VK_RIGHT, true, true));
+    CHECK_FALSE(MSWShouldPreProcessTextCtrlKey(*text, VK_HOME, true, true));
+    CHECK_FALSE(MSWShouldPreProcessTextCtrlKey(*text, VK_END, true, true));
+    CHECK_FALSE(MSWShouldPreProcessTextCtrlKey(*text, VK_SPACE));
+}
+
+#endif // __WXMSW__
 
 TEST_CASE("wxTextCtrl::EventsOnCreate", "[wxTextCtrl][event]")
 {
