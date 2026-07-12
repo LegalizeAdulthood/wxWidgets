@@ -38,6 +38,12 @@ Post to wx-translators@googlegroups.com to ask to update the translations
 before the release. This needs to be done some time before making it, of
 course.
 
+After the updated translations have been merged, update the translations
+status table in `docs/doxygen/mainpages/translations.h` so that the manual
+records the translation status for this release. There is currently no
+automated script for this, so update the percentages and translator
+information manually from the files in `locale/`.
+
 ## Pre-Release Steps
 
 Start by copying all the changes since the previous release to the change log
