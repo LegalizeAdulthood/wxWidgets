@@ -4,6 +4,7 @@
 // Author:      Vadim Zeitlin
 // Created:     2004-06-23 (extracted from samples/console/console.cpp)
 // Copyright:   (c) 2004 Vadim Zeitlin <vadim@wxwidgets.org>
+//              (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -1447,6 +1448,14 @@ TEST_CASE("wxDateTime::ParseDateTime", "[datetime]")
             {  4, wxDateTime::Jan, 2010, 14, 30,  0 },
             true,
             "",
+            false
+        },
+
+        {
+            "2001-06-80 12:45",
+            {  1, wxDateTime::Jan, 9999,  0,  0,  0 },
+            false,
+            "2001-06-80 12:45",
             false
         },
 
