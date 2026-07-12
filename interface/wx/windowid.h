@@ -7,6 +7,8 @@
 
 /**
     The type of unique identifiers (ID) used for wxWindow-derived classes.
+
+    @see @ref overview_windowids
 */
 typedef int wxWindowID;
 
