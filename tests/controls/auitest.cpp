@@ -4,6 +4,7 @@
 // Author:      Sebastian Walderich
 // Created:     2018-12-19
 // Copyright:   (c) 2018 Sebastian Walderich
+//              (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -19,6 +20,7 @@
     #include "wx/app.h"
 #endif // WX_PRECOMP
 
+#include "wx/frame.h"
 #include "wx/panel.h"
 
 #include "wx/aui/auibar.h"
@@ -50,9 +52,66 @@ protected:
     wxAuiNotebook* const nb;
 };
 
+class AuiManagerTestCase
+{
+public:
+    AuiManagerTestCase()
+        : frame(new wxFrame(wxTheApp->GetTopWindow(), wxID_ANY,
+                            "AUI manager test")),
+          mgr(frame)
+    {
+        frame->SetSize(400, 300);
+
+        pane1 = new wxPanel(frame);
+        pane2 = new wxPanel(frame);
+
+        mgr.AddPane(pane1, wxAuiPaneInfo().Name("pane1").CenterPane().
+                    Caption("Pane 1").MaximizeButton());
+        mgr.AddPane(pane2, wxAuiPaneInfo().Name("pane2").Right().
+                    Caption("Pane 2").MaximizeButton());
+        mgr.Update();
+    }
+
+    ~AuiManagerTestCase()
+    {
+        mgr.UnInit();
+        delete frame;
+    }
+
+protected:
+    wxFrame* const frame;
+    wxAuiManager mgr;
+    wxWindow* pane1;
+    wxWindow* pane2;
+};
+
 // ----------------------------------------------------------------------------
 // the tests themselves
 // ----------------------------------------------------------------------------
+
+TEST_CASE_METHOD(AuiManagerTestCase, "wxAuiManager::CloseMaximizedPane", "[aui]")
+{
+    wxAuiPaneInfo& paneInfo1 = mgr.GetPane(pane1);
+    wxAuiPaneInfo& paneInfo2 = mgr.GetPane(pane2);
+
+    mgr.MaximizePane(paneInfo1);
+    mgr.Update();
+
+    CHECK( paneInfo1.IsShown() );
+    CHECK( paneInfo1.IsMaximized() );
+    CHECK_FALSE( paneInfo2.IsShown() );
+
+    wxAuiManagerEvent event(wxEVT_AUI_PANE_BUTTON);
+    event.SetManager(&mgr);
+    event.SetPane(&paneInfo1);
+    event.SetButton(wxAUI_BUTTON_CLOSE);
+    frame->ProcessWindowEvent(event);
+
+    CHECK_FALSE( paneInfo1.IsShown() );
+    CHECK_FALSE( paneInfo1.IsMaximized() );
+    CHECK( paneInfo2.IsShown() );
+    CHECK_FALSE( paneInfo2.IsMaximized() );
+}
 
 TEST_CASE_METHOD(AuiNotebookTestCase, "wxAuiNotebook::DoGetBestSize", "[aui]")
 {
