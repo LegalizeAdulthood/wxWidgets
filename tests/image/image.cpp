@@ -4,6 +4,7 @@
 // Author:      Francesco Montorsi
 // Created:     2009-05-31
 // Copyright:   (c) 2009 Francesco Montorsi
+//              (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -3202,6 +3203,40 @@ TEST_CASE_METHOD(ImageHandlersInit, "wxImage::ResizeQuality", "[.]")
 }
 
 #endif // wxHAS_SVG
+
+TEST_CASE("wxImage::GetSubImage", "[image]")
+{
+    wxImage image(10, 10);
+
+    const wxRect rectInvalidSize(1, 1, -1, 1);
+
+#if wxDEBUG_LEVEL
+    try
+    {
+        image.GetSubImage(rectInvalidSize);
+        FAIL_CHECK("expected invalid subimage size assertion");
+    }
+    catch ( const TestAssertFailure& e )
+    {
+        CHECK( e.m_msg == "invalid subimage size" );
+    }
+
+    const wxRect rectOutOfBounds(0, 0, 11, 1);
+
+    try
+    {
+        image.GetSubImage(rectOutOfBounds);
+        FAIL_CHECK("expected invalid subimage size assertion");
+    }
+    catch ( const TestAssertFailure& e )
+    {
+        CHECK( e.m_msg == "invalid subimage size" );
+    }
+#else
+    CHECK( !image.GetSubImage(rectInvalidSize).IsOk() );
+    CHECK( !image.GetSubImage(wxRect(0, 0, 11, 1)).IsOk() );
+#endif
+}
 
 TEST_CASE_METHOD(ImageHandlersInit, "wxImage::Cursor", "[image][cursor]")
 {
