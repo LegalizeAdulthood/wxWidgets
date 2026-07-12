@@ -384,6 +384,10 @@ long wxTaskBarIcon::WindowProc(unsigned int msg,
             eventType = wxEVT_TASKBAR_RIGHT_UP;
             break;
 
+        case WM_CONTEXTMENU:
+            eventType = wxEVT_TASKBAR_CLICK;
+            break;
+
         case WM_LBUTTONDBLCLK:
             eventType = wxEVT_TASKBAR_LEFT_DCLICK;
             break;
