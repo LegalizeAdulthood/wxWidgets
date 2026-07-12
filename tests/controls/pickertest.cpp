@@ -19,10 +19,13 @@
 #endif // WX_PRECOMP
 
 #include "wx/clrpicker.h"
+#include "wx/filefn.h"
 #include "wx/filepicker.h"
 #include "wx/fontpicker.h"
+#include "wx/textctrl.h"
 #include "pickerbasetest.h"
 #include "asserthelper.h"
+#include "testlog.h"
 
 #if wxUSE_COLOURPICKERCTRL
 
@@ -116,7 +119,8 @@ void DirPickerCtrlTestCase::tearDown()
 #if wxUSE_FILEPICKERCTRL
 
 class FilePickerCtrlTestCase : public PickerBaseTestCase,
-                               public CppUnit::TestCase
+                               public CppUnit::TestCase,
+                               public LogTestCase
 {
 public:
     FilePickerCtrlTestCase() { }
@@ -129,7 +133,10 @@ private:
 
     CPPUNIT_TEST_SUITE( FilePickerCtrlTestCase );
         wxPICKER_BASE_TESTS();
+        CPPUNIT_TEST( NoChdirForInvalidText );
     CPPUNIT_TEST_SUITE_END();
+
+    void NoChdirForInvalidText();
 
     wxFilePickerCtrl *m_file;
 
@@ -155,6 +162,27 @@ void FilePickerCtrlTestCase::setUp()
 void FilePickerCtrlTestCase::tearDown()
 {
     wxDELETE(m_file);
+}
+
+void FilePickerCtrlTestCase::NoChdirForInvalidText()
+{
+    wxDELETE(m_file);
+
+    m_file = new wxFilePickerCtrl(wxTheApp->GetTopWindow(), wxID_ANY,
+                                  wxEmptyString, wxFileSelectorPromptStr,
+                                  wxFileSelectorDefaultWildcardStr,
+                                  wxDefaultPosition, wxDefaultSize,
+                                  wxFLP_USE_TEXTCTRL | wxFLP_CHANGE_DIR);
+
+    const wxString cwd = wxGetCwd();
+    const wxString missing =
+        cwd + wxFILE_SEP_PATH + "wx_nonexistent_picker_dir_17252";
+
+    m_log->Clear();
+    m_file->GetTextCtrl()->SetValue(missing);
+
+    CPPUNIT_ASSERT_EQUAL(wxString(), m_log->GetLog(wxLOG_Error));
+    CPPUNIT_ASSERT_EQUAL(cwd, wxGetCwd());
 }
 
 #endif //wxUSE_FILEPICKERCTRL
