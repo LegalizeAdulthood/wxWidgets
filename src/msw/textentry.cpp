@@ -124,6 +124,20 @@ private:
     wxDECLARE_NO_COPY_CLASS(CSLock);
 };
 
+bool wxMSWTextEntryCanAutoComplete(const wxWindow *win)
+{
+#if wxUSE_TEXTCTRL
+    const wxTextCtrl * const text = wxDynamicCast(win, wxTextCtrl);
+
+    // Native autocomplete clears multiline RichEdit controls when accepting a
+    // completion, so don't enable it for them.
+    return !text || !text->IsRich() || !text->HasFlag(wxTE_MULTILINE);
+#else
+    wxUnusedVar(win);
+    return true;
+#endif // wxUSE_TEXTCTRL
+}
+
 } // anonymity namespace
 
 // Implementation of string enumerator used by wxTextAutoCompleteData. This
@@ -813,6 +827,9 @@ void wxTextEntry::GetSelection(long *from, long *to) const
 
 bool wxTextEntry::DoAutoCompleteFileNames(int flags)
 {
+    if ( !wxMSWTextEntryCanAutoComplete(GetEditableWindow()) )
+        return false;
+
     DWORD dwFlags = 0;
     if ( flags & wxFILE )
         dwFlags |= SHACF_FILESYS_ONLY;
@@ -881,6 +898,9 @@ bool wxTextEntry::MSWEnsureHasAutoCompleteData()
 
 bool wxTextEntry::DoAutoCompleteStrings(const wxArrayString& choices)
 {
+    if ( !wxMSWTextEntryCanAutoComplete(GetEditableWindow()) )
+        return false;
+
     if ( !MSWEnsureHasAutoCompleteData() )
         return false;
 
@@ -900,6 +920,12 @@ bool wxTextEntry::DoAutoCompleteCustom(wxTextCompleter *completer)
     }
     else // Have a valid completer.
     {
+        if ( !wxMSWTextEntryCanAutoComplete(GetEditableWindow()) )
+        {
+            delete completer;
+            return false;
+        }
+
         if ( !MSWEnsureHasAutoCompleteData() )
         {
             // Delete the custom completer for consistency with the case when
