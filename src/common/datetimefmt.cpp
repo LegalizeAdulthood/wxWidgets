@@ -4,6 +4,7 @@
 // Author:      Vadim Zeitlin
 // Created:     11.05.99
 // Copyright:   (c) 1999 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
+//              (c) 2026 wxWidgets development team
 //              parts of code taken from sndcal library by Scott E. Lee:
 //
 //               Copyright 1993-1995, Scott E. Lee, all rights reserved.
@@ -1808,6 +1809,10 @@ wxDateTime::ParseDateTime(const wxString& date, wxString::const_iterator *end)
     {
         // check if we have a time followed by a date
         if ( !dtTime.ParseTime(date, &endTime) )
+            return false;
+
+        // Require a separator here, as ParseTime() also accepts just hours.
+        if ( endTime == date.end() || !wxIsspace(*endTime) )
             return false;
 
         while ( endTime != date.end() && wxIsspace(*endTime) )
