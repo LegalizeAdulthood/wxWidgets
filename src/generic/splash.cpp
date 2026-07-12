@@ -4,6 +4,7 @@
 // Author:      Julian Smart
 // Created:     28/6/2000
 // Copyright:   (c) Julian Smart
+//              (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -39,8 +40,8 @@ wxEND_EVENT_TABLE()
 void wxSplashScreen::Init()
 {
     m_window = nullptr;
-
-    wxEvtHandler::AddFilter(this);
+    m_splashStyle = wxSPLASH_NO_DISMISS_ON_CLICK;
+    m_milliseconds = 0;
 }
 
 /* Note that unless we pass a non-default size to the frame, SetClientSize
@@ -67,6 +68,9 @@ wxSplashScreen::wxSplashScreen(const wxBitmap& bitmap, long splashStyle, int mil
 
     m_splashStyle = splashStyle;
     m_milliseconds = milliseconds;
+
+    if ( !(m_splashStyle & wxSPLASH_NO_DISMISS_ON_CLICK) )
+        wxEvtHandler::AddFilter(this);
 
     m_window = new wxSplashScreenWindow(bitmap, this, wxID_ANY, pos, size, wxNO_BORDER);
 
@@ -98,11 +102,15 @@ wxSplashScreen::~wxSplashScreen()
 {
     m_timer.Stop();
 
-    wxEvtHandler::RemoveFilter(this);
+    if ( !(m_splashStyle & wxSPLASH_NO_DISMISS_ON_CLICK) )
+        wxEvtHandler::RemoveFilter(this);
 }
 
 int wxSplashScreen::FilterEvent(wxEvent& event)
 {
+    if ( m_splashStyle & wxSPLASH_NO_DISMISS_ON_CLICK )
+        return -1;
+
     const wxEventType t = event.GetEventType();
     if ( t == wxEVT_KEY_DOWN ||
             t == wxEVT_LEFT_DOWN ||

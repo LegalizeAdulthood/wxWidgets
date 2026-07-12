@@ -10,6 +10,7 @@
 #define wxSPLASH_NO_CENTRE          0x00
 #define wxSPLASH_TIMEOUT            0x04
 #define wxSPLASH_NO_TIMEOUT         0x00
+#define wxSPLASH_NO_DISMISS_ON_CLICK 0x08
 
 
 /**
@@ -51,6 +52,8 @@ public:
         - wxSPLASH_NO_CENTRE
         - wxSPLASH_TIMEOUT
         - wxSPLASH_NO_TIMEOUT
+        - wxSPLASH_NO_DISMISS_ON_CLICK: disables closing the splash
+          screen on user input.
 
         @a milliseconds is the timeout in milliseconds.
     */
