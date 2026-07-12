@@ -140,6 +140,12 @@ enum wxDirFlags
     allow enumerating of the files in a directory. wxDir allows enumerating
     files as well as directories.
 
+    The @a filespec parameters accepted by this class are filename wildcard
+    patterns, such as @c "*.cpp" or @c "image?.png", matched against the
+    entry name in the enumerated directory and not against a full path. An
+    empty filespec matches all entries allowed by the specified wxDirFlags,
+    subject to the normal hidden-file handling.
+
     wxDir also provides a flexible way to enumerate files recursively using
     Traverse() or a simpler GetAllFiles() function.
 
