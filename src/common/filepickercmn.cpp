@@ -4,6 +4,7 @@
 // Author:      Francesco Montorsi (readapted code written by Vadim Zeitlin)
 // Created:     15/04/2006
 // Copyright:   (c) Vadim Zeitlin, Francesco Montorsi
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -42,6 +43,33 @@ const char wxDirPickerWidgetLabel[] = wxTRANSLATE("Browse");
 wxDEFINE_EVENT( wxEVT_FILEPICKER_CHANGED, wxFileDirPickerEvent );
 wxDEFINE_EVENT( wxEVT_DIRPICKER_CHANGED,  wxFileDirPickerEvent );
 wxIMPLEMENT_DYNAMIC_CLASS(wxFileDirPickerEvent, wxCommandEvent);
+
+namespace
+{
+
+bool wxGetFileDirPickerCwd(wxEventType eventType, const wxString &path,
+                           wxString *cwd)
+{
+    if ( eventType == wxEVT_DIRPICKER_CHANGED )
+    {
+        if ( !wxFileName::DirExists(path) )
+            return false;
+
+        *cwd = path;
+        return true;
+    }
+
+    wxFileName filename(path);
+    wxString dir = filename.GetPath();
+
+    if ( dir.empty() || !wxFileName::DirExists(dir) )
+        return false;
+
+    *cwd = dir;
+    return true;
+}
+
+} // anonymous namespace
 
 // ----------------------------------------------------------------------------
 // wxFileDirPickerCtrlBase
@@ -120,11 +148,14 @@ void wxFileDirPickerCtrlBase::UpdatePickerFromTextCtrl()
     {
         m_pickerIface->SetPath(newpath);
 
-        // update current working directory, if necessary
-        // NOTE: the path separator is required because if newpath is "C:"
-        //       then no change would happen
-        if (IsCwdToUpdate())
-            wxSetWorkingDirectory(newpath);
+        // Update the current working directory only when the new value
+        // contains an existing directory.
+        if ( IsCwdToUpdate() )
+        {
+            wxString cwd;
+            if ( wxGetFileDirPickerCwd(GetEventType(), newpath, &cwd) )
+                wxSetWorkingDirectory(cwd);
+        }
 
         // fire an event
         wxFileDirPickerEvent event(GetEventType(), this, GetId(), newpath);
