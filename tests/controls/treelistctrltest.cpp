@@ -4,6 +4,7 @@
 // Author:      Vadim Zeitlin
 // Created:     2011-08-27
 // Copyright:   (c) 2011 Vadim Zeitlin <vadim@wxwidgets.org>
+//              (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -15,9 +16,14 @@
 #if wxUSE_TREELISTCTRL
 
 
+#include "wx/dataview.h"
 #include "wx/treelist.h"
+#include "wx/uiaction.h"
 
 #include "wx/app.h"
+
+#include "testableframe.h"
+#include "waitfor.h"
 
 // ----------------------------------------------------------------------------
 // test class
@@ -36,6 +42,7 @@ private:
         CPPUNIT_TEST( Traversal );
         CPPUNIT_TEST( ItemText );
         CPPUNIT_TEST( ItemCheck );
+        WXUISIM_TEST( MultiSelectionClick );
     CPPUNIT_TEST_SUITE_END();
 
     // Create the control with the given style.
@@ -52,6 +59,7 @@ private:
     void Traversal();
     void ItemText();
     void ItemCheck();
+    void MultiSelectionClick();
 
 
     // The control itself.
@@ -226,6 +234,49 @@ void TreeListCtrlTestCase::ItemCheck()
                           m_treelist->GetCheckedState(m_code_osx) );
     CPPUNIT_ASSERT_EQUAL( wxCHK_UNDETERMINED,
                           m_treelist->GetCheckedState(m_code) );
+}
+
+void TreeListCtrlTestCase::MultiSelectionClick()
+{
+#if wxUSE_UIACTIONSIMULATOR
+    wxTreeListItem item2 = m_treelist->GetNextSibling(m_code);
+    CPPUNIT_ASSERT( item2.IsOk() );
+
+    m_treelist->Select(m_code);
+    m_treelist->Select(item2);
+
+    wxTreeListItems selections;
+    CPPUNIT_ASSERT_EQUAL( 2u, m_treelist->GetSelections(selections) );
+
+    EventCounter selection(m_treelist, wxEVT_TREELIST_SELECTION_CHANGED);
+
+    m_treelist->GetDataView()->Layout();
+    CPPUNIT_ASSERT( WaitFor("wxTreeListCtrl layout", [&]() {
+        wxWindow* const view = m_treelist->GetDataView()->GetMainWindow();
+        return view->GetClientSize().x > 100;
+    }) );
+
+    const wxRect rect =
+        m_treelist->GetDataView()->GetItemRect(wxDataViewItem(m_code.GetID()));
+    CPPUNIT_ASSERT( !rect.IsEmpty() );
+
+    wxPoint point = rect.GetPosition() + wxPoint(rect.GetWidth() / 2,
+                                                 rect.GetHeight() / 2);
+    point = m_treelist->GetDataView()->ClientToScreen(point);
+
+    wxUIActionSimulator sim;
+    sim.MouseMove(point);
+    wxYield();
+
+    sim.MouseClick(GetMouseButtonPrimary());
+
+    WaitFor("wxTreeListCtrl selection", [&]() {
+        return selection.GetCount() != 0;
+    });
+
+    CPPUNIT_ASSERT_EQUAL( 1u, m_treelist->GetSelections(selections) );
+    CPPUNIT_ASSERT_EQUAL( m_code, selections[0] );
+#endif // wxUSE_UIACTIONSIMULATOR
 }
 
 #endif // wxUSE_TREELISTCTRL
