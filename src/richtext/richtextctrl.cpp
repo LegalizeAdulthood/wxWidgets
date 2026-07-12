@@ -4,6 +4,7 @@
 // Author:      Julian Smart
 // Created:     2005-09-30
 // Copyright:   (c) Julian Smart
+//              (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -842,18 +843,18 @@ void wxRichTextCtrl::OnMoveMouse(wxMouseEvent& event)
             long oldPos = GetCaretPosition();
             wxRichTextParagraphLayoutBox* oldFocus = GetFocusObject();
 
-            wxDataObjectComposite* compositeObject = new wxDataObjectComposite();
+            wxDataObjectComposite compositeObject;
             wxString text = GetFocusObject()->GetTextForRange(range);
 #ifdef __WXMSW__
             text = wxTextFile::Translate(text, wxTextFileType_Dos);
 #endif
-            compositeObject->Add(new wxTextDataObject(text), false /* not preferred */);
+            compositeObject.Add(new wxTextDataObject(text), false /* not preferred */);
 
             wxRichTextBuffer* richTextBuf = new wxRichTextBuffer;
             GetFocusObject()->CopyFragment(range, *richTextBuf);
-            compositeObject->Add(new wxRichTextBufferDataObject(richTextBuf), true /* preferred */);
+            compositeObject.Add(new wxRichTextBufferDataObject(richTextBuf), true /* preferred */);
 
-            wxRichTextDropSource source(*compositeObject, this);
+            wxRichTextDropSource source(compositeObject, this);
             // Use wxDrag_DefaultMove, not because it's the likelier choice but because pressing Ctrl for Copy obeys the principle of least surprise
             // The alternative, wxDrag_DefaultCopy, requires the user to know that Move needs the Shift key pressed
             BeginBatchUndo(_("Drag"));
