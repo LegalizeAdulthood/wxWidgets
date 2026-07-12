@@ -21,7 +21,13 @@
 #endif // WX_PRECOMP
 
 #include "wx/platinfo.h"
+#include "wx/textcompleter.h"
+#include "wx/thread.h"
 #include "wx/uiaction.h"
+
+#ifdef __WXMSW__
+    #include "wx/msw/wrapwin.h"
+#endif // __WXMSW__
 
 #if wxUSE_CLIPBOARD
     #include "wx/clipbrd.h"
@@ -104,6 +110,9 @@ protected:
     void HitTestSingleLine();
     void PositionToXYSingleLine();
     void XYToPositionSingleLine();
+#if defined(__WXMSW__) && wxUSE_OLE
+    void AutoCompleteCustomPrefix();
+#endif // __WXMSW__ && wxUSE_OLE
 
     void DoPositionToCoordsTestWithStyle(long style);
     void DoPositionToXYMultiLine(long style);
@@ -167,6 +176,9 @@ wxTEXT_CTRL_TESTS(Redirector)
 wxTEXT_CTRL_SINGLE_LINE_TEST(HitTestSingleLine)
 wxTEXT_CTRL_SINGLE_LINE_TEST(PositionToXYSingleLine)
 wxTEXT_CTRL_SINGLE_LINE_TEST(XYToPositionSingleLine)
+#if defined(__WXMSW__) && wxUSE_OLE
+    wxTEXT_CTRL_SINGLE_LINE_TEST(AutoCompleteCustomPrefix)
+#endif // __WXMSW__ && wxUSE_OLE
 
 wxTEXT_CTRL_MULTI_LINE_TEST(MultiLineReplace)
 #if wxUSE_UIACTIONSIMULATOR
@@ -235,6 +247,51 @@ void TextCtrlTestCase::MultiLineReplace()
     CHECK(m_text->GetValue() == "Hello changed");
     CHECK(m_text->GetInsertionPoint() == 13);
 }
+
+#if defined(__WXMSW__) && wxUSE_OLE
+
+void TextCtrlTestCase::AutoCompleteCustomPrefix()
+{
+    class RecordingCompleter : public wxTextCompleterSimple
+    {
+    public:
+        virtual void GetCompletions(const wxString& prefix,
+                                    wxArrayString& res) override
+        {
+            {
+                wxCriticalSectionLocker lock(m_cs);
+                m_prefixes.push_back(prefix);
+            }
+
+            if ( !prefix.empty() )
+                res.push_back(prefix + " completion");
+        }
+
+        bool HasPrefix(const wxString& prefix) const
+        {
+            wxCriticalSectionLocker lock(m_cs);
+            return m_prefixes.Index(prefix) != wxNOT_FOUND;
+        }
+
+    private:
+        mutable wxCriticalSection m_cs;
+        wxArrayString m_prefixes;
+    };
+
+    RecordingCompleter *completer = new RecordingCompleter;
+    REQUIRE( m_text->AutoComplete(completer) );
+
+    ::SendMessage((HWND)m_text->GetHWND(), WM_CHAR, '1', 1);
+
+    CHECK( m_text->GetValue() == "1" );
+
+    REQUIRE(WaitFor("custom text completer prefix",
+                    [&]() { return completer->HasPrefix("1"); }));
+
+    CHECK( completer->HasPrefix("1") );
+}
+
+#endif // __WXMSW__ && wxUSE_OLE
 
 void TextCtrlTestCase::ReadOnly()
 {
