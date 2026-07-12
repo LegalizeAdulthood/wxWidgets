@@ -64,4 +64,26 @@ TEST_CASE_METHOD(ListbookTestCase, "Listbook::ListView", "[listbook]")
     CHECK(listview->GetItemText(0) == "Panel 1");
 }
 
+TEST_CASE_METHOD(ListbookTestCase, "Listbook::NoImagesLabelSize", "[listbook]")
+{
+#ifdef __WXMSW__
+    m_listbook = make_unique<wxListbook>(wxTheApp->GetTopWindow(), wxID_ANY,
+                                         wxDefaultPosition, wxSize(400, 300));
+
+    const wxString label("Long multi word label");
+
+    m_listbook->AddPage(new wxPanel(m_listbook.get()), label);
+    m_listbook->SendSizeEvent();
+
+    wxListView* listview = m_listbook->GetListView();
+
+    CHECK(listview->InReportView());
+
+    const int labelWidth = listview->GetTextExtent(label).x;
+
+    CHECK(listview->GetColumnWidth(0) >= labelWidth);
+    CHECK(m_listbook->GetControllerSize().x >= labelWidth);
+#endif // __WXMSW__
+}
+
 #endif //wxUSE_LISTBOOK
