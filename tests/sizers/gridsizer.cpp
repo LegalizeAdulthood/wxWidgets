@@ -4,6 +4,7 @@
 // Author:      Vadim Zeitlin
 // Created:     2015-04-03
 // Copyright:   (c) 2015 Vadim Zeitlin <vadim@wxwidgets.org>
+//              (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -251,4 +252,32 @@ TEST_CASE_METHOD(FlexGridSizerTestCase,
     CHECK( children[1]->GetSize() == wxSize(80, 50) );
     CHECK( children[2]->GetSize() == wxSize(20, 50) );
     CHECK( children[3]->GetSize() == wxSize(80, 50) );
+}
+
+TEST_CASE_METHOD(FlexGridSizerTestCase,
+                 "wxFlexGridSizer::GrowModeAll",
+                 "[grid-sizer][sizer]")
+{
+    const wxSize sizeChild(10, 10);
+
+    wxVector<wxWindow*> children;
+    for ( int n = 0; n < 4; n++ )
+    {
+        children.push_back(new wxWindow(m_win, wxID_ANY, wxDefaultPosition,
+                                        sizeChild));
+    }
+
+    m_sizer->AddGrowableRow(1);
+
+    m_sizer->SetFlexibleDirection(wxVERTICAL);
+    m_sizer->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_ALL);
+
+    m_win->SetClientSize(100, 100);
+
+    SetChildren(children, wxSizerFlags().Expand());
+
+    CHECK( children[0]->GetSize() == wxSize(50, 10) );
+    CHECK( children[1]->GetSize() == wxSize(50, 10) );
+    CHECK( children[2]->GetSize() == wxSize(50, 90) );
+    CHECK( children[3]->GetSize() == wxSize(50, 90) );
 }
