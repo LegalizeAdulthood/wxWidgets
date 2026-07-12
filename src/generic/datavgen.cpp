@@ -4,6 +4,7 @@
 // Author:      Robert Roebling
 // Modified by: Francesco Montorsi, Guru Kathiresan, Bo Yang
 // Copyright:   (c) 1998 Robert Roebling
+//              (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -5078,6 +5079,10 @@ void wxDataViewMainWindow::OnMouse( wxMouseEvent &event )
         // that would make the editor close anyhow, but we do need to do it for
         // the other ones and it does no harm to do it for the left one too.
         FinishEditing();
+
+        // Discard any deferred selection from a previous click whose button-up
+        // event didn't reach us, e.g. after drag-and-drop.
+        m_lineSelectSingleOnUp = (unsigned int)-1;
     }
 
     // Handle right clicking here, before everything else as context menu
@@ -5111,6 +5116,8 @@ void wxDataViewMainWindow::OnMouse( wxMouseEvent &event )
             m_dragCount = 3;
         else if (m_dragCount != 3)
             return;
+
+        m_lineSelectSingleOnUp = (unsigned int)-1;
 
         if (event.LeftIsDown())
         {
@@ -5280,15 +5287,6 @@ void wxDataViewMainWindow::OnMouse( wxMouseEvent &event )
         m_lastOnSame = false;
         m_lineSelectSingleOnUp = (unsigned int)-1;
     }
-    else if(!event.LeftUp())
-    {
-        // This is necessary, because after a DnD operation in
-        // from and to ourself, the up event is swallowed by the
-        // DnD code. So on next non-up event (which means here and
-        // now) m_lineSelectSingleOnUp should be reset.
-        m_lineSelectSingleOnUp = (unsigned int)-1;
-    }
-
     if (event.RightDown())
     {
         m_lineBeforeLastClicked = m_lineLastClicked;
