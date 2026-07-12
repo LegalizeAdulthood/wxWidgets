@@ -4,6 +4,7 @@
 // Author:      Steven Lamerton
 // Created:     2010-07-07
 // Copyright:   (c) 2010 Steven Lamerton
+//              (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "testprec.h"
@@ -16,6 +17,9 @@
 #endif // WX_PRECOMP
 
 #include "wx/richtext/richtextctrl.h"
+#if wxUSE_PRINTING_ARCHITECTURE
+    #include "wx/richtext/richtextprint.h"
+#endif
 #include "wx/richtext/richtextstyles.h"
 #include "testableframe.h"
 #include "asserthelper.h"
@@ -60,6 +64,9 @@ private:
         CPPUNIT_TEST( Delete );
         CPPUNIT_TEST( Url );
         CPPUNIT_TEST( Table );
+#if wxUSE_PRINTING_ARCHITECTURE
+        CPPUNIT_TEST( PrintMargins );
+#endif
     CPPUNIT_TEST_SUITE_END();
 
     void IsModified();
@@ -91,6 +98,9 @@ private:
     void Delete();
     void Url();
     void Table();
+#if wxUSE_PRINTING_ARCHITECTURE
+    void PrintMargins();
+#endif
 
     wxRichTextCtrl* m_rich;
 
@@ -877,5 +887,36 @@ void RichTextCtrlTestCase::Table()
     m_rich->Clear();
     m_rich->SetFocusObject(nullptr);
 }
+
+#if wxUSE_PRINTING_ARCHITECTURE
+
+void RichTextCtrlTestCase::PrintMargins()
+{
+    wxBitmap bmp(720, 1000);
+    wxMemoryDC dc(bmp);
+
+    wxRichTextBuffer buffer;
+    wxRichTextPrintout printout;
+    printout.SetRichTextBuffer(&buffer);
+    printout.SetDC(&dc);
+    printout.SetPPIScreen(254, 254);
+    printout.SetPPIPrinter(254, 254);
+    printout.SetPageSizePixels(720, 1000);
+    printout.SetPageSizeMM(72, 100);
+    printout.SetPaperRectPixels(wxRect(-40, -40, 800, 1080));
+    printout.SetMargins(100, 100, 100, 100);
+
+    wxRect textRect, headerRect, footerRect;
+    printout.CalculateScaling(&dc, textRect, headerRect, footerRect);
+
+    CPPUNIT_ASSERT_EQUAL(60, textRect.x);
+    CPPUNIT_ASSERT_EQUAL(60, textRect.y);
+    CPPUNIT_ASSERT_EQUAL(600, textRect.width);
+    CPPUNIT_ASSERT_EQUAL(880, textRect.height);
+
+    dc.SelectObject(wxNullBitmap);
+}
+
+#endif // wxUSE_PRINTING_ARCHITECTURE
 
 #endif //wxUSE_RICHTEXT
