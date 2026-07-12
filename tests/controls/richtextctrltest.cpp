@@ -41,6 +41,30 @@ protected:
     wxDECLARE_NO_COPY_CLASS(RichTextCtrlTestCase);
 };
 
+#ifdef __WXMSW__
+
+class RefreshCountingRichTextCtrl : public wxRichTextCtrl
+{
+public:
+    RefreshCountingRichTextCtrl() : m_refreshCount(0) { }
+
+    void ClearRefreshCount() { m_refreshCount = 0; }
+    int GetRefreshCount() const { return m_refreshCount; }
+
+    virtual void Refresh(bool eraseBackground = true,
+                         const wxRect *rect = nullptr) override
+    {
+        ++m_refreshCount;
+        wxRichTextCtrl::Refresh(eraseBackground, rect);
+    }
+private:
+    int m_refreshCount;
+
+    wxDECLARE_NO_COPY_CLASS(RefreshCountingRichTextCtrl);
+};
+
+#endif // __WXMSW__
+
 #if wxUSE_CLIPBOARD && wxUSE_DATAOBJ && !defined(__WXOSX__)
 
 namespace
@@ -910,6 +934,29 @@ TEST_CASE_METHOD(RichTextCtrlTestCase, "RichTextCtrl::Table", "[richtextctrl]")
 
     m_rich->Clear();
     m_rich->SetFocusObject(nullptr);
+}
+
+TEST_CASE_METHOD(RichTextCtrlTestCase, "RichTextCtrl::ReparentRefresh",
+                 "[richtextctrl]")
+{
+#ifdef __WXMSW__
+    wxWindow* const oldParent = wxTheApp->GetTopWindow();
+    std::unique_ptr<wxWindow> newParent =
+        make_unique<wxWindow>(oldParent, wxID_ANY);
+    std::unique_ptr<RefreshCountingRichTextCtrl> rich =
+        make_unique<RefreshCountingRichTextCtrl>();
+
+    REQUIRE( rich->Create(oldParent, wxID_ANY, "",
+                          wxDefaultPosition, wxSize(400, 200), wxWANTS_CHARS) );
+
+    rich->SetValue("red blue");
+    rich->SetStyle(0, 2, wxTextAttr(*wxRED));
+    rich->SetStyle(4, 7, wxTextAttr(*wxBLUE));
+    rich->ClearRefreshCount();
+
+    REQUIRE( rich->Reparent(newParent.get()) );
+    CHECK( rich->GetRefreshCount() > 0 );
+#endif // __WXMSW__
 }
 
 #endif //wxUSE_RICHTEXT
