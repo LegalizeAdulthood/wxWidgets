@@ -6,6 +6,7 @@
 // Modified by: Ron Lee
 // Created:
 // Copyright:   (c) Robin Dunn, Robert Roebling
+//              (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -2133,28 +2134,32 @@ DoAdjustForGrowables(int delta,
     if ( delta <= 0 )
         return;
 
-    // total sum of proportions of all non-hidden rows
+    // total sum of proportions of all non-hidden rows/columns
     int sum_proportions = 0;
 
-    // number of currently shown growable rows
+    // number of currently shown growable rows/columns
     int num = 0;
 
     const int max_idx = sizes.size();
 
-    const size_t count = growable.size();
+    const bool growAll = !proportions;
+    const size_t count = growAll ? sizes.size() : growable.size();
     size_t idx;
     for ( idx = 0; idx < count; idx++ )
     {
+        const int growableIdx =
+            growAll ? wx_truncate_cast(int, idx) : growable[idx];
+
         // Since the number of rows/columns can change as items are
         // inserted/deleted, we need to verify at runtime that the
         // requested growable rows/columns are still valid.
-        if ( growable[idx] >= max_idx )
+        if ( growableIdx >= max_idx )
             continue;
 
         // If all items in a row/column are hidden, that row/column will
         // have a dimension of -1.  This causes the row/column to be
         // hidden completely.
-        if ( sizes[growable[idx]] == -1 )
+        if ( sizes[growableIdx] == -1 )
             continue;
 
         if ( proportions )
@@ -2169,10 +2174,13 @@ DoAdjustForGrowables(int delta,
     // the remaining extra free space, adjusted during each iteration
     for ( idx = 0; idx < count; idx++ )
     {
-        if ( growable[idx] >= max_idx )
+        const int growableIdx =
+            growAll ? wx_truncate_cast(int, idx) : growable[idx];
+
+        if ( growableIdx >= max_idx )
             continue;
 
-        if ( sizes[ growable[idx] ] == -1 )
+        if ( sizes[growableIdx] == -1 )
             continue;
 
         int cur_delta;
@@ -2189,7 +2197,7 @@ DoAdjustForGrowables(int delta,
             sum_proportions -= cur_prop;
         }
 
-        sizes[growable[idx]] += cur_delta;
+        sizes[growableIdx] += cur_delta;
         delta -= cur_delta;
     }
 }
