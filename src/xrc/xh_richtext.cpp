@@ -4,6 +4,7 @@
 // Author:      Julian Smart
 // Created:     2006-11-08
 // Copyright:   (c) 2006 Julian Smart
+//              (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -26,6 +27,7 @@ wxRichTextCtrlXmlHandler::wxRichTextCtrlXmlHandler() : wxXmlResourceHandler()
     XRC_ADD_STYLE(wxTE_READONLY);
 
     XRC_ADD_STYLE(wxRE_CENTRE_CARET);
+    XRC_ADD_STYLE(wxRE_MULTILINE);
     XRC_ADD_STYLE(wxRE_READONLY);
 
     AddWindowStyles();

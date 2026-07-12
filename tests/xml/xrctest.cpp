@@ -4,6 +4,7 @@
 // Author:      wxWidgets team
 // Created:     2010-10-30
 // Copyright:   (c) 2010 wxWidgets team
+//              (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -26,6 +27,10 @@
 #include "wx/wfstream.h"
 #include "wx/xrc/xmlres.h"
 #include "wx/xrc/xh_bmp.h"
+#if wxUSE_RICHTEXT
+    #include "wx/richtext/richtextctrl.h"
+    #include "wx/xrc/xh_richtext.h"
+#endif // wxUSE_RICHTEXT
 
 #include <stdarg.h>
 
@@ -284,6 +289,40 @@ TEST_CASE("XRC::Features", "[xrc]")
     CHECK( xrc.LoadFrame(nullptr, "swallow") );
     CHECK( xrc.LoadFrame(nullptr, "dodo") );
 }
+
+#if wxUSE_RICHTEXT
+
+TEST_CASE("XRC::RichTextStyleAliases", "[xrc][richtext]")
+{
+    wxXmlResource xrc;
+    xrc.InitAllHandlers();
+    xrc.AddHandler(new wxRichTextCtrlXmlHandler);
+
+    wxStringInputStream sis(R"(<?xml version="1.0" ?>
+<resource>
+  <object class="wxFrame" name="frame">
+    <object class="wxRichTextCtrl" name="richtext">
+      <style>wxRE_MULTILINE|wxRE_READONLY</style>
+    </object>
+  </object>
+</resource>
+    )");
+    std::unique_ptr<wxXmlDocument> xmlDoc(new wxXmlDocument(sis));
+    REQUIRE( xmlDoc->IsOk() );
+    REQUIRE( xrc.LoadDocument(xmlDoc.release(), TEST_XRC_FILE) );
+
+    wxFrame frame;
+    REQUIRE( xrc.LoadFrame(&frame, nullptr, "frame") );
+
+    wxRichTextCtrl* richText = XRCCTRL(frame,"richtext",wxRichTextCtrl);
+    REQUIRE( richText );
+    CHECK( richText->HasFlag(wxRE_MULTILINE) );
+    CHECK( richText->HasFlag(wxRE_READONLY) );
+
+    CHECK( xrc.Unload(TEST_XRC_FILE) );
+}
+
+#endif // wxUSE_RICHTEXT
 
 TEST_CASE("XRC::EnvVarInPath", "[xrc]")
 {
