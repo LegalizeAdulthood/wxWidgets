@@ -3064,6 +3064,18 @@ void wxGenericTreeCtrl::OnSetFocus( wxFocusEvent &event )
 {
     m_hasFocus = true;
 
+    if ( HasFlag(wxTR_MULTIPLE) && (!m_current || !m_key_current) )
+    {
+        if ( !m_current )
+            m_current = m_anchor;
+
+        if ( m_current )
+        {
+            m_key_current = m_current;
+            RefreshLine( m_current );
+        }
+    }
+
     RefreshSelected();
 
     event.Skip();
