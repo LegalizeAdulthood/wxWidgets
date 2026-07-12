@@ -387,6 +387,26 @@ void RichTextCtrlTestCase::Selection()
 
     CPPUNIT_ASSERT_EQUAL("some", m_rich->GetStringSelection());
 
+    m_rich->SetValue("Paragraph");
+    m_rich->SelectWord(1);
+
+    long from, to;
+    m_rich->GetSelection(&from, &to);
+
+    CPPUNIT_ASSERT_EQUAL(0L, from);
+    CPPUNIT_ASSERT_EQUAL(9L, to);
+    CPPUNIT_ASSERT_EQUAL("Paragraph", m_rich->GetStringSelection());
+
+    m_rich->SetValue("Paragraph ");
+    m_rich->SelectWord(1);
+    m_rich->GetSelection(&from, &to);
+
+    CPPUNIT_ASSERT_EQUAL(0L, from);
+    CPPUNIT_ASSERT_EQUAL(9L, to);
+    CPPUNIT_ASSERT_EQUAL("Paragraph", m_rich->GetStringSelection());
+
+    m_rich->SetValue("some more text");
+
     m_rich->SetSelection(5, 14);
 
     CPPUNIT_ASSERT_EQUAL("more text", m_rich->GetStringSelection());
