@@ -28,6 +28,27 @@
 #include "waitfor.h"
 #include "wx/uiaction.h"
 
+#ifdef __WXMSW__
+    #include "wx/msw/wrapwin.h"
+#endif // __WXMSW__
+
+// ----------------------------------------------------------------------------
+// helpers
+// ----------------------------------------------------------------------------
+
+#ifdef __WXMSW__
+
+static bool IsListCtrlHScrollbarVisible(const wxListCtrl *list)
+{
+    SCROLLBARINFO sbi;
+    sbi.cbSize = sizeof(sbi);
+
+    return ::GetScrollBarInfo((HWND)list->GetHWND(), OBJID_HSCROLL, &sbi) &&
+           !(sbi.rgstate[0] & STATE_SYSTEM_INVISIBLE);
+}
+
+#endif // __WXMSW__
+
 // ----------------------------------------------------------------------------
 // test class
 // ----------------------------------------------------------------------------
@@ -264,6 +285,46 @@ TEST_CASE_METHOD(ListCtrlTestCase, "ListCtrl::CheckItemVirtual", "[listctrl]")
 }
 
 #endif // __WXQT__
+
+#ifdef __WXMSW__
+
+TEST_CASE_METHOD(ListCtrlTestCase, "ListCtrl::HorizontalScrollbarAfterResize",
+                 "[listctrl]")
+{
+    m_list->InsertColumn(0, "Column 0", wxLIST_FORMAT_LEFT, 100);
+    m_list->InsertColumn(1, "Column 1", wxLIST_FORMAT_LEFT, 100);
+    m_list->InsertColumn(2, "Column 2", wxLIST_FORMAT_LEFT, 100);
+
+    m_list->InsertItem(0, "item 0");
+    m_list->SetItem(0, 1, "item 1");
+    m_list->SetItem(0, 2, "item 2");
+
+    m_list->SetSize(600, 200);
+    wxYield();
+    m_list->Update();
+
+    CHECK_FALSE( IsListCtrlHScrollbarVisible(m_list) );
+
+    m_list->SetColumnWidth(2, 600);
+    wxYield();
+    m_list->Update();
+
+    CHECK( IsListCtrlHScrollbarVisible(m_list) );
+
+    m_list->SetSize(400, 200);
+    wxYield();
+    m_list->Update();
+
+    CHECK( IsListCtrlHScrollbarVisible(m_list) );
+
+    m_list->SetSize(900, 200);
+    wxYield();
+    m_list->Update();
+
+    CHECK_FALSE( IsListCtrlHScrollbarVisible(m_list) );
+}
+
+#endif // __WXMSW__
 
 #if wxUSE_UIACTIONSIMULATOR
 
