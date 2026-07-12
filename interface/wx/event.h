@@ -732,6 +732,8 @@ public:
         event @e type identify which type of events should be handled by the
         given @e function (an event generator object may generate many different
         types of events!).
+        The restrictions described in @ref overview_windowids apply to the
+        source ID values.
 
         @param id
             The first ID of the identifier range to be associated with the event
@@ -890,6 +892,8 @@ public:
         See @ref overview_events_bind for more detailed explanation
         of this function and the @ref page_samples_event sample for usage
         examples.
+        The restrictions described in @ref overview_windowids apply to the
+        source ID values specified using @a id and @a lastId.
 
         @param eventType
             The event type to be associated with this event handler.
