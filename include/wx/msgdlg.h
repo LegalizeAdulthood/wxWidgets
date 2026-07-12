@@ -91,7 +91,9 @@ public:
                         const wxString& caption,
                         long style)
         : m_message(message),
-          m_caption(caption)
+          m_caption(caption == wxASCII_STR(wxMessageBoxCaptionStr)
+                        ? wxGetTranslation(wxMessageBoxCaptionStr)
+                        : caption)
     {
         m_parent = GetParentForModalDialog(parent, style);
         SetMessageDialogStyle(style);
