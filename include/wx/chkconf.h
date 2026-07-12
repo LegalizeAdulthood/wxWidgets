@@ -5,6 +5,7 @@
  * Modified by:
  * Created:     09.08.00
  * Copyright:   (c) 2000 Vadim Zeitlin <vadim@wxwidgets.org>
+ *              (c) 2026 wxWidgets development team
  * Licence:     wxWindows licence
  */
 
@@ -1958,6 +1959,15 @@
 #        else
 #            undef wxUSE_GIF
 #            define wxUSE_GIF 0
+#        endif
+#   endif
+
+#   if wxUSE_ICO_CUR
+#        ifdef wxABORT_ON_CONFIG_ERROR
+#            error "wxUSE_ICO_CUR requires wxUSE_IMAGE"
+#        else
+#            undef wxUSE_ICO_CUR
+#            define wxUSE_ICO_CUR 0
 #        endif
 #   endif
 
