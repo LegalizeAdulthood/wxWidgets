@@ -176,6 +176,15 @@ public:
 
     This class may be used to format boolean data in a cell.
 
+    The checked state is taken from the table value, not from the renderer
+    object itself. If the table says that the cell can be accessed as
+    @c wxGRID_VALUE_BOOL, wxGridTableBase::GetValueAsBool() is used. Otherwise
+    the string returned by wxGridTableBase::GetValue() is checked only if
+    wxGridCellBoolEditor::IsTrueValue() returns @true for it, which by default
+    means that @c "1" is checked and the empty string is unchecked.
+
+    Use the same table accessors to query the cell state in application code.
+
     @library{wxcore}
     @category{grid}
 
@@ -3949,6 +3958,13 @@ public:
 
     /**
         Sets the specified column to display boolean values.
+
+        This associates the standard boolean renderer and editor with cells in
+        the column. It doesn't change how the underlying table stores values:
+        for the default string table, use GetCellValue() with
+        wxGridCellBoolEditor::IsTrueValue() to test whether the cell is
+        checked. For a custom table using @c wxGRID_VALUE_BOOL, use
+        wxGridTableBase::GetValueAsBool().
 
         @see SetColFormatCustom()
     */
