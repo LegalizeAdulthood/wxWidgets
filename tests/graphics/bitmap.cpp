@@ -2058,6 +2058,22 @@ TEST_CASE("wxBitmap::GetSubBitmap", "[bitmap]")
     wxRect rectInvalid = rectAll;
     rectInvalid.Offset(1, 0);
     WX_ASSERT_FAILS_WITH_ASSERT( bmp.GetSubBitmap(rectInvalid) );
+
+    wxRect rectInvalidSize = rectAll;
+    rectInvalidSize.SetWidth(-1);
+#if wxDEBUG_LEVEL
+    try
+    {
+        bmp.GetSubBitmap(rectInvalidSize);
+        FAIL_CHECK("expected invalid bitmap region assertion");
+    }
+    catch ( const TestAssertFailure& e )
+    {
+        CHECK( e.m_msg == "invalid bitmap region" );
+    }
+#else
+    CHECK( !bmp.GetSubBitmap(rectInvalidSize).IsOk() );
+#endif
 }
 
 #endif // ports with scaled bitmaps support

@@ -1564,8 +1564,10 @@ wxImage wxImage::GetSubImage( const wxRect &rect ) const
 
     wxCHECK_MSG( IsOk(), image, wxT("invalid image") );
 
-    wxCHECK_MSG( (rect.GetLeft()>=0) && (rect.GetTop()>=0) &&
-                 (rect.GetRight()<=GetWidth()) && (rect.GetBottom()<=GetHeight()),
+    wxCHECK_MSG( (rect.GetLeft() >= 0) && (rect.GetTop() >= 0) &&
+                 (rect.GetWidth() > 0) && (rect.GetHeight() > 0) &&
+                 (rect.GetLeft() <= GetWidth() - rect.GetWidth()) &&
+                 (rect.GetTop() <= GetHeight() - rect.GetHeight()),
                  image, wxT("invalid subimage size") );
 
     const int subwidth = rect.GetWidth();
