@@ -4,6 +4,7 @@
 // Author:      Steven Lamerton
 // Created:     2010-07-07
 // Copyright:   (c) 2010 Steven Lamerton
+//              (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "testprec.h"
@@ -49,6 +50,7 @@ private:
         CPPUNIT_TEST( Bold );
         CPPUNIT_TEST( Italic );
         CPPUNIT_TEST( Underline );
+        CPPUNIT_TEST( UnderlineSelectionRefresh );
         CPPUNIT_TEST( Indent );
         CPPUNIT_TEST( LineSpacing );
         CPPUNIT_TEST( ParagraphSpacing );
@@ -80,6 +82,7 @@ private:
     void Bold();
     void Italic();
     void Underline();
+    void UnderlineSelectionRefresh();
     void Indent();
     void LineSpacing();
     void ParagraphSpacing();
@@ -95,6 +98,45 @@ private:
     wxRichTextCtrl* m_rich;
 
     wxDECLARE_NO_COPY_CLASS(RichTextCtrlTestCase);
+};
+
+class RefreshRecordingRichTextCtrl : public wxRichTextCtrl
+{
+public:
+    RefreshRecordingRichTextCtrl() : m_hasRefreshRect(false)
+    {
+    }
+
+    void ClearRefreshRecord()
+    {
+        m_hasRefreshRect = false;
+        m_refreshRect = wxRect();
+    }
+
+    bool HasRefreshRect() const
+    {
+        return m_hasRefreshRect;
+    }
+    wxRect GetRefreshRect() const
+    {
+        return m_refreshRect;
+    }
+
+    void Refresh( bool eraseBackground = true, const wxRect *rect = nullptr ) override
+    {
+        if ( rect )
+        {
+            m_hasRefreshRect = true;
+            m_refreshRect = *rect;
+        }
+
+        wxRichTextCtrl::Refresh(eraseBackground, rect);
+    }
+private:
+    bool m_hasRefreshRect;
+    wxRect m_refreshRect;
+
+    wxDECLARE_NO_COPY_CLASS(RefreshRecordingRichTextCtrl);
 };
 
 // register in the unnamed registry so that these tests are run by default
@@ -540,6 +582,33 @@ void RichTextCtrlTestCase::Underline()
     m_rich->SetSelection(40, 45);
 
     CPPUNIT_ASSERT(!m_rich->IsSelectionUnderlined());
+}
+
+void RichTextCtrlTestCase::UnderlineSelectionRefresh()
+{
+    RefreshRecordingRichTextCtrl* rich = new RefreshRecordingRichTextCtrl;
+    CPPUNIT_ASSERT(rich->Create(wxTheApp->GetTopWindow(), wxID_ANY, "",
+                                wxDefaultPosition, wxSize(400, 200), wxWANTS_CHARS));
+
+    rich->SetValue("text to underline");
+    rich->SetSelection(8, 17);
+    CPPUNIT_ASSERT(rich->ApplyUnderlineToSelection());
+
+    wxRichTextLine* const line = rich->GetFocusObject()->GetLineAtPosition(8);
+    CPPUNIT_ASSERT(line);
+
+    const wxPoint linePos = rich->GetPhysicalPoint(rich->GetScaledPoint(line->GetAbsolutePosition()));
+    const int lineHeight = (int) (0.5 + line->GetSize().y * rich->GetScale());
+
+    rich->ClearRefreshRecord();
+    rich->SelectNone();
+
+    CPPUNIT_ASSERT(rich->HasRefreshRect());
+    const wxRect rect = rich->GetRefreshRect();
+    CPPUNIT_ASSERT(rect.GetTop() < linePos.y);
+    CPPUNIT_ASSERT(rect.GetBottom() > linePos.y + lineHeight - 1);
+
+    wxDELETE(rich);
 }
 
 void RichTextCtrlTestCase::Indent()

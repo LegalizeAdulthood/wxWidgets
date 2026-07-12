@@ -4,6 +4,7 @@
 // Author:      Julian Smart
 // Created:     2005-09-30
 // Copyright:   (c) Julian Smart
+//              (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -4902,11 +4903,13 @@ bool wxRichTextCtrl::RefreshForSelectionChange(const wxRichTextSelection& oldSel
         wxSize clientSize = GetClientSize();
         wxPoint pt1 = GetPhysicalPoint(GetScaledPoint(firstLine->GetAbsolutePosition()));
         wxPoint pt2 = GetPhysicalPoint(GetScaledPoint(lastLine->GetAbsolutePosition())) + wxPoint(0, (int) (0.5 + lastLine->GetSize().y * GetScale()));
+        const int extraY = wxMax(1, (int) (0.5 + GetScale()));
 
         pt1.x = 0;
-        pt1.y = wxMax(0, pt1.y);
+        // Some text decorations can be drawn just outside the line extent.
+        pt1.y = wxMax(0, pt1.y - extraY);
         pt2.x = 0;
-        pt2.y = wxMin(clientSize.y, pt2.y);
+        pt2.y = wxMin(clientSize.y, pt2.y + extraY);
 
         // Take into account any floating objects within the selection
         if (wxRichTextBuffer::GetFloatingLayoutMode() && GetFocusObject()->GetFloatingObjectCount() > 0)
