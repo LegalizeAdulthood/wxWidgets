@@ -4,6 +4,7 @@
 // Author:      Steven Lamerton
 // Created:     2010-07-07
 // Copyright:   (c) 2010 Steven Lamerton
+//              (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "testprec.h"
@@ -57,6 +58,7 @@ private:
         CPPUNIT_TEST( SymbolBullet );
         CPPUNIT_TEST( FontSize );
         CPPUNIT_TEST( Font );
+        CPPUNIT_TEST( TextEffects );
         CPPUNIT_TEST( Delete );
         CPPUNIT_TEST( Url );
         CPPUNIT_TEST( Table );
@@ -88,6 +90,7 @@ private:
     void SymbolBullet();
     void FontSize();
     void Font();
+    void TextEffects();
     void Delete();
     void Url();
     void Table();
@@ -707,6 +710,25 @@ void RichTextCtrlTestCase::Font()
     m_rich->GetStyle(5, fontstyle);
 
     CPPUNIT_ASSERT_EQUAL(font, fontstyle.GetFont());
+}
+
+void RichTextCtrlTestCase::TextEffects()
+{
+    const int effect = wxTEXT_ATTR_EFFECT_SUPERSCRIPT;
+
+    m_rich->ApplyTextEffectToSelection(effect);
+    CPPUNIT_ASSERT(m_rich->DoesSelectionHaveTextEffectFlag(effect));
+
+    m_rich->WriteText("x");
+
+    m_rich->ApplyTextEffectToSelection(effect);
+    CPPUNIT_ASSERT(!m_rich->DoesSelectionHaveTextEffectFlag(effect));
+
+    m_rich->WriteText("y");
+
+    wxTextAttr style;
+    m_rich->GetStyle(1, style);
+    CPPUNIT_ASSERT((style.GetTextEffects() & effect) == 0);
 }
 
 void RichTextCtrlTestCase::Delete()
