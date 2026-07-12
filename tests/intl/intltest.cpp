@@ -757,6 +757,8 @@ TEST_CASE("wxUILocale::FindLanguageInfo", "[uilocale]")
     CheckFindLanguage("English_United States.utf8", "en_US");
     // Test tag that includes an explicit script
     CheckFindLanguage("sr-Latn-RS", "sr_RS@latin");
+    CheckFindLanguage("sw_TZ", "sw_TZ");
+    CheckFindLanguage("sw-TZ", "sw_TZ");
 
     // Test mixed locales: we should still detect the language correctly, even
     // if we don't recognize the full locale.
