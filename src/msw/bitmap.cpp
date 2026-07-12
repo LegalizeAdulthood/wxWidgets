@@ -1159,8 +1159,9 @@ wxBitmap wxBitmap::GetSubBitmapOfHDC( const wxRect& rect, WXHDC hdc ) const
     wxCHECK_MSG( IsOk(), wxNullBitmap, wxT("invalid bitmap") );
 
     wxCHECK_MSG( (rect.x >= 0) && (rect.y >= 0) &&
-                 (rect.x+rect.width <= GetWidth()) &&
-                 (rect.y+rect.height <= GetHeight()),
+                 (rect.width > 0) && (rect.height > 0) &&
+                 (rect.x <= GetWidth() - rect.width) &&
+                 (rect.y <= GetHeight() - rect.height),
                  wxNullBitmap, wxT("invalid bitmap region") );
 
     wxBitmap ret( rect.width, rect.height, GetDepth() );
