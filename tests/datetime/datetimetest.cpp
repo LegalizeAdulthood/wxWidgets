@@ -1442,6 +1442,14 @@ TEST_CASE("wxDateTime::ParseDateTime", "[datetime]")
         },
 
         {
+            "2001-06-80 12:45",
+            {  1, wxDateTime::Jan, 9999,  0,  0,  0 },
+            false,
+            "2001-06-80 12:45",
+            false
+        },
+
+        {
             // with 'T' separator
             "2010-01-04T14:30",
             {  4, wxDateTime::Jan, 2010, 14, 30,  0 },

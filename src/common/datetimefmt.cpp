@@ -1826,6 +1826,10 @@ wxDateTime::ParseDateTime(const wxString& date, wxString::const_iterator *end)
         if ( !dtTime.ParseTime(date, &endTime) )
             return false;
 
+        // Require a separator here, as ParseTime() also accepts just hours.
+        if ( endTime == date.end() || !wxIsspace(*endTime) )
+            return false;
+
         while ( endTime != date.end() && wxIsspace(*endTime) )
             ++endTime;
 
