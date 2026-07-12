@@ -5,6 +5,7 @@
 // Created:     2008-11-26
 // Copyright:   (c) 2008 Vadim Zeitlin <vadim@wxwidgets.org>
 //              (c) 2010 Steven Lamerton
+//              (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -27,6 +28,7 @@
 #include "wx/panel.h"
 #include "wx/settings.h"
 #include "wx/treectrl.h"
+#include "wx/generic/treectlg.h"
 #include "wx/uiaction.h"
 #include "asserthelper.h"
 #include "testableframe.h"
@@ -81,6 +83,43 @@ public:
     TreeCtrlHideRootTestCase() : TreeCtrlTestCase(wxTR_HIDE_ROOT)
     {
     }
+};
+
+class GenericTreeCtrlMultipleTestCase
+{
+public:
+    GenericTreeCtrlMultipleTestCase()
+    {
+        m_tree = new wxGenericTreeCtrl(wxTheApp->GetTopWindow(),
+                                       wxID_ANY,
+                                       wxDefaultPosition,
+                                       wxSize(400, 200),
+                                       wxTR_DEFAULT_STYLE | wxTR_EDIT_LABELS | wxTR_MULTIPLE);
+
+        m_root = m_tree->AddRoot("root");
+        m_child1 = m_tree->AppendItem(m_root, "child1");
+        m_child2 = m_tree->AppendItem(m_root, "child2");
+
+        m_tree->SetSize(400, 200);
+        m_tree->ExpandAll();
+        m_tree->Refresh();
+        m_tree->Update();
+    }
+
+    ~GenericTreeCtrlMultipleTestCase()
+    {
+        delete m_tree;
+    }
+
+protected:
+
+    wxGenericTreeCtrl *m_tree = nullptr;
+
+    wxTreeItemId m_root,
+                 m_child1,
+                 m_child2;
+
+    wxDECLARE_NO_COPY_CLASS(GenericTreeCtrlMultipleTestCase);
 };
 
 // ----------------------------------------------------------------------------
@@ -567,6 +606,26 @@ TEST_CASE_METHOD(TreeCtrlTestCase, "wxTreeCtrl::KeyNavigation", "[treectrl]")
     wxYield();
 
     CHECK(m_tree->GetSelection() == m_child2);
+}
+
+TEST_CASE_METHOD(GenericTreeCtrlMultipleTestCase, "wxGenericTreeCtrl::FocusMultiSelect", "[treectrl]")
+{
+    wxUIActionSimulator sim;
+
+    CHECK_FALSE(m_tree->GetFocusedItem().IsOk());
+    CHECK_FALSE(m_tree->IsSelected(m_root));
+
+    m_tree->SetFocus();
+    wxYield();
+
+    CHECK(m_tree->GetFocusedItem() == m_root);
+    CHECK_FALSE(m_tree->IsSelected(m_root));
+
+    sim.Char(WXK_DOWN);
+    wxYield();
+
+    CHECK(m_tree->GetFocusedItem() == m_child1);
+    CHECK(m_tree->IsSelected(m_child1));
 }
 
 #endif // wxUSE_UIACTIONSIMULATOR
