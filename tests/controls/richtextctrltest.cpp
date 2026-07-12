@@ -4,6 +4,7 @@
 // Author:      Steven Lamerton
 // Created:     2010-07-07
 // Copyright:   (c) 2010 Steven Lamerton
+// Copyright:   (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "testprec.h"
@@ -60,6 +61,7 @@ private:
         CPPUNIT_TEST( Delete );
         CPPUNIT_TEST( Url );
         CPPUNIT_TEST( Table );
+        CPPUNIT_TEST( ReparentRefresh );
     CPPUNIT_TEST_SUITE_END();
 
     void IsModified();
@@ -91,11 +93,35 @@ private:
     void Delete();
     void Url();
     void Table();
+    void ReparentRefresh();
 
     wxRichTextCtrl* m_rich;
 
     wxDECLARE_NO_COPY_CLASS(RichTextCtrlTestCase);
 };
+
+#ifdef __WXMSW__
+
+class RefreshCountingRichTextCtrl : public wxRichTextCtrl
+{
+public:
+    RefreshCountingRichTextCtrl() : m_refreshCount(0) { }
+
+    void ClearRefreshCount() { m_refreshCount = 0; }
+    int GetRefreshCount() const { return m_refreshCount; }
+
+    void Refresh( bool eraseBackground = true, const wxRect *rect = nullptr ) override
+    {
+        ++m_refreshCount;
+        wxRichTextCtrl::Refresh(eraseBackground, rect);
+    }
+private:
+    int m_refreshCount;
+
+    wxDECLARE_NO_COPY_CLASS(RefreshCountingRichTextCtrl);
+};
+
+#endif // __WXMSW__
 
 // register in the unnamed registry so that these tests are run by default
 CPPUNIT_TEST_SUITE_REGISTRATION( RichTextCtrlTestCase );
@@ -876,6 +902,29 @@ void RichTextCtrlTestCase::Table()
 
     m_rich->Clear();
     m_rich->SetFocusObject(nullptr);
+}
+
+void RichTextCtrlTestCase::ReparentRefresh()
+{
+#ifdef __WXMSW__
+    wxWindow* oldParent = wxTheApp->GetTopWindow();
+    wxWindow* newParent = new wxWindow(oldParent, wxID_ANY);
+    RefreshCountingRichTextCtrl* rich = new RefreshCountingRichTextCtrl;
+
+    CPPUNIT_ASSERT(rich->Create(oldParent, wxID_ANY, "",
+                                wxDefaultPosition, wxSize(400, 200), wxWANTS_CHARS));
+
+    rich->SetValue("red blue");
+    rich->SetStyle(0, 2, wxTextAttr(*wxRED));
+    rich->SetStyle(4, 7, wxTextAttr(*wxBLUE));
+    rich->ClearRefreshCount();
+
+    CPPUNIT_ASSERT(rich->Reparent(newParent));
+    CPPUNIT_ASSERT(rich->GetRefreshCount() > 0);
+
+    wxDELETE(rich);
+    wxDELETE(newParent);
+#endif // __WXMSW__
 }
 
 #endif //wxUSE_RICHTEXT

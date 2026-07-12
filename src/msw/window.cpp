@@ -5,6 +5,7 @@
 // Modified by: VZ on 13.05.99: no more Default(), MSWOnXXX() reorganisation
 // Created:     04/01/98
 // Copyright:   (c) Julian Smart
+// Copyright:   (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -1625,6 +1626,10 @@ bool wxWindowMSW::Reparent(wxWindowBase *parent)
     {
         EnsureParentHasControlParentStyle(GetParent());
     }
+
+    // Reparenting the native HWND can leave stale pixels until the next
+    // incidental redraw, e.g. after selecting text in wxRichTextCtrl.
+    Refresh(false);
 
     return true;
 }
