@@ -92,7 +92,10 @@ public:
     */
     wxGenericValidator(wxArrayInt* valPtr);
     /**
-        Constructor taking a wxDateTime pointer. This will be used for
+        Constructor taking a wxDateTime pointer.
+
+        This constructor is kept for compatibility, but wxGenericValidator
+        doesn't currently support transferring values to or from
         wxDatePickerCtrl.
 
         @param valPtr
