@@ -16,6 +16,9 @@
 #endif // WX_PRECOMP
 
 #include "wx/richtext/richtextctrl.h"
+#if wxUSE_PRINTING_ARCHITECTURE
+    #include "wx/richtext/richtextprint.h"
+#endif
 #include "wx/richtext/richtextstyles.h"
 #include "wx/uiaction.h"
 
@@ -911,5 +914,37 @@ TEST_CASE_METHOD(RichTextCtrlTestCase, "RichTextCtrl::Table", "[richtextctrl]")
     m_rich->Clear();
     m_rich->SetFocusObject(nullptr);
 }
+
+#if wxUSE_PRINTING_ARCHITECTURE
+
+TEST_CASE_METHOD(RichTextCtrlTestCase, "RichTextCtrl::PrintMargins",
+                 "[richtextctrl]")
+{
+    wxBitmap bmp(720, 1000);
+    wxMemoryDC dc(bmp);
+
+    wxRichTextBuffer buffer;
+    wxRichTextPrintout printout;
+    printout.SetRichTextBuffer(&buffer);
+    printout.SetDC(&dc);
+    printout.SetPPIScreen(254, 254);
+    printout.SetPPIPrinter(254, 254);
+    printout.SetPageSizePixels(720, 1000);
+    printout.SetPageSizeMM(72, 100);
+    printout.SetPaperRectPixels(wxRect(-40, -40, 800, 1080));
+    printout.SetMargins(100, 100, 100, 100);
+
+    wxRect textRect, headerRect, footerRect;
+    printout.CalculateScaling(&dc, textRect, headerRect, footerRect);
+
+    CHECK(textRect.x == 60);
+    CHECK(textRect.y == 60);
+    CHECK(textRect.width == 600);
+    CHECK(textRect.height == 880);
+
+    dc.SelectObject(wxNullBitmap);
+}
+
+#endif // wxUSE_PRINTING_ARCHITECTURE
 
 #endif //wxUSE_RICHTEXT
