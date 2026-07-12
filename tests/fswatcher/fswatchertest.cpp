@@ -4,6 +4,7 @@
 // Author:      Bartosz Bekier
 // Created:     2009-06-11
 // Copyright:   (c) 2009 Bartosz Bekier
+//              (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -452,6 +453,116 @@ TEST_CASE_METHOD(FileSystemWatcherTestCase,
     EventTester tester;
     tester.Run();
 }
+
+#ifdef __WINDOWS__
+
+// ----------------------------------------------------------------------------
+// TestEventDelayedDirDelete
+// ----------------------------------------------------------------------------
+
+TEST_CASE_METHOD(FileSystemWatcherTestCase,
+                 "wxFileSystemWatcher::DelayedDirDelete", "[fsw]")
+{
+    class EventTester : public wxEvtHandler
+    {
+    public:
+        EventTester() :
+            m_timer(this),
+            m_deletePending(false),
+            m_gotCreate(false),
+            m_gotDelete(false)
+        {
+            Bind(wxEVT_FSWATCHER, &EventTester::OnFileSystemEvent, this);
+            Bind(wxEVT_TIMER, &EventTester::OnTimer, this);
+            CallAfter(&EventTester::OnIdleInit);
+        }
+
+        ~EventTester()
+        {
+            m_timer.Stop();
+
+            if ( m_loop.IsRunning() )
+                m_loop.Exit();
+
+            if ( wxDirExists(m_dir) )
+                wxRmdir(m_dir);
+        }
+
+        void Run()
+        {
+            m_loop.Run();
+
+            CHECK(m_gotCreate);
+            CHECK(m_gotDelete);
+        }
+
+    private:
+        void OnIdleInit()
+        {
+            CHECK(wxEventLoopBase::GetActive());
+
+            m_watcher.reset(new wxFileSystemWatcher());
+            m_watcher->SetOwner(this);
+
+            wxFileName watchDir = EventGenerator::GetWatchDir();
+            CHECK(m_watcher->Add(watchDir,
+                                 wxFSW_EVENT_CREATE | wxFSW_EVENT_DELETE));
+
+            m_dir = watchDir.GetPathWithSep() + "delayed-dir-delete";
+            REQUIRE(!wxDirExists(m_dir));
+            REQUIRE(wxMkdir(m_dir));
+
+            m_deletePending = true;
+            m_timer.Start(300, true);
+        }
+
+        void OnTimer(wxTimerEvent& WXUNUSED(event))
+        {
+            if ( m_deletePending )
+            {
+                m_deletePending = false;
+
+                REQUIRE(wxDirExists(m_dir));
+                CHECK(wxRmdir(m_dir));
+
+                m_timer.Start(3000, true);
+            }
+            else
+            {
+                m_loop.Exit();
+            }
+        }
+
+        void OnFileSystemEvent(wxFileSystemWatcherEvent& event)
+        {
+            if ( event.GetPath().GetFullPath() != m_dir )
+                return;
+
+            if ( event.GetChangeType() == wxFSW_EVENT_CREATE )
+            {
+                m_gotCreate = true;
+            }
+            else if ( event.GetChangeType() == wxFSW_EVENT_DELETE )
+            {
+                m_gotDelete = true;
+                m_loop.Exit();
+            }
+        }
+
+        wxEventLoop m_loop;
+        wxTimer m_timer;
+        std::unique_ptr<wxFileSystemWatcher> m_watcher;
+        wxString m_dir;
+        bool m_deletePending;
+        bool m_gotCreate;
+        bool m_gotDelete;
+    };
+
+    EventTester tester;
+    tester.Run();
+}
+
+#endif // __WINDOWS__
 
 // kqueue-based implementation doesn't collapse create/delete pairs in
 // renames and detects neither modifications nor access to the
