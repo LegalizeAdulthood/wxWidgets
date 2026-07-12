@@ -530,7 +530,8 @@ public:
     unsigned int GetSpacing() const;
 
     /**
-        Returns the background colour of the item.
+        Returns the background colour of the item, or ::wxNullColour if no
+        explicit background colour is set for it.
     */
     virtual wxColour GetItemBackgroundColour(const wxTreeItemId& item) const;
 
@@ -589,7 +590,8 @@ public:
     virtual wxString GetItemText(const wxTreeItemId& item) const;
 
     /**
-        Returns the colour of the item label.
+        Returns the colour of the item label, or ::wxNullColour if no explicit
+        text colour is set for it.
     */
     virtual wxColour GetItemTextColour(const wxTreeItemId& item) const;
 
@@ -901,6 +903,10 @@ public:
 
     /**
         Sets the colour of the item's background.
+
+        Passing ::wxNullColour resets the item to use the tree control
+        background colour. This also allows the item to follow later changes
+        to the tree control background colour.
     */
     virtual void SetItemBackgroundColour(const wxTreeItemId& item,
                                          const wxColour& col);
@@ -982,6 +988,8 @@ public:
 
     /**
         Sets the colour of the item's text.
+
+        Passing ::wxNullColour resets the item to use the default text colour.
     */
     virtual void SetItemTextColour(const wxTreeItemId& item,
                                    const wxColour& col);
