@@ -4,6 +4,7 @@
 // Author:      Vadim Zeitlin
 // Created:     2007-09-25
 // Copyright:   (c) 2007 Vadim Zeitlin <vadim@wxwidgets.org>
+//              (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -21,7 +22,13 @@
 #endif // WX_PRECOMP
 
 #include "wx/platinfo.h"
+#include "wx/textcompleter.h"
+#include "wx/thread.h"
 #include "wx/uiaction.h"
+
+#ifdef __WXMSW__
+    #include "wx/msw/wrapwin.h"
+#endif // __WXMSW__
 
 #if wxUSE_CLIPBOARD
     #include "wx/clipbrd.h"
@@ -76,6 +83,9 @@ private:
     CPPUNIT_TEST_SUITE( TextCtrlTestCase );
         // These tests run for single line text controls.
         wxTEXT_ENTRY_TESTS();
+#if defined(__WXMSW__) && wxUSE_OLE
+        CPPUNIT_TEST( AutoCompleteCustomPrefix );
+#endif // __WXMSW__ && wxUSE_OLE
         WXUISIM_TEST( MaxLength );
         CPPUNIT_TEST( PositionToXYSingleLine );
         CPPUNIT_TEST( XYToPositionSingleLine );
@@ -149,6 +159,9 @@ private:
 #endif // wxUSE_RICHEDIT
     void PositionToXYSingleLine();
     void XYToPositionSingleLine();
+#if defined(__WXMSW__) && wxUSE_OLE
+    void AutoCompleteCustomPrefix();
+#endif // __WXMSW__ && wxUSE_OLE
 
     void DoPositionToCoordsTestWithStyle(long style);
     void DoPositionToXYMultiLine(long style);
@@ -232,6 +245,51 @@ void TextCtrlTestCase::MultiLineReplace()
     CPPUNIT_ASSERT_EQUAL("Hello changed", m_text->GetValue());
     CPPUNIT_ASSERT_EQUAL(13, m_text->GetInsertionPoint());
 }
+
+#if defined(__WXMSW__) && wxUSE_OLE
+
+void TextCtrlTestCase::AutoCompleteCustomPrefix()
+{
+    class RecordingCompleter : public wxTextCompleterSimple
+    {
+    public:
+        virtual void GetCompletions(const wxString& prefix, wxArrayString& res) override
+        {
+            {
+                wxCriticalSectionLocker lock(m_cs);
+                m_prefixes.push_back(prefix);
+            }
+
+            if ( !prefix.empty() )
+                res.push_back(prefix + " completion");
+        }
+
+        bool HasPrefix(const wxString& prefix) const
+        {
+            wxCriticalSectionLocker lock(m_cs);
+            return m_prefixes.Index(prefix) != wxNOT_FOUND;
+        }
+
+    private:
+        mutable wxCriticalSection m_cs;
+        wxArrayString m_prefixes;
+    };
+
+    RecordingCompleter *completer = new RecordingCompleter;
+    CPPUNIT_ASSERT( m_text->AutoComplete(completer) );
+
+    ::SendMessage((HWND)m_text->GetHWND(), WM_CHAR, '1', 1);
+
+    CPPUNIT_ASSERT_EQUAL("1", m_text->GetValue());
+
+    WaitFor("custom text completer prefix", [&]() {
+        return completer->HasPrefix("1");
+    });
+
+    CPPUNIT_ASSERT( completer->HasPrefix("1") );
+}
+
+#endif // __WXMSW__ && wxUSE_OLE
 
 void TextCtrlTestCase::ReadOnly()
 {
