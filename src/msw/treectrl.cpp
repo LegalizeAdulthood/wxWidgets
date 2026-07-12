@@ -5,6 +5,7 @@
 // Modified by: Vadim Zeitlin to be less MSW-specific on 10.10.98
 // Created:     1997
 // Copyright:   (c) Julian Smart
+//              (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -1863,25 +1864,18 @@ void wxTreeCtrl::Unselect()
         return;
     }
 
-    if ( HasFlag(wxTR_MULTIPLE) )
-    {
-        wxTreeEvent changingEvent(wxEVT_TREE_SEL_CHANGING,
-                                  this, wxTreeItemId());
-        changingEvent.m_itemOld = htFocus;
+    wxTreeEvent changingEvent(wxEVT_TREE_SEL_CHANGING,
+                              this, wxTreeItemId());
+    changingEvent.m_itemOld = htFocus;
 
-        if ( IsTreeEventAllowed(changingEvent) )
-        {
-            ClearFocusedItem();
-
-            wxTreeEvent changedEvent(wxEVT_TREE_SEL_CHANGED,
-                                     this, wxTreeItemId());
-            changedEvent.m_itemOld = htFocus;
-            (void)HandleTreeEvent(changedEvent);
-        }
-    }
-    else
+    if ( IsTreeEventAllowed(changingEvent) )
     {
         ClearFocusedItem();
+
+        wxTreeEvent changedEvent(wxEVT_TREE_SEL_CHANGED,
+                                 this, wxTreeItemId());
+        changedEvent.m_itemOld = htFocus;
+        (void)HandleTreeEvent(changedEvent);
     }
 }
 
