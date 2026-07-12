@@ -4,6 +4,7 @@
 // Author:      Vadim Zeitlin
 // Created:     2007-09-25
 // Copyright:   (c) 2007 Vadim Zeitlin <vadim@wxwidgets.org>
+// Copyright:   (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -1775,6 +1776,43 @@ TEST_CASE("wxTextCtrl::EmptyUndoBuffer", "[wxTextCtrl][undo]")
 }
 
 #endif // __MINGW32_TOOLCHAIN__
+
+#if defined(__WXMSW__) && wxUSE_OLE && wxUSE_RICHEDIT
+
+TEST_CASE("wxTextCtrl::AutoCompleteRichMultiline", "[wxTextCtrl][autocomplete]")
+{
+    wxArrayString choices;
+    choices.Add("match");
+    choices.Add("matching");
+
+    long richStyle = 0;
+
+    SECTION("Rich")
+    {
+        richStyle = wxTE_RICH;
+    }
+
+    SECTION("Rich2")
+    {
+        richStyle = wxTE_RICH2;
+    }
+
+    if ( !richStyle )
+        return;
+
+    auto text = std::make_unique<wxTextCtrl>
+                (
+                    wxTheApp->GetTopWindow(), wxID_ANY, "",
+                    wxDefaultPosition, wxSize(400, 200),
+                    wxTE_MULTILINE | richStyle
+                );
+
+    text->ChangeValue("keep me");
+    CHECK_FALSE( text->AutoComplete(choices) );
+    CHECK( text->GetValue() == "keep me" );
+}
+
+#endif // __WXMSW__ && wxUSE_OLE && wxUSE_RICHEDIT
 
 #if wxUSE_RICHEDIT
 
