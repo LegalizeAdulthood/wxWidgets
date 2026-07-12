@@ -358,10 +358,24 @@ void wxRichTextPrintout::CalculateScaling(wxDC* dc, wxRect& textRect, wxRect& he
     int headerMargin = wxRichTextObject::ConvertTenthsMMToPixels(ppiPrinterX, m_headerFooterData.GetHeaderMargin());
     int footerMargin = wxRichTextObject::ConvertTenthsMMToPixels(ppiPrinterX, m_headerFooterData.GetFooterMargin());
 
+    wxRect paperRect = GetPaperRectPixels();
+    if ( paperRect.IsEmpty() )
+        paperRect = wxRect(0, 0, pageWidth, pageHeight);
+
+    int contentLeft = wxMax(0, paperRect.x + marginLeft);
+    int contentTop = wxMax(0, paperRect.y + marginTop);
+    int contentRight = wxMin(pageWidth, paperRect.x + paperRect.width - marginRight);
+    int contentBottom = wxMin(pageHeight, paperRect.y + paperRect.height - marginBottom);
+
+    if ( contentRight < contentLeft )
+        contentRight = contentLeft;
+    if ( contentBottom < contentTop )
+        contentBottom = contentTop;
+
     dc->SetUserScale(overallScale, overallScale);
 
-    wxRect rect((int) (marginLeft/scale), (int) (marginTop/scale),
-                (int) ((pageWidth - marginLeft - marginRight)/scale), (int)((pageHeight - marginTop - marginBottom)/scale));
+    wxRect rect((int) (contentLeft/scale), (int) (contentTop/scale),
+                (int) ((contentRight - contentLeft)/scale), (int)((contentBottom - contentTop)/scale));
 
     headerRect = wxRect(0, 0, 0, 0);
 
