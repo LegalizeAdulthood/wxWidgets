@@ -11,7 +11,7 @@
 
 #include "wx/defs.h"
 
-#if wxUSE_STREAMS && (wxUSE_ICO_CUR || wxUSE_GIF)
+#if wxUSE_STREAMS && wxUSE_IMAGE && wxUSE_ICO_CUR
 
 #include "wx/stream.h"
 #include "wx/image.h"
@@ -80,6 +80,6 @@ private:
 };
 
 
-#endif  // wxUSE_STREAMS && (wxUSE_ICO_CUR || wxUSE_GIF)
+#endif  // wxUSE_STREAMS && wxUSE_IMAGE && wxUSE_ICO_CUR
 
 #endif  // _WX_ANIDECOD_H
