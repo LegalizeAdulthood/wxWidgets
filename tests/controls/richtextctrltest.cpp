@@ -420,6 +420,35 @@ TEST_CASE_METHOD(RichTextCtrlTestCase, "RichTextCtrl::Selection",
     CHECK(m_rich->GetStringSelection() == "more");
 }
 
+TEST_CASE_METHOD(RichTextCtrlTestCase, "RichTextCtrl::SelectionEvent",
+                 "[richtextctrl]")
+{
+    m_rich->SetValue("some more text");
+
+    EventCounter selected(m_rich.get(), wxEVT_RICHTEXT_SELECTION_CHANGED);
+
+    m_rich->SetSelection(0, 4);
+    CHECK( selected.GetCount() == 1 );
+
+    selected.Clear();
+
+    m_rich->SetSelection(0, 4);
+    CHECK( selected.GetCount() == 0 );
+
+    m_rich->SetSelection(5, 9);
+    CHECK( selected.GetCount() == 1 );
+
+    selected.Clear();
+
+    m_rich->SelectNone();
+    CHECK( selected.GetCount() == 1 );
+
+    selected.Clear();
+
+    m_rich->SelectNone();
+    CHECK( selected.GetCount() == 0 );
+}
+
 TEST_CASE_METHOD(RichTextCtrlTestCase, "RichTextCtrl::Editable",
                  "[richtextctrl]")
 {
