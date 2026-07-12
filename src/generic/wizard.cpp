@@ -9,6 +9,7 @@
 //              Robert Vazan (sizers)
 // Created:     15.08.99
 // Copyright:   (c) 1999 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
+//              (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -647,6 +648,13 @@ bool wxWizard::ShowPage(wxWizardPage *page, bool goingForward)
     // and finally show it
     m_page->Show();
     m_page->SetFocus();
+
+#ifdef __WXMSW__
+    // Leaving focus on a page without focusable children breaks button
+    // mnemonics such as Alt-N and Alt-C under MSW.
+    if ( wxWindow::FindFocus() == m_page )
+        m_btnNext->SetFocus();
+#endif // __WXMSW__
 
     if ( !m_usingSizer )
         m_sizerBmpAndPage->Layout();
