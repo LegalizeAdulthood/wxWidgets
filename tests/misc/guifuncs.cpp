@@ -45,6 +45,11 @@
     #include <vector>
 #endif // wxHAS_VIRTUAL_FILE_DATA_OBJECT
 
+#if defined(__WXMSW__) && wxUSE_TASKBARICON
+    #include "wx/taskbar.h"
+    #include "wx/msw/private.h"
+#endif
+
 #include "asserthelper.h"
 #include "waitfor.h"
 
@@ -60,6 +65,43 @@ wxGCC_WARNING_SUPPRESS(array-bounds)
 // ----------------------------------------------------------------------------
 // the tests
 // ----------------------------------------------------------------------------
+
+#if defined(__WXMSW__) && wxUSE_TASKBARICON
+
+namespace
+{
+
+class TestTaskBarIcon : public wxTaskBarIcon
+{
+public:
+    long SendTaskBarMessage(long lParam)
+    {
+        const UINT msgTaskbar =
+            ::RegisterWindowMessage(wxT("wxTaskBarIconMessage"));
+
+        return WindowProc(msgTaskbar, 0, lParam);
+    }
+};
+
+} // anonymous namespace
+
+TEST_CASE("GUI::TaskBarContextMenu", "[guifuncs][taskbar]")
+{
+    TestTaskBarIcon icon;
+    int clicks = 0;
+
+    icon.Bind(wxEVT_TASKBAR_CLICK,
+              [&clicks](wxTaskBarIconEvent&)
+              {
+                  clicks++;
+              });
+
+    icon.SendTaskBarMessage(WM_CONTEXTMENU);
+
+    CHECK( clicks == 1 );
+}
+
+#endif // defined(__WXMSW__) && wxUSE_TASKBARICON
 
 TEST_CASE("GUI::DisplaySize", "[guifuncs]")
 {
