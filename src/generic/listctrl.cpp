@@ -4,6 +4,7 @@
 // Author:      Robert Roebling
 //              Vadim Zeitlin (virtual list control support)
 // Copyright:   (c) 1998 Robert Roebling
+//              (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -3080,6 +3081,19 @@ void wxListMainWindow::OnChar( wxKeyEvent &event )
     }
 
     int keyCode = event.GetKeyCode();
+    if ( GetItemCount() == 1 && !IsHighlighted(m_current) )
+    {
+        switch ( keyCode )
+        {
+            case WXK_UP:
+            case WXK_DOWN:
+            case WXK_LEFT:
+            case WXK_RIGHT:
+                OnArrowChar( m_current, event );
+                return;
+        }
+    }
+
     switch ( keyCode )
     {
         case WXK_UP:
