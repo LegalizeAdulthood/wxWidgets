@@ -4,6 +4,7 @@
 // Author:      Julian Smart
 // Created:     28/6/2000
 // Copyright:   (c) Julian Smart
+//              (c) 2026 wxWidgets development team
 // Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -25,6 +26,7 @@
 #define wxSPLASH_NO_CENTRE          0x00
 #define wxSPLASH_TIMEOUT            0x04
 #define wxSPLASH_NO_TIMEOUT         0x00
+#define wxSPLASH_NO_DISMISS_ON_CLICK 0x08
 
 class WXDLLIMPEXP_FWD_CORE wxSplashScreenWindow;
 

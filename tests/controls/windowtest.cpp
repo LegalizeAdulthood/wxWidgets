@@ -26,6 +26,7 @@
 #include "wx/caret.h"
 #include "wx/cshelp.h"
 #include "wx/dcclient.h"
+#include "wx/splash.h"
 #include "wx/timer.h"
 #include "wx/tooltip.h"
 #include "wx/wupdlock.h"
@@ -285,6 +286,26 @@ TEST_CASE_METHOD(WindowTestCase, "Window::ContextHelpCaptureLost",
     CHECK(!win->HasCapture());
 }
 #endif // wxUSE_HELP
+
+#if wxUSE_SPLASH
+
+TEST_CASE("wxSplashScreen::NoDismissOnClick", "[splash]")
+{
+    wxBitmap bmp(1, 1);
+    const long splashStyle = wxSPLASH_NO_CENTRE | wxSPLASH_NO_TIMEOUT |
+                             wxSPLASH_NO_DISMISS_ON_CLICK;
+    wxSplashScreen* splash = new wxSplashScreen(bmp, splashStyle, 0,
+                                                wxTheApp->GetTopWindow(),
+                                                wxID_ANY);
+
+    wxMouseEvent event(wxEVT_LEFT_DOWN);
+    CHECK( splash->FilterEvent(event) == -1 );
+    CHECK_FALSE( splash->IsBeingDeleted() );
+
+    delete splash;
+}
+
+#endif // wxUSE_SPLASH
 
 TEST_CASE_METHOD(WindowTestCase, "Window::Properties", "[window]")
 {
