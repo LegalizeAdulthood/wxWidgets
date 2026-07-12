@@ -559,7 +559,7 @@ WidgetsFrame::WidgetsFrame(const wxString& title)
     menuTextEntry->AppendRadioItem(TextEntry_AutoCompleteDirectories,
                                    "&Directories names auto-completion");
     menuTextEntry->AppendRadioItem(TextEntry_AutoCompleteCustom,
-                                   "&Custom auto-completion");
+                                   "&Custom auto-completion for current entry");
     menuTextEntry->AppendRadioItem(TextEntry_AutoCompleteKeyLength,
                                    "Custom with &min length");
     menuTextEntry->AppendSeparator();
@@ -1266,8 +1266,9 @@ void WidgetsFrame::DoUseCustomAutoComplete(size_t minLength)
 
     if ( entry->AutoComplete(new CustomTextCompleter(minLength)))
     {
-        wxLogMessage("Enabled custom auto completer for \"NNN XX\" items "
-                     "(where N is a digit and X is a letter).");
+        wxLogMessage("Enabled custom auto completer for the current text "
+                     "entry using \"NNN XX\" items (where N is a digit and "
+                     "X is a letter).");
     }
     else
     {
