@@ -4,6 +4,7 @@
 // Author:      Julian Smart
 // Created:
 // Copyright:   (c) Julian Smart
+//              (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -91,7 +92,9 @@ public:
                         const wxString& caption,
                         long style)
         : m_message(message),
-          m_caption(caption)
+          m_caption(caption == wxASCII_STR(wxMessageBoxCaptionStr)
+                        ? wxGetTranslation(wxMessageBoxCaptionStr)
+                        : caption)
     {
         m_parent = GetParentForModalDialog(parent, style);
         SetMessageDialogStyle(style);
