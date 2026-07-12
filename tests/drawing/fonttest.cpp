@@ -4,6 +4,7 @@
 // Author:      Armel Asselin
 // Created:     2014-02-28
 // Copyright:   (c) 2014 Ellié Computing <opensource@elliecomputing.com>
+//              (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -17,6 +18,11 @@
     #include "wx/font.h"
 #endif // WX_PRECOMP
 
+#include "wx/bitmap.h"
+#include "wx/colour.h"
+#include "wx/dcmemory.h"
+#include "wx/image.h"
+
 #include "drawing.h"
 
 #ifdef __WXGTK__
@@ -24,6 +30,73 @@
 #endif
 
 #if wxUSE_TEST_GC_DRAWING
+
+#ifdef __WXMSW__
+
+namespace
+{
+
+const wxSize TEXT_BITMAP_SIZE(240, 240);
+const wxPoint TEXT_ORIGIN(120, 120);
+
+wxRect GetRotatedTextBounds(double angle)
+{
+    wxBitmap bitmap(TEXT_BITMAP_SIZE);
+    wxMemoryDC dc(bitmap);
+    dc.SetBackground(*wxWHITE_BRUSH);
+    dc.Clear();
+    dc.SetBackgroundMode(wxTRANSPARENT);
+    dc.SetTextForeground(*wxBLACK);
+    dc.SetFont(wxFont(wxFontInfo(24).Family(wxFONTFAMILY_SWISS)));
+    dc.DrawRotatedText("TEST", TEXT_ORIGIN.x, TEXT_ORIGIN.y, angle);
+    dc.SelectObject(wxNullBitmap);
+
+    const wxImage image = bitmap.ConvertToImage();
+
+    int left = TEXT_BITMAP_SIZE.x;
+    int top = TEXT_BITMAP_SIZE.y;
+    int right = -1;
+    int bottom = -1;
+
+    for ( int y = 0; y < TEXT_BITMAP_SIZE.y; ++y )
+    {
+        for ( int x = 0; x < TEXT_BITMAP_SIZE.x; ++x )
+        {
+            if ( image.GetRed(x, y) < 250 || image.GetGreen(x, y) < 250 ||
+                 image.GetBlue(x, y) < 250 )
+            {
+                left = wxMin(left, x);
+                top = wxMin(top, y);
+                right = wxMax(right, x);
+                bottom = wxMax(bottom, y);
+            }
+        }
+    }
+
+    if ( right < left || bottom < top )
+        return wxRect();
+
+    return wxRect(left, top, right - left + 1, bottom - top + 1);
+}
+
+} // anonymous namespace
+
+TEST_CASE("wxMemoryDC::DrawRotatedText cardinal angles", "[dc][text][msw]")
+{
+    const wxRect bounds90 = GetRotatedTextBounds(90);
+    const wxRect bounds180 = GetRotatedTextBounds(180);
+    const wxRect bounds270 = GetRotatedTextBounds(270);
+
+    REQUIRE(!bounds90.IsEmpty());
+    REQUIRE(!bounds180.IsEmpty());
+    REQUIRE(!bounds270.IsEmpty());
+
+    CHECK(bounds90.GetHeight() > bounds90.GetWidth());
+    CHECK(bounds180.GetRight() <= TEXT_ORIGIN.x + 2);
+    CHECK(bounds270.GetHeight() > bounds270.GetWidth());
+}
+
+#endif // __WXMSW__
 
 const GraphicsContextDrawingTestCase::DrawingTestCase
 GraphicsContextDrawingTestCase::ms_drawingFontTc = {
