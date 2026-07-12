@@ -195,12 +195,12 @@ public:
     bool CreateFromHICON(WXHICON icon);
 
     /**
-        Returns the Windows icon handle.
+        Returns the native Windows icon handle.
 
-        This wxMSW-specific method returns the native @c HICON used by this
-        icon, cast to @c WXHICON opaque handle type. The handle is still owned
-        by wxIcon and must not be destroyed by the caller. It becomes invalid
-        when the last wxIcon object using it is destroyed.
+        The returned value is an opaque handle which may be cast to @c HICON
+        in wxMSW-specific code. It is still owned by this wxIcon object and
+        must not be destroyed by the caller. It becomes invalid when the last
+        wxIcon object using it is destroyed.
 
         @onlyfor{wxmsw}
     */
