@@ -4,6 +4,7 @@
 // Author:      Steven Lamerton
 // Created:     2010-07-07
 // Copyright:   (c) 2010 Steven Lamerton
+//              (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "testprec.h"
@@ -43,6 +44,7 @@ private:
         CPPUNIT_TEST( UndoRedo );
         CPPUNIT_TEST( CaretPosition );
         CPPUNIT_TEST( Selection );
+        CPPUNIT_TEST( SelectionEvent );
         WXUISIM_TEST( Editable );
         CPPUNIT_TEST( Range );
         CPPUNIT_TEST( Alignment );
@@ -74,6 +76,7 @@ private:
     void UndoRedo();
     void CaretPosition();
     void Selection();
+    void SelectionEvent();
     void Editable();
     void Range();
     void Alignment();
@@ -396,6 +399,34 @@ void RichTextCtrlTestCase::Selection()
     m_rich->SetSelectionRange(range);
 
     CPPUNIT_ASSERT_EQUAL("more", m_rich->GetStringSelection());
+}
+
+void RichTextCtrlTestCase::SelectionEvent()
+{
+    m_rich->SetValue("some more text");
+
+    EventCounter selected(m_rich, wxEVT_RICHTEXT_SELECTION_CHANGED);
+
+    m_rich->SetSelection(0, 4);
+    CPPUNIT_ASSERT_EQUAL(1, selected.GetCount());
+
+    selected.Clear();
+
+    m_rich->SetSelection(0, 4);
+    CPPUNIT_ASSERT_EQUAL(0, selected.GetCount());
+
+    m_rich->SetSelection(5, 9);
+    CPPUNIT_ASSERT_EQUAL(1, selected.GetCount());
+
+    selected.Clear();
+
+    m_rich->SelectNone();
+    CPPUNIT_ASSERT_EQUAL(1, selected.GetCount());
+
+    selected.Clear();
+
+    m_rich->SelectNone();
+    CPPUNIT_ASSERT_EQUAL(0, selected.GetCount());
 }
 
 void RichTextCtrlTestCase::Editable()

@@ -4,6 +4,7 @@
 // Author:      Julian Smart
 // Created:     2005-09-30
 // Copyright:   (c) Julian Smart
+//              (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -4851,6 +4852,23 @@ void wxRichTextCtrl::OnSysColourChanged(wxSysColourChangedEvent& WXUNUSED(event)
 // Refresh the area affected by a selection change
 bool wxRichTextCtrl::RefreshForSelectionChange(const wxRichTextSelection& oldSelection, const wxRichTextSelection& newSelection)
 {
+    if ( oldSelection == newSelection )
+        return false;
+
+    wxRichTextParagraphLayoutBox* eventContainer = newSelection.GetContainer();
+    if ( !eventContainer )
+        eventContainer = oldSelection.GetContainer();
+
+    wxRichTextRange eventRange = wxRICHTEXT_NO_SELECTION;
+    if ( newSelection.IsValid() )
+        eventRange = newSelection.GetRange();
+
+    wxRichTextEvent cmdEvent(wxEVT_RICHTEXT_SELECTION_CHANGED, GetId());
+    cmdEvent.SetEventObject(this);
+    cmdEvent.SetContainer(eventContainer);
+    cmdEvent.SetRange(eventRange);
+    GetEventHandler()->ProcessEvent(cmdEvent);
+
     // If the selection is not part of the focus object, or we have multiple ranges, then the chances are that
     // the selection contains whole containers rather than just text, so refresh everything
     // for now as it would be hard to compute the rectangle bounding all selections.
