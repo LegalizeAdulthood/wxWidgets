@@ -4,6 +4,7 @@
 // Author:      Francesco Montorsi (extracted from console sample)
 // Created:     2010-06-13
 // Copyright:   (c) 2010 wxWidgets team
+//              (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -13,10 +14,10 @@
 #include "testprec.h"
 
 #include "wx/dynlib.h"
+#include "wx/filename.h"
 
 #ifndef __WINDOWS__
     #include "wx/dir.h"
-    #include "wx/filename.h"
 #endif
 
 // ----------------------------------------------------------------------------
@@ -132,3 +133,42 @@ TEST_CASE("DynamicLibrary::Load", "[dynlib]")
     }
 #endif // __WINDOWS__
 }
+
+#ifdef __WINDOWS__
+
+TEST_CASE("DynamicLibrary::ListLoaded", "[dynlib]")
+{
+    static const char* const LIB_NAME = "kernel32.dll";
+
+    wxDynamicLibrary lib(LIB_NAME);
+    REQUIRE( lib.IsLoaded() );
+
+    wxDynamicLibraryDetailsArray dlls = wxDynamicLibrary::ListLoaded();
+
+    if ( !dlls.GetCount() )
+    {
+        WARN("No loaded library details available.");
+        return;
+    }
+
+    bool found = false;
+
+    for ( size_t n = 0; n < dlls.GetCount(); ++n )
+    {
+        const wxDynamicLibraryDetails& details = dlls[n];
+
+        if ( wxFileName(details.GetPath()).GetFullName().CmpNoCase(LIB_NAME) )
+            continue;
+
+        found = true;
+
+        CHECK( details.GetName().CmpNoCase(LIB_NAME) == 0 );
+        CHECK( details.GetName().Find('\\') == wxNOT_FOUND );
+        CHECK( details.GetName().Find('/') == wxNOT_FOUND );
+        CHECK( details.GetPath().CmpNoCase(details.GetName()) != 0 );
+    }
+
+    CHECK( found );
+}
+
+#endif // __WINDOWS__
