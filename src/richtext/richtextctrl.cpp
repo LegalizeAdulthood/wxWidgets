@@ -4,6 +4,7 @@
 // Author:      Julian Smart
 // Created:     2005-09-30
 // Copyright:   (c) Julian Smart
+//              (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -4430,7 +4431,7 @@ bool wxRichTextCtrl::DoesSelectionHaveTextEffectFlag(int flag)
         {
             if (IsDefaultStyleShowing())
                 wxRichTextApplyStyle(attr, GetDefaultStyleEx());
-            return (attr.GetTextEffectFlags() & flag) != 0;
+            return (attr.GetTextEffects() & flag) != 0;
         }
     }
     return false;
