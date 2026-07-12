@@ -51,7 +51,8 @@ wxEventType wxEVT_HYPERLINK;
 
     This class shows a static text element which links to an URL.
 
-    Appearance and behaviour is completely customizable.
+    Appearance and behaviour is customizable, subject to the limitations of
+    the native control used by the current port.
 
     In fact, when the user clicks on the hyperlink, a wxHyperlinkEvent is
     sent but if that event is not handled (or it's skipped; see wxEvent::Skip),
@@ -60,6 +61,12 @@ wxEventType wxEVT_HYPERLINK;
     Note that standard wxWindow functions like wxWindow::SetBackgroundColour,
     wxWindow::SetFont, wxWindow::SetCursor, wxWindow::SetLabel can be used to
     customize appearance of the hyperlink.
+
+    Support for changing the hyperlink-specific colours is port-dependent:
+    the generic implementation honours them, but native controls may ignore
+    some or all of SetNormalColour(), SetHoverColour() and
+    SetVisitedColour(). Notably, native wxGTK ignores these setters, while
+    native wxMSW doesn't use a separate hover colour.
 
     @beginStyleTable
     @style{wxHL_ALIGN_LEFT}
@@ -177,13 +184,18 @@ public:
         Sets the colour used to print the label of the hyperlink when the mouse is over
         the control.
 
-        Changing this colour is not supported in the native wxMSW version.
+        This is fully supported only by the generic implementation. It is
+        ignored by native wxGTK, and native wxMSW uses the normal colour for
+        hover state.
     */
     virtual void SetHoverColour(const wxColour& colour);
 
     /**
         Sets the colour used to print the label when the link has never been clicked before
         (i.e.\ the link has not been @e visited) and the mouse is not over the control.
+
+        This is fully supported by the generic implementation and by native
+        wxMSW, but ignored by native wxGTK.
     */
     virtual void SetNormalColour(const wxColour& colour);
 
@@ -200,6 +212,9 @@ public:
     /**
         Sets the colour used to print the label when the mouse is not over the control
         and the link has already been clicked before (i.e.\ the link has been @e visited).
+
+        This is fully supported by the generic implementation and by native
+        wxMSW, but ignored by native wxGTK.
     */
     virtual void SetVisitedColour(const wxColour& colour);
 };
