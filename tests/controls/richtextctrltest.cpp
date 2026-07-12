@@ -4,6 +4,7 @@
 // Author:      Steven Lamerton
 // Created:     2010-07-07
 // Copyright:   (c) 2010 Steven Lamerton
+//              (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "testprec.h"
@@ -661,6 +662,7 @@ void RichTextCtrlTestCase::SymbolBullet()
     m_rich->BeginSymbolBullet("*", 15, 20);
     m_rich->AddParagraph("bullet one");
     m_rich->EndSymbolBullet();
+    m_rich->AddParagraph("not bullet");
     m_rich->BeginSymbolBullet("%", 25, -5);
     m_rich->AddParagraph("bullet two");
     m_rich->EndSymbolBullet();
@@ -674,7 +676,19 @@ void RichTextCtrlTestCase::SymbolBullet()
     CPPUNIT_ASSERT_EQUAL(15, bullet.GetLeftIndent());
     CPPUNIT_ASSERT_EQUAL(20, bullet.GetLeftSubIndent());
 
-    m_rich->GetStyle(15, bullet);
+    const long plainPos = m_rich->GetValue().Find("not bullet");
+    CPPUNIT_ASSERT(plainPos != wxNOT_FOUND);
+
+    m_rich->GetStyle(plainPos + 1, bullet);
+
+    CPPUNIT_ASSERT(!bullet.HasBulletStyle());
+    CPPUNIT_ASSERT_EQUAL(0, bullet.GetLeftIndent());
+    CPPUNIT_ASSERT_EQUAL(0, bullet.GetLeftSubIndent());
+
+    const long secondBulletPos = m_rich->GetValue().Find("bullet two");
+    CPPUNIT_ASSERT(secondBulletPos != wxNOT_FOUND);
+
+    m_rich->GetStyle(secondBulletPos + 1, bullet);
 
     CPPUNIT_ASSERT(bullet.HasBulletStyle());
     CPPUNIT_ASSERT(bullet.HasBulletText());
