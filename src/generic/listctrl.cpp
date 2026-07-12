@@ -3176,6 +3176,19 @@ void wxListMainWindow::OnChar( wxKeyEvent &event )
     }
 #endif // __WXOSX__
 
+    if ( GetItemCount() == 1 && !IsHighlighted(m_current) )
+    {
+        switch ( keyCode )
+        {
+            case WXK_UP:
+            case WXK_DOWN:
+            case WXK_LEFT:
+            case WXK_RIGHT:
+                OnArrowChar( m_current, event );
+                return;
+        }
+    }
+
     switch ( keyCode )
     {
         case WXK_UP:
