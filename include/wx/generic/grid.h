@@ -5,6 +5,7 @@
 // Modified by: Santiago Palacios
 // Created:     1/08/1999
 // Copyright:   (c) Michael Bedward
+//              (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -2684,8 +2685,7 @@ protected:
     // do we have some place to store attributes in?
     bool CanHaveAttributes() const;
 
-    // cell attribute cache (currently we only cache 1, may be will do
-    // more/better later)
+    // cell attribute cache storage, unused but kept for ABI compatibility
     struct CachedAttr
     {
         int             row, col;
@@ -2695,14 +2695,13 @@ protected:
     // invalidates the attribute cache
     void ClearAttrCache();
 
-    // adds an attribute to cache
+    // unused compatibility function
     void CacheAttr(int row, int col, wxGridCellAttr *attr) const;
 
-    // looks for an attr in cache, returns true if found
+    // unused compatibility function
     bool LookupAttr(int row, int col, wxGridCellAttr **attr) const;
 
-    // looks for the attr in cache, if not found asks the table and caches the
-    // result
+    // asks the table for the attr
     wxGridCellAttr *GetCellAttr(int row, int col) const;
     wxGridCellAttr *GetCellAttr(const wxGridCellCoords& coords ) const
         { return GetCellAttr( coords.GetRow(), coords.GetCol() ); }

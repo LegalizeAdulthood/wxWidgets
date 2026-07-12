@@ -5,6 +5,7 @@
 // Modified by: Robin Dunn, Vadim Zeitlin, Santiago Palacios
 // Created:     1/08/1999
 // Copyright:   (c) Michael Bedward (mbedward@ozemail.com.au)
+//              (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -9946,64 +9947,38 @@ void wxGrid::ClearAttrCache()
 
 void wxGrid::RefreshAttr(int row, int col)
 {
-    if ( m_attrCache.row == row && m_attrCache.col == col )
-        ClearAttrCache();
+    wxUnusedVar(row);
+    wxUnusedVar(col);
 }
-
 
 void wxGrid::CacheAttr(int row, int col, wxGridCellAttr *attr) const
 {
-    if ( attr != nullptr )
-    {
-        wxGrid * const self = const_cast<wxGrid *>(this);
-
-        self->ClearAttrCache();
-        self->m_attrCache.row = row;
-        self->m_attrCache.col = col;
-        self->m_attrCache.attr = attr;
-        wxSafeIncRef(attr);
-    }
+    wxUnusedVar(row);
+    wxUnusedVar(col);
+    wxUnusedVar(attr);
 }
 
 bool wxGrid::LookupAttr(int row, int col, wxGridCellAttr **attr) const
 {
-    if ( row == m_attrCache.row && col == m_attrCache.col )
-    {
-        *attr = m_attrCache.attr;
-        wxSafeIncRef(m_attrCache.attr);
+    wxUnusedVar(row);
+    wxUnusedVar(col);
+    wxUnusedVar(attr);
 
 #ifdef DEBUG_ATTR_CACHE
-        gs_nAttrCacheHits++;
+    gs_nAttrCacheMisses++;
 #endif
 
-        return true;
-    }
-    else
-    {
-#ifdef DEBUG_ATTR_CACHE
-        gs_nAttrCacheMisses++;
-#endif
-
-        return false;
-    }
+    return false;
 }
 
 wxGridCellAttr *wxGrid::GetCellAttr(int row, int col) const
 {
     wxGridCellAttr *attr = nullptr;
-    // Additional test to avoid looking at the cache e.g. for
-    // wxNoCellCoords, as this will confuse memory management.
     if ( row >= 0 )
-    {
-        if ( !LookupAttr(row, col, &attr) )
-        {
-            attr = m_table ? m_table->GetAttr(row, col, wxGridCellAttr::Any)
-                           : nullptr;
-            CacheAttr(row, col, attr);
-        }
-    }
+        attr = m_table ? m_table->GetAttr(row, col, wxGridCellAttr::Any)
+                       : nullptr;
 
-    if (attr)
+    if ( attr )
     {
         attr->SetDefAttr(m_defaultCellAttr);
     }

@@ -4,6 +4,7 @@
 // Author:      Steven Lamerton
 // Created:     2010-06-25
 // Copyright:   (c) 2010 Steven Lamerton
+//              (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "testprec.h"
@@ -2172,6 +2173,84 @@ TEST_CASE_METHOD(GridTestCase, "Grid::SetTable_ClearAttrCache", "[grid]")
     // Remove the grid table before our local objects go out of scope
     m_grid->SetTable(nullptr);
 #endif // !__WXOSX__
+}
+
+namespace DynamicAttrProvider
+{
+
+class AttrProvider : public wxGridCellAttrProvider
+{
+public:
+    AttrProvider()
+        : m_useAltColour(false)
+    {
+    }
+
+    void ToggleColour()
+    {
+        m_useAltColour = !m_useAltColour;
+    }
+
+    virtual wxGridCellAttr *GetAttr(int row, int col,
+                                    wxGridCellAttr::wxAttrKind kind) const override
+    {
+        wxUnusedVar(row);
+        wxUnusedVar(col);
+        wxUnusedVar(kind);
+
+        wxGridCellAttr * const attr = new wxGridCellAttr;
+        attr->SetBackgroundColour(m_useAltColour ? *wxGREEN : *wxYELLOW);
+
+        return attr;
+    }
+
+private:
+    bool m_useAltColour;
+};
+
+class GridTable : public wxGridStringTable
+{
+public:
+    GridTable()
+        : wxGridStringTable(1, 1),
+          m_attrProvider(new AttrProvider)
+    {
+        SetAttrProvider(m_attrProvider);
+    }
+
+    void ToggleColour()
+    {
+        m_attrProvider->ToggleColour();
+    }
+
+private:
+    AttrProvider * const m_attrProvider;
+};
+
+} // namespace DynamicAttrProvider
+
+TEST_CASE_METHOD(GridTestCase, "Grid::DynamicAttrProvider", "[grid][attr]")
+{
+    using namespace DynamicAttrProvider;
+
+    GridTable table;
+    m_grid->SetTable(&table);
+
+    {
+        wxGridCellAttrPtr attr(m_grid->CallGetCellAttr(0, 0));
+        REQUIRE( attr );
+        CHECK( attr->GetBackgroundColour() == *wxYELLOW );
+    }
+
+    table.ToggleColour();
+
+    {
+        wxGridCellAttrPtr attr(m_grid->CallGetCellAttr(0, 0));
+        REQUIRE( attr );
+        CHECK( attr->GetBackgroundColour() == *wxGREEN );
+    }
+
+    m_grid->SetTable(nullptr);
 }
 
 #define CHECK_MULTICELL() CHECK_THAT( *m_grid, HasMulticellOnly(multi) )
