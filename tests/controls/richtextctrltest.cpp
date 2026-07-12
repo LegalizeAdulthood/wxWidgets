@@ -4,6 +4,7 @@
 // Author:      Steven Lamerton
 // Created:     2010-07-07
 // Copyright:   (c) 2010 Steven Lamerton
+//              (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "testprec.h"
@@ -49,6 +50,7 @@ private:
         CPPUNIT_TEST( Bold );
         CPPUNIT_TEST( Italic );
         CPPUNIT_TEST( Underline );
+        CPPUNIT_TEST( TextEffect );
         CPPUNIT_TEST( Indent );
         CPPUNIT_TEST( LineSpacing );
         CPPUNIT_TEST( ParagraphSpacing );
@@ -80,6 +82,7 @@ private:
     void Bold();
     void Italic();
     void Underline();
+    void TextEffect();
     void Indent();
     void LineSpacing();
     void ParagraphSpacing();
@@ -540,6 +543,27 @@ void RichTextCtrlTestCase::Underline()
     m_rich->SetSelection(40, 45);
 
     CPPUNIT_ASSERT(!m_rich->IsSelectionUnderlined());
+}
+
+static void CheckTextEffectToggle(wxRichTextCtrl* rich, int effect)
+{
+    CPPUNIT_ASSERT(!rich->DoesSelectionHaveTextEffectFlag(effect));
+
+    rich->ApplyTextEffectToSelection(effect);
+    CPPUNIT_ASSERT(rich->DoesSelectionHaveTextEffectFlag(effect));
+
+    rich->ApplyTextEffectToSelection(effect);
+    CPPUNIT_ASSERT(!rich->DoesSelectionHaveTextEffectFlag(effect));
+}
+
+void RichTextCtrlTestCase::TextEffect()
+{
+    m_rich->SetValue("text");
+    m_rich->SetInsertionPointEnd();
+
+    CheckTextEffectToggle(m_rich, wxTEXT_ATTR_EFFECT_STRIKETHROUGH);
+    CheckTextEffectToggle(m_rich, wxTEXT_ATTR_EFFECT_SUPERSCRIPT);
+    CheckTextEffectToggle(m_rich, wxTEXT_ATTR_EFFECT_SUBSCRIPT);
 }
 
 void RichTextCtrlTestCase::Indent()
