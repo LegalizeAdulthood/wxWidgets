@@ -5,6 +5,7 @@
 // Created:     01/02/97
 // Modified:    22/10/98 - almost total rewrite, simpler interface (VZ)
 // Copyright:   (c) 1998 Robert Roebling and Julian Smart
+//              (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -3016,6 +3017,18 @@ void wxGenericTreeCtrl::OnPaint( wxPaintEvent &WXUNUSED(event) )
 void wxGenericTreeCtrl::OnSetFocus( wxFocusEvent &event )
 {
     m_hasFocus = true;
+
+    if ( HasFlag(wxTR_MULTIPLE) && (!m_current || !m_key_current) )
+    {
+        if ( !m_current )
+            m_current = m_anchor;
+
+        if ( m_current )
+        {
+            m_key_current = m_current;
+            RefreshLine( m_current );
+        }
+    }
 
     RefreshSelected();
 
