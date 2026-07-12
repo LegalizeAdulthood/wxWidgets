@@ -195,6 +195,17 @@ public:
     bool CreateFromHICON(WXHICON icon);
 
     /**
+        Returns the native Windows icon handle.
+
+        The returned value is an opaque handle which may be cast to @c HICON
+        in wxMSW-specific code. It is still owned by this wxIcon object and
+        must not be destroyed by the caller.
+
+        @onlyfor{wxmsw}
+    */
+    WXHICON GetHICON() const;
+
+    /**
         Returns disabled (dimmed) version of the icon.
 
         This method is available in wxIcon only under wxMSW, other ports only
