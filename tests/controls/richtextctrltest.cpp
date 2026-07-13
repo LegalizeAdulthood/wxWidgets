@@ -4,6 +4,7 @@
 // Author:      Steven Lamerton
 // Created:     2010-07-07
 // Copyright:   (c) 2010 Steven Lamerton
+//              (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "testprec.h"
@@ -42,6 +43,7 @@ private:
         CPPUNIT_TEST( CutCopyPaste );
         CPPUNIT_TEST( UndoRedo );
         CPPUNIT_TEST( CaretPosition );
+        CPPUNIT_TEST( LineBreakAtParagraphEnd );
         CPPUNIT_TEST( Selection );
         WXUISIM_TEST( Editable );
         CPPUNIT_TEST( Range );
@@ -73,6 +75,7 @@ private:
     void CutCopyPaste();
     void UndoRedo();
     void CaretPosition();
+    void LineBreakAtParagraphEnd();
     void Selection();
     void Editable();
     void Range();
@@ -369,6 +372,21 @@ void RichTextCtrlTestCase::CaretPosition()
     m_rich->MoveToLineEnd();
 
     CPPUNIT_ASSERT_EQUAL(21, m_rich->GetCaretPosition());
+}
+
+void RichTextCtrlTestCase::LineBreakAtParagraphEnd()
+{
+    CPPUNIT_ASSERT(m_rich->LineBreak());
+    m_rich->LayoutContent();
+
+    CPPUNIT_ASSERT_EQUAL(2, m_rich->GetFocusObject()->GetLineCount());
+
+    m_rich->SetValue("Line");
+    m_rich->SetInsertionPointEnd();
+    CPPUNIT_ASSERT(m_rich->LineBreak());
+    m_rich->LayoutContent();
+
+    CPPUNIT_ASSERT_EQUAL(2, m_rich->GetFocusObject()->GetLineCount());
 }
 
 void RichTextCtrlTestCase::Selection()
