@@ -358,6 +358,31 @@ TEST_CASE_METHOD(RichTextCtrlTestCase, "RichTextCtrl::UndoRedo",
     m_rich->EndSuppressUndo();
 }
 
+TEST_CASE_METHOD(RichTextCtrlTestCase, "RichTextCtrl::HorizontalScroll",
+                 "[richtextctrl]")
+{
+    wxRichTextCtrl rich(wxTheApp->GetTopWindow(), wxID_ANY, "",
+                        wxDefaultPosition, wxSize(80, 120),
+                        wxWANTS_CHARS | wxHSCROLL);
+
+    rich.SetValue("This is a very long line that should remain on one "
+                  "visual line when horizontal scrolling is enabled.");
+    rich.LayoutContent();
+
+    CHECK(rich.GetNumberOfLines() == 1);
+
+    int ppuX = 0;
+    int ppuY = 0;
+    rich.GetScrollPixelsPerUnit(&ppuX, &ppuY);
+
+    int virtualWidth = 0;
+    int virtualHeight = 0;
+    rich.GetVirtualSize(&virtualWidth, &virtualHeight);
+
+    CHECK(ppuX > 0);
+    CHECK(virtualWidth > rich.GetClientSize().x);
+}
+
 TEST_CASE_METHOD(RichTextCtrlTestCase, "RichTextCtrl::CaretPosition",
                  "[richtextctrl]")
 {
