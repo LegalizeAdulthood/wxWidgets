@@ -808,6 +808,11 @@ public:
         scrolling in this direction is not enabled at all, HasScrollbar()
         always returns @false as well.
 
+        Notice that for native controls which don't use wxWidgets scrolling
+        framework, such as wxListCtrl, this method only reports the state of
+        scrollbars managed by wxWidgets itself and can return @false even when
+        the native control is currently showing a scrollbar.
+
         @param orient
             Orientation to check, either wxHORIZONTAL or wxVERTICAL.
     */
