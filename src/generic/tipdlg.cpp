@@ -4,6 +4,7 @@
 // Author:      Vadim Zeitlin
 // Created:     28.06.99
 // Copyright:   (c) Vadim Zeitlin
+//              (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -218,8 +219,7 @@ wxTipDialog::wxTipDialog(wxWindow *parent,
                             wxDefaultPosition, wxSize(200, 160),
                             wxTE_MULTILINE |
                             wxTE_READONLY |
-                            wxTE_NO_VSCROLL |
-                            wxTE_RICH2 | // a hack to get rid of vert scrollbar
+                            wxTE_RICH2 | // avoid always-visible scrollbar
                             wxDEFAULT_CONTROL_BORDER
                             );
 #if defined(__WXMSW__)
