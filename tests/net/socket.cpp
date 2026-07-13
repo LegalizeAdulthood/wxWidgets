@@ -277,6 +277,21 @@ TEST_CASE("Socket::Url", "[socket]")
 #endif
 }
 
+#if wxUSE_IPV6
+
+TEST_CASE("wxIPV6address::HostnameAndService", "[socket][addr][ipv6]")
+{
+    wxIPV6address addr;
+
+    CHECK(addr.Hostname("::"));
+    CHECK(addr.Service(1234));
+    CHECK(addr.Type() == wxSockAddress::IPV6);
+    CHECK(addr.IPAddress() == "::");
+    CHECK(addr.Service() == 1234);
+}
+
+#endif // wxUSE_IPV6
+
 TEST_CASE("wxDatagramSocket::ShortRead", "[socket][dgram]")
 {
     // Check that reading fewer bytes than are present in a
