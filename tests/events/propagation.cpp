@@ -4,6 +4,7 @@
 // Author:      Vadim Zeitlin
 // Created:     2009-01-16
 // Copyright:   (c) 2009 Vadim Zeitlin <vadim@wxwidgets.org>
+//              (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -511,6 +512,21 @@ void EventPropagationTestCase::MenuEvent()
     wxON_BLOCK_EXIT_OBJ1( *submenu,
                           wxEvtHandler::SetNextHandler, (wxEvtHandler*)nullptr );
     ASSERT_MENU_EVENT_RESULT_FOR( wxID_ABOUT, submenu, "aosomA" );
+
+#ifdef __WXMSW__
+    // Popup menus are dispatched from their root menu, but the handler
+    // associated with the submenu containing the item must still be used.
+    g_str.clear();
+    menu->MSWCommand(0, wxID_ABOUT);
+    CHECK( g_str == "aosomA" );
+
+    int countSubmenu = 0;
+    submenu->Bind(wxEVT_MENU,
+                  [&countSubmenu](wxCommandEvent&) { countSubmenu++; },
+                  wxID_ABOUT);
+    menu->MSWCommand(0, wxID_ABOUT);
+    CHECK( countSubmenu == 1 );
+#endif // __WXMSW__
 
 #if wxUSE_MENUBAR
     // Test that the event handler associated with the menu bar gets the event.
