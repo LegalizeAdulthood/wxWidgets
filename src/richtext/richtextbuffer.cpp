@@ -4979,6 +4979,11 @@ bool wxRichTextParagraph::Draw(wxDC& dc, wxRichTextDrawingContext& context, cons
 // Get the range width using partial extents calculated for the whole paragraph.
 static int wxRichTextGetRangeWidth(const wxRichTextParagraph& para, const wxRichTextRange& range, const wxArrayInt& partialExtents)
 {
+    // Excluding a line break can leave an empty range whose end precedes its
+    // start, so don't use its end to index the partial extents.
+    if ( range.GetLength() == 0 )
+        return 0;
+
     wxASSERT(partialExtents.GetCount() >= (size_t) range.GetLength());
 
     if (partialExtents.GetCount() < (size_t) range.GetLength())
@@ -5449,10 +5454,17 @@ bool wxRichTextParagraph::Layout(wxReadOnlyDC& dc, wxRichTextDrawingContext& con
 
     //wxASSERT(!(lastCompletedEndPos != -1 && lastCompletedEndPos < GetRange().GetEnd()-1));
 
+    wxString lastText;
+    const long lastContentPos = GetRange().GetEnd()-1;
+    const bool endsWithLineBreak =
+        lastCompletedEndPos == lastContentPos &&
+        GetContiguousPlainText(lastText, wxRichTextRange(lastContentPos, lastContentPos), false) &&
+        lastText.length() == 1 && lastText[0] == wxRichTextLineBreakChar;
+
     // Add the last line - it's the current pos -> last para pos
     // Subtract -1 because the last position is always the end-paragraph position.
-    if ((lastCompletedEndPos < GetRange().GetEnd()-1) ||
-        lineCount == 0 || lastLineEndedWithLineBreak)
+    if ( (lastCompletedEndPos < lastContentPos) || lineCount == 0 ||
+         lastLineEndedWithLineBreak || endsWithLineBreak )
     {
         int startOffset = (lineCount == 0 ? startPositionFirstLine : startPositionSubsequentLines);
         availableRect = wxRect(rect.x + startOffset, rect.y + currentPosition.y,
@@ -5473,7 +5485,7 @@ bool wxRichTextParagraph::Layout(wxReadOnlyDC& dc, wxRichTextDrawingContext& con
 
         wxRichTextLine* line = AllocateLine(lineCount);
 
-        wxRichTextRange actualRange(lastCompletedEndPos+1, GetRange().GetEnd()-1);
+        wxRichTextRange actualRange(lastCompletedEndPos+1, lastContentPos);
 
         // Set relative range so we won't have to change line ranges when paragraphs are moved
         line->SetRange(wxRichTextRange(actualRange.GetStart() - GetRange().GetStart(), actualRange.GetEnd() - GetRange().GetStart()));

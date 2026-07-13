@@ -519,6 +519,22 @@ TEST_CASE_METHOD(RichTextCtrlTestCase,
     CHECK(m_rich->GetInsertionPoint() == 0);
 }
 
+TEST_CASE_METHOD(RichTextCtrlTestCase, "RichTextCtrl::LineBreakAtParagraphEnd",
+                 "[richtextctrl]")
+{
+    REQUIRE(m_rich->LineBreak());
+    m_rich->LayoutContent();
+
+    CHECK(m_rich->GetFocusObject()->GetLineCount() == 2);
+
+    m_rich->SetValue("Line");
+    m_rich->SetInsertionPointEnd();
+    REQUIRE(m_rich->LineBreak());
+    m_rich->LayoutContent();
+
+    CHECK(m_rich->GetFocusObject()->GetLineCount() == 2);
+}
+
 TEST_CASE_METHOD(RichTextCtrlTestCase, "RichTextCtrl::Selection",
                  "[richtextctrl]")
 {
