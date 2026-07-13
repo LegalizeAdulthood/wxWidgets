@@ -4,6 +4,7 @@
 // Author:      Vadim Zeitlin
 // Created:     2004-12-11
 // Copyright:   (c) 2004 wxWindows
+//              (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 // ----------------------------------------------------------------------------
@@ -16,6 +17,8 @@
 #ifndef WX_PRECOMP
     #include "wx/gdicmn.h"
 #endif // WX_PRECOMP
+
+#include "wx/geometry.h"
 
 #include "wx/iosfwrap.h"
 
@@ -123,4 +126,42 @@ TEST_CASE("wxRect::Union", "[rect]")
 
         CHECK( data.GetSecond().Union(data.GetFirst()) == data.GetResult() );
     }
+}
+
+TEST_CASE("wxRect2D::UnionEmpty", "[rect]")
+{
+    const wxRect2DInt ri(100, 100, 50, 50);
+
+    wxRect2DInt ri1 = ri;
+    ri1.Union(wxRect2DInt(0, 0, 0, 0));
+    CHECK( ri1 == ri );
+
+    wxRect2DInt ri2(0, 0, 0, 0);
+    ri2.Union(ri);
+    CHECK( ri2 == ri );
+
+    const wxRect2DDouble rd(100, 100, 50, 50);
+
+    wxRect2DDouble rd1 = rd;
+    rd1.Union(wxRect2DDouble(0, 0, 0, 0));
+    CHECK( rd1 == rd );
+
+    wxRect2DDouble rd2(0, 0, 0, 0);
+    rd2.Union(rd);
+    CHECK( rd2 == rd );
+}
+
+TEST_CASE("wxRect2D::ContainsEmpty", "[rect]")
+{
+    const wxRect2DInt ri(100, 100, 50, 50);
+
+    CHECK( ri.Contains(wxRect2DInt(0, 0, 0, 0)) );
+    CHECK( ri.Contains(wxRect2DInt(125, 125, 0, 0)) );
+    CHECK( ri.Contains(wxRect2DInt(200, 200, 0, 0)) );
+
+    const wxRect2DDouble rd(100, 100, 50, 50);
+
+    CHECK( rd.Contains(wxRect2DDouble(0, 0, 0, 0)) );
+    CHECK( rd.Contains(wxRect2DDouble(125, 125, 0, 0)) );
+    CHECK( rd.Contains(wxRect2DDouble(200, 200, 0, 0)) );
 }
