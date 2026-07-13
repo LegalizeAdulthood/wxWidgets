@@ -154,6 +154,21 @@ Here is a sample:
 
 @image html overview_sizer_09.png
 
+When adding windows to wxStaticBoxSizer, create them as children of the
+static box returned by wxStaticBoxSizer::GetStaticBox(), not as siblings
+of it:
+
+@code
+    wxStaticBoxSizer *sizer =
+        new wxStaticBoxSizer(wxVERTICAL, panel, "Options");
+    wxStaticBox *box = sizer->GetStaticBox();
+
+    sizer->Add(new wxCheckBox(box, wxID_ANY, "Enable feature"),
+               wxSizerFlags().Border());
+    sizer->Add(new wxTextCtrl(box, wxID_ANY),
+               wxSizerFlags().Expand().Border());
+@endcode
+
 @section overview_sizer_grid wxGridSizer
 
 wxGridSizer is a two-dimensional sizer. All children are given the same size,
