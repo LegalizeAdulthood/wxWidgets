@@ -625,7 +625,8 @@ public:
     inline bool Contains( const wxPoint2DDouble &pt ) const
         { return  GetOutCode( pt ) == wxInside; }
     inline bool Contains( const wxRect2DDouble &rect ) const
-        { return ( ( ( m_x <= rect.m_x ) && ( rect.m_x + rect.m_width <= m_x + m_width ) ) &&
+        { return rect.IsEmpty() ||
+                ( ( ( m_x <= rect.m_x ) && ( rect.m_x + rect.m_width <= m_x + m_width ) ) &&
                 ( ( m_y <= rect.m_y ) && ( rect.m_y + rect.m_height <= m_y + m_height ) ) ); }
     inline bool IsEmpty() const
         { return m_width <= 0 || m_height <= 0; }
@@ -760,7 +761,8 @@ public:
         inline bool Contains( const wxPoint2DInt &pt ) const
             { return  GetOutCode( pt ) == wxInside; }
         inline bool Contains( const wxRect2DInt &rect ) const
-            { return ( ( ( m_x <= rect.m_x ) && ( rect.m_x + rect.m_width <= m_x + m_width ) ) &&
+            { return rect.IsEmpty() ||
+                ( ( ( m_x <= rect.m_x ) && ( rect.m_x + rect.m_width <= m_x + m_width ) ) &&
                 ( ( m_y <= rect.m_y ) && ( rect.m_y + rect.m_height <= m_y + m_height ) ) ); }
         inline bool IsEmpty() const
             { return ( m_width <= 0 || m_height <= 0 ); }
