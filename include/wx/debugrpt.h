@@ -4,6 +4,7 @@
 // Author:      Vadim Zeitlin
 // Created:     2005-01-17
 // Copyright:   (c) 2005 Vadim Zeitlin <vadim@wxwidgets.org>
+//              (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -34,16 +35,18 @@ public:
     enum Context { Context_Current, Context_Exception };
 
 
-    // ctor creates a temporary directory where we create the files which will
-    // be included in the report, use IsOk() to check for errors
+    // ctor initializes the report, use IsOk() to create the temporary
+    // directory and check for errors
     wxDebugReport();
 
-    // dtor normally destroys the temporary directory created in the ctor (with
-    // all the files it contains), call Reset() to prevent this from happening
+    // dtor normally destroys the temporary directory created for the report
+    // (with all the files it contains), call Reset() to prevent this from
+    // happening
     virtual ~wxDebugReport();
 
-    // return the name of the directory used for this report
-    const wxString& GetDirectory() const { return m_dir; }
+    // return the name of the directory used for this report, creating it if
+    // needed
+    const wxString& GetDirectory() const { return DoGetDirectory(); }
 
     // return true if the object was successfully initialized
     bool IsOk() const { return !GetDirectory().empty(); }
@@ -120,6 +123,9 @@ protected:
     virtual wxFileName GetSaveLocation() const;
 
 private:
+    const wxString& DoGetDirectory() const;
+    bool CreateDirectory();
+
     // name of the report directory
     wxString m_dir;
 

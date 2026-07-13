@@ -3,7 +3,7 @@
 # Purpose:     CMake file for gui test
 # Author:      Tobias Taschner
 # Created:     2016-10-31
-# Copyright:   (c) 2016 wxWidgets development team
+# Copyright:   (c) 2016-2026 wxWidgets development team
 # Licence:     wxWindows licence
 #############################################################################
 
@@ -85,6 +85,7 @@ set(TEST_GUI_SRC
     controls/webtest.cpp
     controls/windowtest.cpp
     controls/dialogtest.cpp
+    debugrpt/debugrpttest.cpp
     events/clone.cpp
     events/enterleave.cpp
     # Duplicate this file here to test GUI event loops too.
@@ -251,6 +252,9 @@ if(wxUSE_XRC)
 endif()
 if(wxUSE_XML)
     wx_exe_link_libraries(test_gui wxxml)
+endif()
+if(wxUSE_DEBUGREPORT)
+    wx_exe_link_libraries(test_gui wxqa)
 endif()
 if(wxUSE_HTML)
     wx_exe_link_libraries(test_gui wxhtml)

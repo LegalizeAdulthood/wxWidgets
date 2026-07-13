@@ -4,6 +4,7 @@
 // Author:      Vadim Zeitlin
 // Created:     2005-01-17
 // Copyright:   (c) 2005 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
+//              (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -174,6 +175,23 @@ void XmlStackWalker::OnStackFrame(const wxStackFrame& frame)
 
 #endif // wxUSE_STACKWALKER
 
+namespace
+{
+
+const wxChar *wxDebugReportPendingDir = wxT("\1");
+
+bool wxDebugReportIsDirPending(const wxString& dir)
+{
+    return dir == wxDebugReportPendingDir;
+}
+
+bool wxDebugReportHasDir(const wxString& dir)
+{
+    return !dir.empty() && !wxDebugReportIsDirPending(dir);
+}
+
+} // anonymous namespace
+
 // ============================================================================
 // wxDebugReport implementation
 // ============================================================================
@@ -183,6 +201,19 @@ void XmlStackWalker::OnStackFrame(const wxStackFrame& frame)
 // ----------------------------------------------------------------------------
 
 wxDebugReport::wxDebugReport()
+    : m_dir(wxDebugReportPendingDir)
+{
+}
+
+const wxString& wxDebugReport::DoGetDirectory() const
+{
+    if ( wxDebugReportIsDirPending(m_dir) )
+        const_cast<wxDebugReport *>(this)->CreateDirectory();
+
+    return m_dir;
+}
+
+bool wxDebugReport::CreateDirectory()
 {
     // get a temporary directory name
     wxString appname = GetReportName();
@@ -210,12 +241,16 @@ wxDebugReport::wxDebugReport()
         wxLogError(_("Debug report couldn't be created."));
 
         Reset();
+
+        return false;
     }
+
+    return true;
 }
 
 wxDebugReport::~wxDebugReport()
 {
-    if ( !m_dir.empty() )
+    if ( wxDebugReportHasDir(m_dir) )
     {
         // remove all files in this directory
         wxDir dir(m_dir);
@@ -232,7 +267,7 @@ wxDebugReport::~wxDebugReport()
         }
     }
 
-    if ( !m_dir.empty() )
+    if ( wxDebugReportHasDir(m_dir) )
     {
         if ( wxRmDir(m_dir) != 0 )
         {
