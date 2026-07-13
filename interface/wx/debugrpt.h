@@ -162,14 +162,15 @@ public:
     };
 
     /**
-        The constructor creates a temporary directory where the files that will
-        be included in the report are created. Use IsOk() to check for errors.
+        The constructor initializes the report. Use IsOk() to create the
+        temporary directory where the files that will be included in the report
+        are created and to check for errors.
     */
     wxDebugReport();
 
     /**
-        The destructor normally destroys the temporary directory created in the
-        constructor with all the files it contains. Call Reset() to prevent
+        The destructor normally destroys the temporary directory created for
+        the report with all the files it contains. Call Reset() to prevent
         this from happening.
     */
     virtual ~wxDebugReport();
@@ -242,7 +243,8 @@ public:
 
     /**
         This method should be used to construct the full name of the files
-        which you wish to add to the report using AddFile().
+        which you wish to add to the report using AddFile(). It creates the
+        temporary report directory if needed.
 
         @return The name of the temporary directory used for the files in this
                  report.
