@@ -4,6 +4,7 @@
 // Author:      Stefan Csomor
 // Created:     08/05/99
 // Copyright:   (c) 1999 Stefan Csomor
+//              (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -71,6 +72,18 @@ void wxRect2DDouble::Intersect( const wxRect2DDouble &src1 , const wxRect2DDoubl
 
 void wxRect2DDouble::Union( const wxRect2DDouble &src1 , const wxRect2DDouble &src2 , wxRect2DDouble *dest )
 {
+    if ( src1.IsEmpty() )
+    {
+        *dest = src2;
+        return;
+    }
+
+    if ( src2.IsEmpty() )
+    {
+        *dest = src1;
+        return;
+    }
+
     wxDouble left,right,bottom,top;
 
     left = wxMin ( src1.m_x , src2.m_x );
@@ -291,6 +304,18 @@ void wxRect2DInt::Intersect( const wxRect2DInt &src1 , const wxRect2DInt &src2 ,
 
 void wxRect2DInt::Union( const wxRect2DInt &src1 , const wxRect2DInt &src2 , wxRect2DInt *dest )
 {
+    if ( src1.IsEmpty() )
+    {
+        *dest = src2;
+        return;
+    }
+
+    if ( src2.IsEmpty() )
+    {
+        *dest = src1;
+        return;
+    }
+
     wxInt32 left,right,bottom,top;
 
     left = wxMin ( src1.m_x , src2.m_x );
