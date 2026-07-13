@@ -4,6 +4,7 @@
 // Author:      Julian Smart
 // Created:     2005-09-30
 // Copyright:   (c) Julian Smart
+//              (c) 2026 wxWidgets development team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 
@@ -2936,11 +2937,20 @@ void wxRichTextCtrl::SetupScrollbars(bool atTop, bool fromOnPaint)
     // TODO: reimplement scrolling so we scroll by line, not by fixed number
     // of pixels. See e.g. wxVScrolledWindow for ideas.
     int pixelsPerUnit = GetLineHeight();
+    bool hasHorizontalScrollbar = HasFlag(wxHSCROLL);
+    int pixelsPerUnitX = hasHorizontalScrollbar ? wxMax(GetCharWidth(), 1) : 0;
     wxSize clientSize = GetClientSize();
+
+    int maxWidth = 0;
+    if ( hasHorizontalScrollbar )
+        maxWidth = (int) (0.5 + GetScale() * GetBuffer().GetCachedSize().x);
 
     int maxHeight = (int) (0.5 + GetScale() * (GetBuffer().GetCachedSize().y + GetBuffer().GetTopMargin()));
 
     // Round up so we have at least maxHeight pixels
+    int unitsX = 0;
+    if ( pixelsPerUnitX )
+        unitsX = (maxWidth + pixelsPerUnitX - 1) / pixelsPerUnitX;
     int unitsY = (maxHeight + pixelsPerUnit - 1) / pixelsPerUnit;
 
     int startX = 0, startY = 0;
@@ -2948,6 +2958,12 @@ void wxRichTextCtrl::SetupScrollbars(bool atTop, bool fromOnPaint)
         GetViewStart(& startX, & startY);
 
     int maxPositionX = 0;
+    if ( pixelsPerUnitX )
+    {
+        maxPositionX =
+            (wxMax(unitsX * pixelsPerUnitX - clientSize.x, 0) +
+             pixelsPerUnitX - 1) / pixelsPerUnitX;
+    }
     int maxPositionY = (wxMax(unitsY * pixelsPerUnit - clientSize.y, 0) + pixelsPerUnit - 1) / pixelsPerUnit;
 
     int newStartX = wxMin(maxPositionX, startX);
@@ -2959,14 +2975,22 @@ void wxRichTextCtrl::SetupScrollbars(bool atTop, bool fromOnPaint)
     GetScrollPixelsPerUnit(& oldPPUX, & oldPPUY);
     GetViewStart(& oldStartX, & oldStartY);
     GetVirtualSize(& oldVirtualSizeX, & oldVirtualSizeY);
-    if (oldPPUY > 0)
+    if ( oldPPUX > 0 )
+        oldVirtualSizeX /= oldPPUX;
+    if ( oldPPUY > 0 )
         oldVirtualSizeY /= oldPPUY;
 
-    if (oldPPUX == 0 && oldPPUY == pixelsPerUnit && oldVirtualSizeY == unitsY && oldStartX == newStartX && oldStartY == newStartY)
+    if ( oldPPUX == pixelsPerUnitX && oldPPUY == pixelsPerUnit &&
+         oldVirtualSizeX == unitsX && oldVirtualSizeY == unitsY &&
+         oldStartX == newStartX && oldStartY == newStartY )
         return;
 
     // Don't set scrollbars if there were none before, and there will be none now.
-    if (oldPPUY != 0 && (oldVirtualSizeY*oldPPUY < clientSize.y) && (unitsY*pixelsPerUnit < clientSize.y))
+    if ( (oldPPUX != 0 || oldPPUY != 0) &&
+         (oldVirtualSizeX * oldPPUX < clientSize.x) &&
+         (oldVirtualSizeY * oldPPUY < clientSize.y) &&
+         (unitsX * pixelsPerUnitX < clientSize.x) &&
+         (unitsY * pixelsPerUnit < clientSize.y) )
         return;
 
     // Hysteresis detection. If an object width is relative to the window width, then there can be
@@ -2997,7 +3021,8 @@ void wxRichTextCtrl::SetupScrollbars(bool atTop, bool fromOnPaint)
     // Move to previous scroll position if
     // possible
     if (doSetScrollbars)
-        SetScrollbars(0, pixelsPerUnit, 0, unitsY, newStartX, newStartY);
+        SetScrollbars(pixelsPerUnitX, pixelsPerUnit,
+                      unitsX, unitsY, newStartX, newStartY);
 }
 
 /// Paint the background
@@ -4317,6 +4342,18 @@ bool wxRichTextCtrl::LayoutContent(bool onlyVisibleRect)
 void wxRichTextCtrl::DoLayoutBuffer(wxRichTextBuffer& buffer, wxReadOnlyDC& dc, wxRichTextDrawingContext& context, const wxRect& rect, const wxRect& parentRect, int flags)
 {
     buffer.Layout(dc, context, rect, parentRect, flags);
+
+    if ( HasFlag(wxHSCROLL) && buffer.GetMaxSize().x > rect.width )
+    {
+        wxRect scrollRect(rect);
+        scrollRect.width = buffer.GetMaxSize().x;
+
+        wxRect scrollParentRect(parentRect);
+        scrollParentRect.width = wxMax(scrollParentRect.width, scrollRect.width);
+
+        buffer.Invalidate(wxRICHTEXT_ALL);
+        buffer.Layout(dc, context, scrollRect, scrollParentRect, flags);
+    }
 }
 
 /// Is all of the selection, or the current caret position, bold?

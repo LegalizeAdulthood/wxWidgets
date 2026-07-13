@@ -4,6 +4,7 @@
 // Author:      Steven Lamerton
 // Created:     2010-07-07
 // Copyright:   (c) 2010 Steven Lamerton
+//              (c) 2026 wxWidgets development team
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "testprec.h"
@@ -41,6 +42,7 @@ private:
         WXUISIM_TEST( TextEvent );
         CPPUNIT_TEST( CutCopyPaste );
         CPPUNIT_TEST( UndoRedo );
+        CPPUNIT_TEST( HorizontalScroll );
         CPPUNIT_TEST( CaretPosition );
         CPPUNIT_TEST( Selection );
         WXUISIM_TEST( Editable );
@@ -72,6 +74,7 @@ private:
     void TextEvent();
     void CutCopyPaste();
     void UndoRedo();
+    void HorizontalScroll();
     void CaretPosition();
     void Selection();
     void Editable();
@@ -336,6 +339,30 @@ void RichTextCtrlTestCase::UndoRedo()
     CPPUNIT_ASSERT(m_rich->CanUndo());
 
     m_rich->EndSuppressUndo();
+}
+
+void RichTextCtrlTestCase::HorizontalScroll()
+{
+    wxRichTextCtrl rich(wxTheApp->GetTopWindow(), wxID_ANY, "",
+                        wxDefaultPosition, wxSize(80, 120),
+                        wxWANTS_CHARS | wxHSCROLL);
+
+    rich.SetValue("This is a very long line that should remain on one "
+                  "visual line when horizontal scrolling is enabled.");
+    rich.LayoutContent();
+
+    CPPUNIT_ASSERT_EQUAL(1, rich.GetNumberOfLines());
+
+    int ppuX = 0;
+    int ppuY = 0;
+    rich.GetScrollPixelsPerUnit(&ppuX, &ppuY);
+
+    int virtualWidth = 0;
+    int virtualHeight = 0;
+    rich.GetVirtualSize(&virtualWidth, &virtualHeight);
+
+    CPPUNIT_ASSERT(ppuX > 0);
+    CPPUNIT_ASSERT(virtualWidth > rich.GetClientSize().x);
 }
 
 void RichTextCtrlTestCase::CaretPosition()
