@@ -284,8 +284,17 @@ void TextCtrlTestCase::MaxLength()
         EventCounter maxlen(m_text, wxEVT_TEXT_MAXLEN);
 
         m_text->SetMaxLength(250);
-        m_text->SetFocus();
-        wxYield();
+
+        // wxUIActionSimulator sends input to the focused native window.
+        // Keep focus on the text control between programmatic setup steps.
+        auto focusText = [&]()
+        {
+            wxTheApp->GetTopWindow()->Raise();
+            m_text->SetFocus();
+            wxYield();
+        };
+
+        focusText();
 
         const wxString linePattern = MakeLinePattern();
 
@@ -295,6 +304,7 @@ void TextCtrlTestCase::MaxLength()
 
         m_text->SetInsertionPointEnd();
 
+        focusText();
         sim.Char(WXK_RETURN);
         sim.Char('v', wxMOD_CONTROL); // Paste copied line.
         wxYield();
@@ -303,15 +313,18 @@ void TextCtrlTestCase::MaxLength()
 
         m_text->SetInsertionPointEnd();
 
+        focusText();
         sim.Char(WXK_RETURN);
         wxYield();
 
+        focusText();
         sim.Char('v', wxMOD_CONTROL); // Paste copied line (2nd time).
         WaitFor("wxTextCtrl update", [&]() { return maxlen.GetCount() != 0; });
 
         CPPUNIT_ASSERT_EQUAL(1, maxlen.GetCount()); // Maximum length reached.
         maxlen.Clear();
 
+        focusText();
         sim.Text("7"); // Should be rejected.
         WaitFor("wxTextCtrl update", [&]() { return maxlen.GetCount() != 0; });
 
